@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Order Email Builder</title>
+<style>
+:root{--bg:#f4f5f2;--ink:#1b2422;--mut:#66726f;--line:#d9ded9;--acc:#0e6b5c;--acc2:#0a4f44;--card:#fff;--warn:#fff1a6}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Segoe UI",system-ui,Arial,sans-serif}
+.bar{position:sticky;top:0;z-index:5;display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 16px;background:var(--ink);color:#fff}
+.bar h1{font-size:17px;margin:0 auto 0 0;font-weight:600}
+button{font:inherit;cursor:pointer;border:0;border-radius:8px;padding:9px 16px;font-weight:600}
+.b-save{background:#f2c94c;color:#222}.b-copy{background:var(--acc);color:#fff}.b-alt{background:#3a4743;color:#fff}.b-lite{background:#e7ece8;color:var(--ink)}
+button:hover{filter:brightness(1.08)}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #f2c94c;outline-offset:1px}
+main{display:grid;grid-template-columns:minmax(300px,1fr) minmax(300px,1fr);gap:16px;padding:16px;max-width:1200px;margin:auto}
+@media(max-width:820px){main{grid-template-columns:1fr}}
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
+h2{font-size:15px;margin:0 0 8px}
+textarea,input,select{width:100%;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink)}
+textarea{min-height:130px;resize:vertical}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:480px){.grid{grid-template-columns:1fr}}
+label{display:block;font-size:12.5px;color:var(--mut);margin-bottom:3px}
+.full{grid-column:1/-1}
+.inv{display:flex;align-items:center;gap:10px;background:var(--warn);padding:10px;border-radius:8px;font-weight:600;margin-top:12px}
+.inv input{width:22px;height:22px;accent-color:var(--acc)}
+.hint{font-size:12.5px;color:var(--mut);margin:6px 0 0}
+#preview{border:1px dashed var(--line);border-radius:8px;padding:14px;background:#fff;font-family:Calibri,Arial,sans-serif;font-size:14.5px;overflow-x:auto}
+.subj{display:flex;gap:8px;margin-bottom:10px}
+.status{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:600;background:#e5f3ef;color:var(--acc2)}
+details{margin:0 16px;max-width:1168px}
+@media(min-width:1232px){details{margin:0 auto}}
+details summary{cursor:pointer;color:var(--mut);padding:4px 0}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:9;max-width:90%}
+#toast.on{opacity:1}
+#pin{width:84px;padding:6px 8px;text-align:center;letter-spacing:2px}
+#cloud{padding:4px 11px;border-radius:99px;font-size:15px;cursor:pointer;background:#6b7773;user-select:none}
+#cloud.ok{background:#1f9d55}#cloud.bad{background:#d64545}
+#chgBar{background:#fff4d6;border:1px solid #f0c24b;border-radius:8px;padding:9px 11px;font-size:13px;line-height:1.5}
+#chgBar button{margin-top:6px;margin-right:6px}
+#chgBar.on{background:#fdecec;border-color:#d64545;color:#8a1c1c}
+#chgWrap{background:#fff4d6;border:1px solid #f0c24b;border-radius:8px;padding:7px 10px}
+#chgWrap.on{background:#fdecec;border-color:#d64545;color:#8a1c1c}
+#chgWrap label{margin:0;cursor:pointer;display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.45}
+#chgWrap input{margin-top:3px;width:auto}
+#hist{margin-top:14px}#hist table{width:100%;border-collapse:collapse;font-size:13px}
+#hist th,#hist td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:top}
+#hist .rep td{background:#fff8d6}#hist .tag{display:inline-block;padding:0 7px;border-radius:99px;background:#f2c94c;color:#222;font-size:11px;font-weight:700}
+#chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+#chips .chip{padding:4px 11px;font-size:12.5px;background:#e5f3ef;color:var(--acc2);border-radius:99px}
+.sugbox{position:absolute;left:0;right:0;top:100%;z-index:30;background:#fff;border:1px solid #c9d6d1;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.18);max-height:260px;overflow:auto;margin-top:3px;display:none}
+.sugbox.on{display:block}
+.sugbox .it{padding:9px 12px;border-bottom:1px solid #edf1ef;cursor:pointer;color:#1b2422;line-height:1.35}
+.sugbox .it:last-child{border-bottom:0}.sugbox .it:hover,.sugbox .it.act{background:#e5f3ef}
+.sugbox .it b{display:block;font-size:14.5px}.sugbox .it small{color:#5f6f6a;font-size:12px}
+.sugbox .none{padding:9px 12px;color:#5f6f6a;font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="bar">
+  <input id="pin" type="password" inputmode="numeric" autocomplete="new-password" maxlength="4" aria-label="PIN" placeholder="PIN">
+  <button class="b-alt" id="login" type="button">🔑 Login</button>
+  <h1>📨 Order Email Builder</h1>
+  <button class="b-save" id="save">💾 Save</button>
+  <button class="b-copy" id="copy">📋 Copy Email</button>
+  <button class="b-alt" id="copyTxt">Copy plain text</button>
+  <button class="b-alt" id="clear">New</button>
+  <button class="b-alt" id="lock" style="display:none">🔓 Lock</button>
+  <span id="cloud" style="display:none" title="">☁️</span>
+  
+</div>
+
+
+
+<main>
+  <section>
+    <h2>1. Paste everything here</h2>
+    <textarea id="smart" placeholder="Paste or type anything: name, CNIC, mobile, doctor, product, rate, address... fields are filled automatically."></textarea>
+    <p class="hint">Mobile, CNIC, date, rate, quantity, doctor and status are detected automatically.</p>
+
+    <h2 style="margin-top:16px">2. Check or edit fields</h2>
+    <div class="grid">
+      <div><label for="date">Date (tap to pick)</label><input id="date" type="date"></div>
+      <div><label for="time">Time (live, editable)</label><input id="time" type="time"></div>
+      <div class="full"><label for="status">Patient status</label>
+        <select id="status"><option value="">Auto (from backup)</option><option>New Patient</option><option>Carry Forward Patient</option></select></div>
+      <div class="full" id="chgWrap" style="display:none"><label for="chg"><input type="checkbox" id="chg"> <span id="chgText"></span></label></div>
+      <div class="full" id="chgBar" style="display:none"></div>
+      <div><label for="name">Patient name</label><input id="name" autocomplete="off"></div>
+      <div><label for="cnic">CNIC</label><input id="cnic" inputmode="numeric" autocomplete="off"></div>
+            <div class="full"><label for="product">Product name (type first letters for suggestions)</label><input id="product" list="products" autocomplete="off"><div id="chips"></div></div>
+      <div><label for="rate">Rate</label><input id="rate"></div>
+      <div><label for="qty">Quantity</label><input id="qty"></div>
+      <div class="full"><label for="doctor">Prescriber name</label><input id="doctor"></div>
+      <div class="full"><label for="pmobile">Patient mobile (optional, used to detect carry forward)</label><input id="pmobile" list="mobiles" inputmode="tel" autocomplete="off"></div>
+      <div class="full"><label class="inv" for="moreMob"><input type="checkbox" id="moreMob"> 📱 Add more mobile numbers (up to 3 in total)</label></div>
+      <div id="mob2w" style="display:none"><label for="pmobile2">Mobile 2</label><input id="pmobile2" inputmode="tel" autocomplete="off"></div>
+      <div id="mob3w" style="display:none"><label for="pmobile3">Mobile 3</label><input id="pmobile3" inputmode="tel" autocomplete="off"></div>
+      <div class="full"><label for="address">Delivery address</label><input id="address"></div>
+      <div class="full"><label for="city">City (detected from the address, editable)</label><input id="city" list="cities" autocomplete="off"></div>
+      <div class="full"><label for="notes">Additional notes (optional, shown in email)</label><textarea id="notes" style="min-height:70px"></textarea></div>
+    </div>
+    <label class="inv" for="invoice"><input type="checkbox" id="invoice" checked> 🧾 Invoice line: “Please provide invoice to the patient.”</label>
+    <label class="inv" for="icekit" style="margin-top:8px"><input type="checkbox" id="icekit" checked> ❄️ Ice kit line: “Deliver injection in proper ice kit including thermocol box.”</label>
+    <datalist id="cities"></datalist><datalist id="products"></datalist><datalist id="mobiles"></datalist><datalist id="names"></datalist><datalist id="cnics"></datalist>
+  </section>
+
+  <section>
+    <h2>Live preview <span class="status" id="stBadge"></span></h2>
+    <div class="subj"><select id="design" aria-label="Email design"></select></div>
+    <div class="subj"><input id="subject" aria-label="Subject"><button class="b-lite" id="copySubj">Copy subject</button></div>
+    <div id="preview"></div>
+    <p class="hint">Click “Copy Email”, then paste (Ctrl+V) in the Outlook message body.</p>
+    <div id="hist"></div>
+  </section>
+</main>
+<div id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const FIELDS=['date','time','status','name','cnic','pmobile','product','rate','qty','doctor','address','city','notes'];
+const MEM={};let storeOK=true;
+const LS=k=>{if(k in MEM)return MEM[k];try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
+const SS=(k,v)=>{MEM[k]=v;try{localStorage.setItem(k,JSON.stringify(v));if(JSON.parse(localStorage.getItem(k))===undefined)throw 0}catch(e){storeOK=false}};
+let patients={};
+let prods={};let rowsAll=[];let unlocked=false,curPin='',busy=false;
+try{['patients','prods','history','sheetUrl','design'].forEach(k=>localStorage.removeItem(k))}catch(e){}          // product stats: key = lowercase product
+const AUTO={};                       // field -> value last filled automatically
+const pkey=s=>String(s||'').toLowerCase().replace(/\s+/g,' ').trim();
+const topOf=o=>Object.keys(o||{}).sort((a,b)=>o[b]-o[a])[0]||'';
+function addProd(name,rate,qty){
+  const k=pkey(name);if(!k)return;
+  const s=prods[k]||(prods[k]={name:String(name).trim(),n:0,rates:{},qtys:{}});
+  s.name=String(name).trim();s.n++;
+  if(rate)s.rates[rate]=(s.rates[rate]||0)+1;
+  if(qty)s.qtys[qty]=(s.qtys[qty]||0)+1;
+}   // key = cnic or lowercase name
+
+const p2=n=>String(n).padStart(2,'0');
+function todayISO(){const d=new Date();return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())}
+function nowHM(){const d=new Date();return p2(d.getHours())+':'+p2(d.getMinutes())}
+function fmtDate(i){const m=String(i||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?(+m[3])+'/'+(+m[2])+'/'+m[1]:i||''}
+function fmtTime(t){const m=String(t||'').match(/^(\d{1,2}):(\d{2})/);if(!m)return'';let h=+m[1];const ap=h>=12?'PM':'AM';h=h%12||12;return h+':'+m[2]+' '+ap}
+function isoDate(s){const m=String(s).match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})$/);if(!m)return/^\d{4}-\d{2}-\d{2}$/.test(s)?s:'';let y=+m[3];if(y<100)y+=2000;return y+'-'+p2(m[2])+'-'+p2(m[1])}
+function isoTime(s){const m=String(s).match(/(\d{1,2}):(\d{2})\s*(am|pm)?/i);if(!m)return'';let h=+m[1];if(m[3]){const pm=/pm/i.test(m[3]);if(pm&&h<12)h+=12;if(!pm&&h===12)h=0}return p2(h)+':'+m[2]}
+let timeAuto=true;
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),2600)}
+const digits=s=>String(s||'').replace(/\D/g,'');
+const normMob=s=>{let d=digits(s);if(d.length===12&&d.startsWith('92'))d='0'+d.slice(2);if(d.length===10&&d[0]==='3')d='0'+d;return d};
+const rateTxt=r=>{r=(r||'').trim();if(!r)return'';return /^[\d,]+$/.test(r)?'Rs. '+Number(r.replace(/,/g,'')).toLocaleString('en-US'):r};
+
+/* ---------- patients / suggestions ---------- */
+const mobsOf=s=>String(s||'').split(/[\/,;|\n]+/).map(normMob).filter(x=>x.length>=10);
+const last10=x=>String(x).slice(-10);
+const mobOverlap=(a,b)=>{const B=mobsOf(b).map(last10);return mobsOf(a).some(x=>B.includes(last10(x)))};
+function showMob(){const on=$('moreMob').checked;$('mob2w').style.display=on?'':'none';$('mob3w').style.display=on?'':'none'}
+function mobsForm(){
+  const a=[$('pmobile').value.trim()];
+  if($('moreMob').checked)a.push($('pmobile2').value.trim(),$('pmobile3').value.trim());
+  return a.filter((x,i,arr)=>x&&arr.indexOf(x)===i);
+}
+const CHG={ts:'',orig:null,row:null,okProd:'',declined:'',forceNew:false};   // forceNew: the user chose a NEW order, so the next backup must add a row   // ts = server timestamp of the earlier row; orig = its name/CNIC/product; declined = patient the user chose NOT to update
+const chgKey=d=>digits(d.cnic)||pkey(d.name);
+function hm24(t){const m=String(t||'').match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);if(!m)return'';let h=+m[1];const ap=(m[3]||'').toUpperCase();if(ap==='PM'&&h<12)h+=12;if(ap==='AM'&&h===12)h=0;return p2(h)+':'+m[2]}
+function rowT(r){return +r._t||+r.ts||0}
+function chgInfo(d){   // latest backed-up order of this patient from the last 24 hours
+  let best=null;const now=Date.now();
+  histFor(d).forEach(r=>{const t=rowT(r);if(t&&now-t<86400000&&(!best||t>best.t))best={r,t}});
+  return best;
+}
+function ago(t){const m=Math.max(1,Math.round((Date.now()-t)/60000));if(m<60)return m+(m===1?' minute':' minutes');const h=Math.round(m/60);return h+(h===1?' hour':' hours')}
+function startChange(r){$('chg').checked=true;CHG.ts=String(r.ts||r._t||'');CHG.row=r;CHG.orig={name:pkey(r.name),cnic:digits(r.cnic),prod:pkey(r.product)};CHG.okProd='';CHG.declined=''}
+function endChange(declineKey){$('chg').checked=false;CHG.ts='';CHG.orig=null;CHG.row=null;CHG.okProd='';if(declineKey!==undefined)CHG.declined=declineKey}
+function bothChanged(){   // name AND CNIC changed = a different patient = new order
+  if(!$('chg').checked||!CHG.orig)return false;
+  return pkey($('name').value)!==CHG.orig.name&&!!CHG.orig.cnic&&digits($('cnic').value)!==CHG.orig.cnic;
+}
+function prodPending(){   // product changed while updating an earlier order: ask first
+  if(!$('chg').checked||!CHG.orig||!CHG.orig.prod)return false;
+  const p=pkey($('product').value);
+  return !!p&&p!==CHG.orig.prod&&CHG.okProd!==p;
+}
+function chgBlocked(){
+  if(!prodPending())return false;
+  toast('Please choose: replace the earlier order or add a new order');
+  try{$('chgBar').scrollIntoView({behavior:'smooth',block:'center'})}catch(e){}
+  return true;
+}
+function renderChg(){
+  const wrap=$('chgWrap'),bar=$('chgBar');
+  bar.style.display='none';bar.innerHTML='';
+  if(!unlocked){if($('chg').checked)endChange();wrap.style.display='none';return}
+  if(bothChanged()){endChange(chgKey(data()));toast('Name and CNIC both changed – this will be saved as a new order')}
+  let r=null,t=0;
+  if($('chg').checked&&CHG.row){r=CHG.row;t=rowT(r)}
+  else{const b=chgInfo(data());if(b){r=b.r;t=b.t}}
+  if(!r){wrap.style.display='none';return}
+  const on=$('chg').checked,what=esc(((r.product||'')+(r.qty?' '+r.qty:'')).trim());
+  wrap.style.display='';wrap.className='full'+(on?' on':'');
+  $('chgText').innerHTML=on
+    ?'✏️ <b>Updating earlier order:</b> '+what+', sent '+ago(t)+' ago. Untick for a new order.'
+    :'An earlier order exists for this patient: '+what+', sent '+ago(t)+' ago. Tick to update it instead of adding a new order.';
+  if(prodPending()){
+    bar.style.display='';
+    bar.innerHTML='⚠️ The product was changed. Replace the earlier order, or add a new order?<br><button type="button" class="b-lite" id="chgRep">Replace earlier order</button><button type="button" class="b-lite" id="chgAdd">Add as new order</button>';
+    $('chgRep').onclick=()=>{CHG.okProd=pkey($('product').value);render()};
+    $('chgAdd').onclick=()=>{endChange(chgKey(data()));CHG.forceNew=true;render()};
+  }
+}
+function loadChange(r){   // open the earlier order in the form and switch change mode on
+  Object.keys(AUTO).forEach(k=>delete AUTO[k]);
+  const set=(k,v)=>{$(k).value=v==null?'':String(v).trim()};
+  ['name','cnic','product','rate','qty','doctor','address','notes'].forEach(k=>set(k,r[k]));
+  const ms=mobsOf(r.pmobile);set('pmobile',ms[0]||'');set('pmobile2',ms[1]||'');set('pmobile3',ms[2]||'');
+  $('moreMob').checked=ms.length>1;showMob();
+  const c0=String(r.city||'').trim(),auto=cityStrict($('address').value);
+  cityManual=!!c0&&c0!==auto;$('city').value=cityManual?c0:auto;
+  const iso=isoDate(String(r.date||'').trim());if(iso)$('date').value=iso;
+  const hm=hm24(r.time);if(hm){$('time').value=hm;timeAuto=false}
+  if(['New Patient','Carry Forward Patient'].includes(r.status))$('status').value=r.status;
+  $('invoice').checked=String(r.invoice).toLowerCase()==='yes';
+  startChange(r);
+  render();toast('Earlier order loaded – edit it, then Save or Copy');
+}
+function autoChange(keepForm){   // a saved patient was picked: if they have an order from the last 24 hours, switch change mode on
+  if(!unlocked||$('chg').checked)return;
+  const d=data(),key=chgKey(d);
+  if(!key||CHG.declined===key)return;
+  const b=chgInfo(d);if(!b)return;
+  if(keepForm){startChange(b.r);render()}else loadChange(b.r);
+}
+function findPatient(name,cnic,pm){
+  const c=digits(cnic),n=(name||'').trim().toLowerCase(),m=digits(pm);
+  const A=Object.values(patients);
+  return A.find(p=>c.length>=13&&digits(p.cnic)===c)||A.find(p=>m.length>=10&&mobsOf(p.pmobile).some(x=>last10(x)===m.slice(-10)))||A.find(p=>n&&String(p.name||'').trim().toLowerCase()===n)||null;
+}
+function refreshLists(){
+  const P0=Object.values(patients),P=P0.filter(p=>p.name);
+  $('names').innerHTML=P.map(p=>`<option value="${esc(p.name)}">${esc(p.cnic||'')}</option>`).join('');
+  $('mobiles').innerHTML=P0.flatMap(p=>mobsOf(p.pmobile).map(x=>`<option value="${esc(x)}">${esc(p.name||'')}</option>`)).join('');
+  $('cnics').innerHTML=P0.filter(p=>p.cnic).map(p=>`<option value="${esc(p.cnic)}">${esc(p.name||'')}</option>`).join('');
+  const PL=Object.values(prods).sort((a,b)=>b.n-a.n);   // most used first
+  $('cities').innerHTML=CITIES.slice().sort().map(c=>`<option value="${c}"></option>`).join('');
+  $('products').innerHTML=PL.map(x=>`<option value="${esc(x.name)}"></option>`).join('');
+  $('chips').innerHTML=PL.slice(0,6).map(x=>`<button type="button" class="chip">${esc(x.name)}</button>`).join('');
+}
+function setAuto(k,v){
+  const cur=$(k).value.trim();
+  if(!cur||cur===AUTO[k]){$(k).value=v||'';AUTO[k]=v||''}
+}
+function fillFromProduct(){
+  const key=pkey($('product').value),st=prods[key];if(!key||!st)return;
+  const p=findPatient($('name').value,$('cnic').value,$('pmobile').value);
+  if(p&&pkey(p.product)===key){setAuto('rate',p.rate);setAuto('qty',p.qty);return}
+  setAuto('rate',topOf(st.rates));setAuto('qty',topOf(st.qtys));
+}
+function autofillFrom(p,keep){
+  if(!p)return;
+  [['name',p.name],['cnic',p.cnic]].forEach(([k,v])=>{if(v)$(k).value=v});
+  let ms=mobsOf(p.pmobile);const cur=normMob($('pmobile').value);
+  if(cur.length>=10&&ms.some(x=>last10(x)===last10(cur)))ms=[cur,...ms.filter(x=>last10(x)!==last10(cur))];
+  if(ms[0])$('pmobile').value=ms[0];
+  if(ms[1]&&!$('pmobile2').value.trim()&&!$('pmobile3').value.trim()){$('moreMob').checked=true;$('pmobile2').value=ms[1];$('pmobile3').value=ms[2]||'';showMob()}
+  setAuto('doctor',p.doctor);setAuto('address',p.address);
+  const pc=$('product').value.trim();
+  if(!pc||pc===AUTO.product){setAuto('product',p.product);setAuto('rate',p.rate);setAuto('qty',p.qty)}
+  else if(pkey(pc)===pkey(p.product)){setAuto('rate',p.rate);setAuto('qty',p.qty)}
+  else fillFromProduct();
+  autoChange(keep);
+}
+function resolvedStatus(){
+  if(!unlocked)return $('status').value;
+  return $('status').value||(findPatient($('name').value,$('cnic').value,$('pmobile').value)?'Carry Forward Patient':'New Patient');
+}
+
+/* ---------- smart parser ---------- */
+const KEYS={name:'name',patientname:'name',patient:'name',cnic:'cnic',nic:'cnic',id:'cnic',idcard:'cnic',cnicno:'cnic',
+ product:'product',productname:'product',medicine:'product',drug:'product',rate:'rate',price:'rate',
+ quantity:'qty',qty:'qty',doctor:'doctor',doctorname:'doctor',dr:'doctor',prescriber:'doctor',
+ patientmobile:'pmobile',patientphone:'pmobile',patientcontact:'pmobile',patientnumber:'pmobile',patientcell:'pmobile',patientmobilenumber:'pmobile',contact:'pmobile',contactnumber:'pmobile',phone:'pmobile',mobile:'pmobile',whatsapp:'pmobile',number:'pmobile',
+ address:'address',deliveryaddress:'address',location:'address',changeaddress:'address',newaddress:'address',newdeliveryaddress:'address',status:'status',patientstatus:'status',date:'date'};
+function normStatus(s){return /carry|follow|old|repeat|continu/i.test(s)?'Carry Forward Patient':/new/i.test(s)?'New Patient':''}
+function parse(text){
+  const r={};const rest=[];
+  const PH=/(?:\+92|0092|92|0)[ -]?3\d{2}[ -]?\d{7}\b/;
+  text.replace(/[•▪●◦*]/g,'\n').split(/\r?\n/).forEach(line=>{
+    line=line.trim();if(!line)return;
+    if(line[0]==='[')line=line.replace(/^\[[^\]]*\]\s*(?:\+?[\d ]{8,}|[^:]{1,30}):\s*/,'');
+    if(!line)return;
+    const m=line.match(/^([A-Za-z ]{2,24})\s*[:：]\s*(.+)$/);
+    const f=m&&KEYS[m[1].toLowerCase().replace(/[^a-z]/g,'')];
+    if(f){let val=m[2].trim();if(f==='name'){const q=val.match(PH);if(q){val=val.replace(q[0],'').trim();rest.push(q[0])}}r[f]=val;return}
+    rest.push(line);
+  });
+  let t=rest.join('\n');
+  const take=(re,fn)=>{const m=t.match(re);if(m){t=t.replace(m[0],' ');return fn?fn(m):m[0]}return null};
+  if(!r.cnic){const c=take(/\b\d{5}[- ]?\d{7}[- ]?\d\b/);if(c)r.cnic=c}
+  t=t.replace(/\b(?:cnic|nic|id\s*card)\s*(?:no\.?|number)?\s*[:.\-]?/ig,' ');
+  if(!r.pmobile){const p=take(PH);if(p)r.pmobile=p}
+  if(!r.date){const d=take(/\b\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4}\b/);if(d)r.date=d}
+  if(!r.time){const d=take(/\b\d{1,2}:\d{2}\s*(?:am|pm)?/i);if(d)r.time=d}
+  if(!r.rate){const x=take(/(?:rs\.?|pkr|rate)\s*[:\-]?\s*([\d,]{3,})/i,m=>m[1]);if(x)r.rate=x}
+  if(!r.qty){const x=take(/\b(\d+)\s*(packs?|vials?|boxes|box|pcs|injections?|amps?)\b/i,m=>m[1]+' '+m[2][0].toUpperCase()+m[2].slice(1).toLowerCase());if(x)r.qty=x}
+  if(!r.doctor){const x=take(/\bdr\.?[ \t]*[A-Za-z]+(?:[ \t]+[A-Za-z]+){0,2}/i);if(x)r.doctor=x.trim().replace(/^dr\.?\s*/i,'Dr. ')}
+  if(!r.status){const x=take(/carry\s*forward|follow\s*up|old patient|new patient|repeat patient/i);if(x)r.status=x}
+  if(!r.product){const x=take(/\b[A-Za-z]+(?:[ \t]+[A-Za-z]+)?[ \t]+(?:injection|inj\.?|tablets?|capsules?|syrup|vial)\b/i);if(x)r.product=x.trim()}
+  const left=t.split('\n').map(s=>s.trim().replace(/^\d+\s*[-.)]\s*/,'').replace(/^[\s,\-:]+|[\s,\-:]+$/g,'')).filter(s=>s&&s.length<80&&!/details?$|kindly|respected|approv|regards|thank/i.test(s)&&/[A-Za-z]/.test(s));
+  if(!r.name&&left.length){const i=left.findIndex(s=>/^[A-Za-z .]+$/.test(s)&&s.split(' ').length<=4);if(i>-1)r.name=left.splice(i,1)[0]}
+  if(!r.address&&left.length)r.address=left.join(', ');
+  if(r.cnic)r.cnic=digits(r.cnic);
+  if(r.date)r.date=isoDate(r.date);
+  if(r.time)r.time=isoTime(r.time);
+  if(r.pmobile)r.pmobile=digits(r.pmobile).replace(/^92/,'0');
+  if(r.status)r.status=normStatus(r.status);
+  return r;
+}
+function applySmart(){
+  const txt=$('smart').value;if(!txt.trim())return;
+  const r=parse(txt);Object.keys(AUTO).forEach(k=>delete AUTO[k]);endChange('');
+  FIELDS.forEach(k=>{$(k).value=r[k]||(k==='date'?todayISO():k==='time'?nowHM():'')});
+  timeAuto=!r.time;cityManual=false;
+  $('pmobile2').value='';$('pmobile3').value='';$('moreMob').checked=false;
+  const extra=[...new Set((txt.match(/(?<!\d)(?:\+?92|0)3\d{2}[\s-]?\d{7}(?!\d)/g)||[]).map(normMob))].filter(x=>last10(x)!==last10(normMob(r.pmobile))).slice(0,2);
+  if(extra.length){$('moreMob').checked=true;$('pmobile2').value=extra[0]||'';$('pmobile3').value=extra[1]||''}
+  showMob();
+  const p=findPatient(r.name,r.cnic,r.pmobile);
+  if(p){autofillFrom(p,true)}else fillFromProduct();
+  render();
+}
+
+/* ---------- email building ---------- */
+function data(){const d={};FIELDS.forEach(k=>d[k]=$(k).value.trim());d.pmobile=mobsForm().join(' / ');d.chg=$('chg').checked;d.rate=rateTxt(d.rate);d.invoice=$('invoice').checked;d.icekit=$('icekit').checked;d.status=resolvedStatus();return d}
+
+/* ---------- email designs (Outlook-safe: tables + inline CSS) ---------- */
+const DESIGN_LIST=[['classic','Classic (original)'],['executive','1 · Executive Card'],['ledger','2 · Ledger Minimal'],['summary','3 · Order Summary'],['midnight','4 · Midnight & Gold'],['cards','5 · Modern Cards']];
+function model(d,v){
+  const dt=d.date?fmtDate(d.date)+(d.time?', '+fmtTime(d.time):''):'';
+  const pat=[['📅 ','Date &amp; Time',v(dt,'—')],['🪪 ','CNIC',v(d.cnic,'—')],['','Patient Name',v(d.name,'—')]];
+  if(d.pmobile)pat.push(['📱 ','Patient Mobile',v(d.pmobile,'')]);
+  pat.push(['','Patient Status',v(d.status,'—')]);
+  const S=[{t:'Patient Details',i:'👤 ',r:pat},
+   {t:'Product Details',i:'💊 ',r:[['','Product Name',v(d.product,'—')],['','Rate',v(d.rate,'—')],['','Quantity',v(d.qty,'—')]]},
+   {t:'Prescriber Details',i:'🩺 ',r:[['','Prescriber Name',v(d.doctor,'—')]]},
+   {t:'Delivery Address',i:'📍 ',r:[['','Address',v(d.address,'—')]]}];
+  if(d.notes)S.push({t:'Additional Notes',i:'📝 ',r:[['','Notes',esc(d.notes).replace(/\n/g,'<br>')]]});
+  return{S,title:d.product?esc(d.product):'Order Request',nm:d.name?esc(d.name):'',dt:esc(dt),
+   inv:'Please provide invoice to the patient.',ice:'Deliver injection in proper ice kit including thermocol box.'};
+}
+const FF='font-family:Calibri,Arial,sans-serif;';
+const INTRO='Kindly approve the following order and arrange its timely supply.',OUTRO='Your prompt approval and support will be highly appreciated.';
+function alertBox(d,M,pad,bg,bd,col,e1,e2){
+  const L=[];if(d.invoice)L.push('<b>'+e1+M.inv+'</b>');if(d.icekit)L.push('<b>'+e2+M.ice+'</b>');
+  if(!L.length)return'';
+  return `<tr><td style="padding:${pad}"><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td bgcolor="${bg}" style="background-color:${bg};border-left:5px solid ${bd};padding:12px 14px;${FF}font-size:11pt;color:${col};line-height:1.7">${L.join('<br>')}</td></tr></table></td></tr>`;
+}
+const DESIGNS={classic:(d,v,f)=>{
+  const li=(l,x,e)=>`<li style="margin:2px 0">${l}: <b>${v(x,e)}</b></li>`;
+  const sec=(t,items)=>`<p style="margin:14px 0 4px"><b>${t}</b></p><ul style="margin:0 0 0 18px;padding:0">${items}</ul>`;
+  let h=`<div style="${f}"><p style="margin:0 0 8px">Respected Sir,</p>
+<p style="margin:0">Kindly approve the following order and arrange its timely supply. ⏰</p>`;
+  h+=sec('👤 Patient Details',
+    li('📅 Date &amp; Time',fmtDate(d.date)+(d.time?', '+fmtTime(d.time):''),'—')+li('🪪 CNIC',d.cnic,'—')+li('Patient Name',d.name,'—')+(d.pmobile?li('📱 Patient Mobile',d.pmobile,''):'')+li('Patient Status',d.status,'—'));
+  h+=sec('💊 Product Details',li('Product Name',d.product,'—')+li('Rate',d.rate,'—')+li('Quantity',d.qty,'—'));
+  h+=sec('🩺 Prescriber Details',li('Prescriber Name',d.doctor,'—'));
+  h+=sec('📍 Delivery Address',`<li style="margin:2px 0"><b>${v(d.address,'—')}</b></li>`);
+  if(d.notes)h+=sec('📝 Additional Notes',`<li style="margin:2px 0">${esc(d.notes).replace(/\n/g,'<br>')}</li>`);
+  if(d.invoice||d.icekit){
+    const L=[];if(d.invoice)L.push('<b>⚠️🧾 Please provide invoice to the patient.</b>');if(d.icekit)L.push('<b>❄️📦 Deliver injection in proper ice kit including thermocol box.</b>');
+    h+=`<table cellpadding="0" cellspacing="0" style="margin:16px 0 4px;border-collapse:collapse"><tr><td style="background-color:#fff1a6;border-left:5px solid #d32f2f;padding:8px 12px;${f}">${L.join('<br>')}</td></tr></table>`;
+  }
+  h+=`<p style="margin:14px 0 0">✅ Your prompt approval and support will be highly appreciated.</p></div>`;
+
+  return h;
+},
+executive(d,v){const M=model(d,v);
+  const row=(r)=>`<tr><td width="38%" style="${FF}font-size:10.5pt;color:#6b7b77;padding:7px 0;border-bottom:1px solid #e6ebe8">${r[0]}${r[1]}</td><td style="${FF}font-size:11pt;color:#12201d;padding:7px 0;border-bottom:1px solid #e6ebe8"><b>${r[2]}</b></td></tr>`;
+  const sec=x=>`<tr><td style="padding:18px 28px 0"><div style="${FF}font-size:9.5pt;letter-spacing:1.5px;color:#0e6b5c;font-weight:bold;padding-bottom:4px">${x.i}${x.t.toUpperCase()}</div><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse">${x.r.map(row).join('')}</table></td></tr>`;
+  return `<table width="600" align="center" cellpadding="0" cellspacing="0" style="width:600px;border-collapse:collapse;border:1px solid #d9e2de;background:#ffffff">
+<tr><td bgcolor="#0a4f44" style="background-color:#0a4f44;padding:22px 28px;${FF}color:#ffffff"><div style="font-size:9.5pt;letter-spacing:2px;color:#9fd3c7">ORDER APPROVAL REQUEST</div><div style="font-size:16pt;font-weight:bold;padding-top:4px;color:#ffffff">${M.title}</div></td></tr>
+<tr><td style="padding:22px 28px 0;${FF}font-size:11pt;color:#12201d">Respected Sir,<br><br>${INTRO} ⏰</td></tr>
+${M.S.map(sec).join('')}
+${alertBox(d,M,'20px 28px 0','#fff6c9','#c62828','#3a2a00','⚠️🧾 ','❄️📦 ')}
+<tr><td style="padding:20px 28px 26px;${FF}font-size:11pt;color:#12201d">✅ ${OUTRO}</td></tr></table>`},
+ledger(d,v){const M=model(d,v),SF="font-family:Georgia,'Times New Roman',serif;";
+  const row=r=>`<tr><td width="34%" style="${FF}font-size:10.5pt;color:#7a7568;padding:5px 0;vertical-align:top">${r[1]}</td><td style="${FF}font-size:11pt;color:#1d1b16;padding:5px 0"><b>${r[2]}</b></td></tr>`;
+  const sec=x=>`<tr><td style="padding:20px 0 0"><div style="${SF}font-size:13pt;color:#1d1b16;border-bottom:1px solid #b89a5a;padding-bottom:5px;margin-bottom:4px">${x.t}</div><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse">${x.r.map(row).join('')}</table></td></tr>`;
+  const L=[];if(d.invoice)L.push('<b>'+M.inv+'</b>');if(d.icekit)L.push('<b>'+M.ice+'</b>');
+  return `<table width="600" align="center" cellpadding="0" cellspacing="0" style="width:600px;border-collapse:collapse;background:#ffffff">
+<tr><td style="border-top:3px solid #b89a5a;padding:18px 0 0;${SF}font-size:11pt;color:#1d1b16;line-height:1.6">Respected Sir,<br>${INTRO}</td></tr>
+${M.S.map(sec).join('')}
+${L.length?`<tr><td style="padding:22px 0 0"><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid #b89a5a"><tr><td bgcolor="#faf6ea" style="background-color:#faf6ea;padding:12px 16px;${FF}font-size:11pt;color:#3b2f10;line-height:1.7">${L.join('<br>')}</td></tr></table></td></tr>`:''}
+<tr><td style="padding:20px 0 10px;${SF}font-size:11pt;font-style:italic;color:#1d1b16;border-bottom:3px solid #b89a5a">${OUTRO}</td></tr></table>`},
+summary(d,v){const M=model(d,v);
+  const row=r=>`<tr><td width="34%" style="${FF}font-size:10.5pt;color:#5d6b78;padding:6px 0;vertical-align:top">${r[1]}</td><td style="${FF}font-size:11pt;color:#14202b;padding:6px 0"><b>${r[2]}</b></td></tr>`;
+  const sec=x=>`<tr><td style="padding:18px 28px 0"><table cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td width="4" bgcolor="#1f4e79" style="background-color:#1f4e79;width:4px">&nbsp;</td><td style="padding-left:10px;${FF}font-size:11.5pt;font-weight:bold;color:#1f4e79">${x.t}</td></tr></table><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-top:4px">${x.r.map(row).join('')}</table></td></tr>`;
+  const k=(l,val,w,b)=>`<td width="${w}" style="padding:12px 14px;${FF}${b?'border-right:1px solid #cfdbe7':''}"><div style="font-size:9pt;letter-spacing:1px;color:#5d6b78">${l}</div><div style="font-size:13pt;color:#14202b;padding-top:2px"><b>${val}</b></div></td>`;
+  const P=M.S[1].r;
+  return `<table width="600" align="center" cellpadding="0" cellspacing="0" style="width:600px;border-collapse:collapse;border:1px solid #d5dee8;background:#ffffff">
+<tr><td style="padding:24px 28px 0;${FF}font-size:11pt;color:#14202b">Respected Sir,<br>${INTRO}</td></tr>
+<tr><td style="padding:16px 28px 0"><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid #cfdbe7"><tr><td colspan="3" bgcolor="#1f4e79" style="background-color:#1f4e79;padding:9px 14px;${FF}font-size:9.5pt;letter-spacing:1.5px;color:#ffffff"><b>ORDER SUMMARY</b></td></tr><tr bgcolor="#f1f5f9">${k('PRODUCT',P[0][2],'44%',1)}${k('RATE',P[1][2],'28%',1)}${k('QUANTITY',P[2][2],'28%',0)}</tr></table></td></tr>
+${M.S.filter((x,i)=>i!==1).map(sec).join('')}
+${alertBox(d,M,'20px 28px 0','#fdf3d0','#c62828','#3a2a00','⚠️ ','❄️ ')}
+<tr><td style="padding:20px 28px 26px;${FF}font-size:11pt;color:#14202b">${OUTRO}</td></tr></table>`},
+midnight(d,v){const M=model(d,v);let z=0;
+  const row=r=>{z++;const bg=z%2?'#f7f5ef':'#ffffff';return `<tr bgcolor="${bg}" style="background-color:${bg}"><td width="36%" style="${FF}font-size:10.5pt;color:#6e6a5d;padding:8px 12px">${r[1]}</td><td style="${FF}font-size:11pt;color:#1a1a1a;padding:8px 12px"><b>${r[2]}</b></td></tr>`};
+  const sec=x=>{z=0;return `<tr><td style="padding:20px 26px 0"><div style="${FF}font-size:10pt;letter-spacing:2px;color:#a8863a;font-weight:bold;padding-bottom:6px">${x.t.toUpperCase()}</div><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid #e8e3d3">${x.r.map(row).join('')}</table></td></tr>`};
+  return `<table width="600" align="center" cellpadding="0" cellspacing="0" style="width:600px;border-collapse:collapse;border:1px solid #d8d2bf;background:#ffffff">
+<tr><td bgcolor="#1c1f26" style="background-color:#1c1f26;padding:24px 26px;${FF}color:#ffffff"><div style="font-size:9.5pt;letter-spacing:3px;color:#d4b062">ORDER REQUEST</div><div style="font-size:17pt;font-weight:bold;padding-top:4px;color:#ffffff">${M.title}</div>${M.nm||M.dt?`<div style="font-size:10.5pt;color:#b9bcc4;padding-top:2px">${[M.nm,M.dt].filter(Boolean).join(' &nbsp;|&nbsp; ')}</div>`:''}</td></tr>
+<tr><td bgcolor="#d4b062" height="3" style="background-color:#d4b062;height:3px;font-size:1px;line-height:3px">&nbsp;</td></tr>
+<tr><td style="padding:22px 26px 0;${FF}font-size:11pt;color:#1a1a1a;line-height:1.6">Respected Sir,<br>${INTRO}</td></tr>
+${M.S.map(sec).join('')}
+${alertBox(d,M,'20px 26px 0','#fff4cf','#b3261e','#3a2a00','⚠️ ','❄️ ')}
+<tr><td style="padding:20px 26px 26px;${FF}font-size:11pt;color:#1a1a1a">${OUTRO}</td></tr></table>`},
+cards(d,v){const M=model(d,v),C=['#4f46e5','#0e7490','#7c3aed','#0e6b5c','#64748b'];
+  const row=r=>`<tr><td style="${FF}font-size:9pt;letter-spacing:1px;color:#7a8794;padding:8px 0 0">${r[1].toUpperCase()}</td></tr><tr><td style="${FF}font-size:11pt;color:#17212b;padding:1px 0 4px"><b>${r[2]}</b></td></tr>`;
+  const card=(x,w)=>`<td width="${w}" valign="top" bgcolor="#ffffff" style="background-color:#ffffff;border-top:3px solid ${C[M.S.indexOf(x)]};padding:12px 16px 10px"><div style="${FF}font-size:11.5pt;font-weight:bold;color:${C[M.S.indexOf(x)]}">${x.t}</div><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse">${x.r.map(row).join('')}</table></td>`;
+  const full=x=>`<tr><td style="padding:12px 20px 0"><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr>${card(x,'100%')}</tr></table></td></tr>`;
+  return `<table width="600" align="center" cellpadding="0" cellspacing="0" bgcolor="#eef2f6" style="width:600px;border-collapse:collapse;background-color:#eef2f6">
+<tr><td style="padding:22px 20px 0;${FF}font-size:11pt;color:#17212b;line-height:1.6">Respected Sir,<br>${INTRO}</td></tr>
+<tr><td style="padding:14px 20px 0"><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr>${card(M.S[0],'50%')}<td width="12" style="width:12px;font-size:1px">&nbsp;</td>${card(M.S[1],'50%')}</tr></table></td></tr>
+${M.S.slice(2).map(full).join('')}
+${alertBox(d,M,'14px 20px 0','#fff4cf','#b3261e','#3a2a00','⚠️ ','❄️ ')}
+<tr><td style="padding:18px 20px 24px;${FF}font-size:11pt;color:#17212b">${OUTRO}</td></tr></table>`}
+};
+function build(){
+  const d=data(),v=(x,e)=>x?esc(x):`<span style="color:#b00">${e}</span>`;
+  const f='font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#000';
+  const h=(DESIGNS[$('design').value]||DESIGNS.classic)(d,v,f);
+  let t=`Respected Sir,\n\nKindly approve the following order and arrange its timely supply.\n\nPatient Details\n- Date & Time: ${fmtDate(d.date)}${d.time?', '+fmtTime(d.time):''}\n- CNIC: ${d.cnic}\n- Patient Name: ${d.name}\n${d.pmobile?'- Patient Mobile: '+d.pmobile+'\n':''}- Patient Status: ${d.status}\n\nProduct Details\n- Product Name: ${d.product}\n- Rate: ${d.rate}\n- Quantity: ${d.qty}\n\nPrescriber Details\n- Prescriber Name: ${d.doctor}\n\nDelivery Address\n- ${d.address}\n\n${d.notes?'Additional Notes\n- '+d.notes+'\n\n':''}`;
+  if(d.invoice)t+=`>>> Please provide invoice to the patient.\n`;
+  if(d.icekit)t+=`>>> Deliver injection in proper ice kit including thermocol box.\n`;
+  if(d.invoice||d.icekit)t+='\n';
+  t+=`Your prompt approval and support will be highly appreciated.`;
+  return{html:h,text:t,d};
+}
+const CITIES=['Multan','Lahore','Karachi','Islamabad','Rawalpindi','Faisalabad','Peshawar','Quetta','Sialkot','Gujranwala','Bahawalpur','Sargodha','Sahiwal','Khanewal','Vehari','Lodhran','Muzaffargarh','Dera Ghazi Khan','Rahim Yar Khan','Jhang','Sheikhupura','Gujrat','Hyderabad','Sukkur','Larkana','Abbottabad','Mardan','Mansehra','Okara','Kasur','Bahawalnagar','Layyah','Mianwali','Khushab','Bhakkar','Pakpattan','Toba Tek Singh','Chiniot','Jhelum','Attock','Chakwal','Narowal','Hafizabad','Mandi Bahauddin','Burewala','Kamalia','Jalalpur Pirwala','Shujabad','Mailsi','Kabirwala','Gojra','Wah Cantt','Mirpur','Muzaffarabad','Gilgit','Swat','Kohat','Bannu','Nawabshah','Mirpurkhas','Sanghar','Jacobabad','Gwadar','Turbat','Zhob'];
+CITIES.push('Kot Addu','Rajanpur','Jampur','Taunsa','Alipur','Jatoi','Liaquatpur','Khanpur','Ahmedpur East','Dunyapur','Mian Channu','Arifwala','Haroonabad','Chishtian','Hasilpur','Yazman','Kharian','Wazirabad','Daska','Pattoki','Jaranwala','Samundri','Depalpur','Shorkot','Bhalwal','Taxila','Murree','Haripur','Nowshera','Charsadda','Dera Ismail Khan','Mingora','Skardu','Chitral','Khuzdar','Sibi','Hub','Thatta','Badin','Dadu','Jamshoro','Shikarpur','Khairpur','Ghotki','Umerkot','Tando Allahyar','Tando Adam');
+const CITY_ALIASES=[[/\bd\.?\s?g\.?\s?khan\b|\bdgk\b/,'Dera Ghazi Khan'],[/\bmuzaffar\s+garh\b/,'Muzaffargarh'],[/\bkot\s?addu\b|\bkotaddu\b/,'Kot Addu'],[/\blodhra\b/,'Lodhran'],[/\brahim\s?yar\s?khan\b|\bryk\b|\br\.y\.?\s?khan\b/,'Rahim Yar Khan'],[/\bpindi\b/,'Rawalpindi'],[/\bd\.?\s?i\.?\s?khan\b/,'Dera Ismail Khan']];
+/* Known cities only (no guessing). The last city named in the address wins, e.g. "Multan Road, Vehari" -> Vehari */
+function cityStrict(a){
+  if(!a)return'';
+  let best='',pos=-1;
+  const consider=(re,name)=>{let m;while((m=re.exec(a))){if(m.index>=pos){pos=m.index;best=name}if(m[0]==='')re.lastIndex++}};
+  CITIES.forEach(c=>consider(new RegExp('\\b'+c.replace(/ /g,'\\s+')+'\\b','ig'),c));
+  CITY_ALIASES.forEach(([re,name])=>consider(new RegExp(re.source,'ig'),name));
+  return best;
+}
+let cityManual=false;
+function syncCity(){if(cityManual)return;const c=cityStrict($('address').value);if($('city').value!==c)$('city').value=c}
+function cityOf(a){
+  if(!a)return'';
+  let best='',pos=-1;
+  CITIES.forEach(c=>{const re=new RegExp('\\b'+c.replace(/ /g,'\\s+')+'\\b','ig');let m;while((m=re.exec(a))){if(m.index>=pos){pos=m.index;best=c}}});
+  if(best)return best;
+  const seg=a.split(/[,\n]/).map(x=>x.trim()).filter(Boolean).pop()||'';
+  return seg.split(/\s+/).length<=2?seg:'';
+}
+function fmtCnic(v){
+  const d=String(v||'').replace(/\D/g,'').slice(0,13);
+  return d.length>12?d.slice(0,5)+'-'+d.slice(5,12)+'-'+d.slice(12):d.length>5?d.slice(0,5)+'-'+d.slice(5):d;
+}
+function render(){
+  syncCity();
+  {const cf=fmtCnic($('cnic').value);if($('cnic').value!==cf)$('cnic').value=cf}
+  const b=build();$('preview').innerHTML=b.html;$('stBadge').textContent=b.d.status;
+  $('subject').value=[b.d.product||'Product','Supply',b.d.city].filter(Boolean).join(' ');
+  renderHistory();renderChg();
+}
+
+/* ---------- copy ---------- */
+async function copyRich(){
+  if(chgBlocked())return;
+  const b=build();backup();
+  try{
+    await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([b.html],{type:'text/html'}),'text/plain':new Blob([b.text],{type:'text/plain'})})]);
+    toast('Copied ✔ Paste in Outlook');return;
+  }catch(e){}
+  const r=document.createRange();r.selectNodeContents($('preview'));const s=getSelection();s.removeAllRanges();s.addRange(r);
+  const ok=document.execCommand('copy');s.removeAllRanges();toast(ok?'Copied ✔ Paste in Outlook':'Copy failed – select the preview and press Ctrl+C');
+}
+async function copyText(txt,msg){
+  try{await navigator.clipboard.writeText(txt)}catch(e){const a=document.createElement('textarea');a.value=txt;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove()}
+  toast(msg);
+}
+
+/* ---------- backup + PIN (patient data is fetched only after the PIN) ---------- */
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycbyrgtSzvgr2r6LYJrxk0LNYvE1j-KZGYuTbx77iXC5YDOMWBjqXqWAs2dxz64EuBU7CFw/exec';
+const MSG={html:'Google returned a login/error page. In the deployment settings, set "Who has access" to Anyone.',bad:'The script returned an unexpected response.',old:'The Apps Script is outdated. Paste the latest code and deploy a new version.',net:'Network or connection problem.',locked:'Too many attempts. Please try again later.',pin:'Incorrect PIN.'};
+function setCloud(ok,msg){const c=$('cloud');c.className=ok===true?'ok':ok===false?'bad':'';c.dataset.msg=msg||'';c.title=msg||''}
+const sentSig={};let pending=[];
+const typedPin=()=>{const v=$('pin').value.trim();return /^\d{4}$/.test(v)?v:''};   // PIN typed but not logged in is still recorded with the order
+function recFrom(d){return{saved:new Date().toLocaleString('en-GB'),...d,date:fmtDate(d.date),time:fmtTime(d.time),invoice:d.invoice?'Yes':'No',pin:unlocked?curPin:typedPin(),chg:d.chg?'1':'',nw:CHG.forceNew?'1':'',cts:String(Date.now()),rts:d.chg?(CHG.ts||''):''}}
+async function post(rec){
+  const body=JSON.stringify(rec);
+  try{await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',keepalive:true,headers:{'Content-Type':'text/plain;charset=utf-8'},body});return true}
+  catch(e){try{return !!(navigator.sendBeacon&&navigator.sendBeacon(SCRIPT_URL,new Blob([body],{type:'text/plain;charset=utf-8'})))}catch(_){return false}}
+}
+async function flush(){const q=pending;pending=[];for(const r of q){if(!(await post(r)))pending.push(r)}}
+addEventListener('online',flush);
+/* called on Save / Copy Email / Copy plain text – works silently with or without PIN */
+async function backup(){
+  const d=data();
+  if(!d.name&&!digits(d.cnic))return'skip';
+  const sig=JSON.stringify([digits(d.cnic)||d.name.toLowerCase(),d.pmobile,d.product,d.rate,d.qty,d.doctor,d.address,d.notes,d.date,d.chg]);
+  if(sentSig[sig]&&Date.now()-sentSig[sig]<1800000)return'dup';   // same order within 30 min = same order
+  sentSig[sig]=Date.now();
+  const rec=recFrom(d);
+  if(unlocked){
+    const key=digits(d.cnic)||d.name.toLowerCase();
+    patients[key]={name:d.name,cnic:d.cnic,pmobile:d.pmobile,doctor:d.doctor,address:d.address,product:d.product,rate:d.rate,qty:d.qty};
+    addProd(d.product,d.rate,d.qty);
+    const loc={...rec,_t:+rec.cts};
+    const win=d.chg?86400000:1800000;   // change mode = 1 day, otherwise 30 minutes
+    const same=r=>{const t=rowT(r);return t&&Date.now()-t<win&&String(r.pin||'')===String(rec.pin)&&pkey(r.name)===pkey(rec.name)&&digits(r.cnic)===digits(rec.cnic)&&(!!digits(rec.cnic)||mobOverlap(r.pmobile,rec.pmobile))};
+    let ix=-1;
+    if(d.chg&&CHG.ts)ix=rowsAll.findIndex(r=>String(r.ts)===String(CHG.ts));
+    if(ix<0&&!CHG.forceNew)ix=rowsAll.map(r=>!!same(r)).lastIndexOf(true);
+    if(ix>=0)rowsAll[ix]=loc;else rowsAll.push(loc);
+    CHG.ts=d.chg?String(loc._t):'';
+    if(d.chg){CHG.row=loc;CHG.orig={name:pkey(loc.name),cnic:digits(loc.cnic),prod:pkey(loc.product)};CHG.okProd=''}
+    refreshLists();render();
+  }
+  CHG.forceNew=false;
+  if(pending.length)await flush();
+  const ok=await post(rec);
+  if(!ok){pending.push(rec);if(unlocked)setCloud(false,'Backup could not be sent – check the internet connection; it will retry automatically')}
+  else if(unlocked)setCloud(true,'Google Sheet connected');
+  return ok?'ok':'fail';
+}
+async function save(){
+  if(chgBlocked())return;
+  const d=data();
+  if(!d.name){toast('Patient name is required');$('name').focus();return}
+  const r=await backup();
+  toast(!unlocked?'Saved ✔':r==='ok'?'Saved ✔ Backed up to Google Sheet':r==='dup'?'Already saved ✔':'Saved – backup pending, check the internet connection');
+}
+async function sync(pin){
+  for(let a=0;a<2;a++){
+    try{
+      const res=await fetch(SCRIPT_URL+'?pin='+encodeURIComponent(pin)+'&_='+Date.now(),{cache:'no-store'});
+      const txt=await res.text();let j;
+      try{j=JSON.parse(txt)}catch(e){return{err:/<html|<!doctype/i.test(txt)?'html':'bad'}}
+      if(Array.isArray(j))return{err:'old'};
+      if(j&&j.error)return{err:j.error};
+      if(j&&j.ok&&Array.isArray(j.rows))return{rows:j.rows,role:j.role||'user'};
+      return{err:'bad'};
+    }catch(e){if(a===1)return{err:'net'};await new Promise(r=>setTimeout(r,1200))}
+  }
+}
+function loadRows(rows){
+  patients={};prods={};rowsAll=[];let n=0;
+  const t=x=>String(x==null?'':x).trim();
+  rows.forEach(r=>{
+    const nm=t(r.name),cn=digits(r.cnic),pm=mobsOf(r.pmobile).join(' / ');
+    if(!nm&&!cn&&!pm)return;
+    rowsAll.push(r);
+    const k=cn||nm.toLowerCase()||pm;
+    const o=patients[k]||{name:'',cnic:'',pmobile:'',doctor:'',address:'',product:'',rate:'',qty:''};
+    if(nm)o.name=nm;if(cn)o.cnic=cn;if(pm)o.pmobile=pm;
+    if(t(r.doctor))o.doctor=t(r.doctor);
+    if(t(r.address))o.address=t(r.address);
+    if(t(r.product)){o.product=t(r.product);o.rate=t(r.rate);o.qty=t(r.qty);addProd(o.product,o.rate,o.qty)}
+    patients[k]=o;n++;
+  });
+  return n;
+}
+function applyMode(){
+  $('pin').style.display=unlocked?'none':'';$('login').style.display=unlocked?'none':'';
+  $('lock').style.display=unlocked?'':'none';
+  $('cloud').style.display=unlocked?'':'none';
+  $('status').options[0].text=unlocked?'Auto (from backup)':'Select status…';
+  if(!unlocked){patients={};prods={};rowsAll=[];curPin=''}
+  refreshLists();render();
+}
+function lock(){unlocked=false;applyMode()}
+async function tryUnlock(pin){
+  if(busy)return;
+  if(!/^\d{4}$/.test(pin||'')){toast('Enter a 4-digit PIN');return}
+  busy=true;
+  const r=await sync(pin);busy=false;
+  if(!r.rows){toast(MSG[r.err]||'Error');return}
+  $('pin').value='';
+  const n=loadRows(r.rows);curPin=pin;unlocked=true;applyMode();
+  setCloud(true,n+' records, '+Object.keys(prods).length+' products loaded');
+  toast(r.role==='admin'?'Unlocked ✔ (Admin)':n?'Unlocked ✔':'New PIN ✔ – no earlier data for this PIN (check the PIN if this was a mistake)');
+}
+async function resync(){
+  const r=await sync(curPin);
+  if(r.rows){const n=loadRows(r.rows);refreshLists();render();setCloud(true,n+' records, '+Object.keys(prods).length+' products loaded')}
+  else{setCloud(false,MSG[r.err]||'Error');if(r.err==='pin'||r.err==='locked')lock()}
+}
+
+/* ---------- order history of the patient (after PIN only) ---------- */
+function rowDateISO(r){return isoDate(String(r.date||'').trim())||isoDate((String(r.saved||'').match(/\d{1,2}\/\d{1,2}\/\d{4}/)||[''])[0])||''}
+function histFor(d){
+  const c=digits(d.cnic),mm=mobsOf(d.pmobile),n=String(d.name||'').trim().toLowerCase();
+  if(!(c.length>=13||mm.length||n))return[];
+  return rowsAll.filter(r=>{
+    const rc=digits(r.cnic),rn=String(r.name||'').trim().toLowerCase();
+    if(c.length>=13&&rc===c)return true;
+    if(mm.length&&mobOverlap(r.pmobile,d.pmobile)&&!(n&&rn&&rn!==n))return true;
+    if(n&&rn===n){if(c.length>=13&&rc.length>=13&&rc!==c)return false;return true}
+    return false;
+  });
+}
+function renderHistory(){
+  const h=$('hist');if(!h)return;
+  if(!unlocked){h.innerHTML='';return}
+  const d=data(),H=histFor(d);
+  if(!H.length){h.innerHTML=(d.name||d.cnic||d.pmobile)?'<h2>📜 Order history</h2><p class="hint">No earlier orders were found for this patient.</p>':'';return}
+  const seen={};
+  const L=H.map((r,i)=>{const k=pkey(r.product);const rep=!!(k&&seen[k]);if(k)seen[k]=1;return{r,i,rep,iso:rowDateISO(r)}});
+  L.sort((x,y)=>(y.iso.localeCompare(x.iso))||(y.i-x.i));
+  const cnt={},nm={};H.forEach(r=>{const k=pkey(r.product);if(k){cnt[k]=(cnt[k]||0)+1;nm[k]=r.product}});
+  const sum=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]).map(k=>esc(nm[k])+' ×'+cnt[k]).join(' · ');
+  const show=L.slice(0,15);
+  const dd=r=>esc(String(r.date||'').trim()||(String(r.saved||'').match(/\d{1,2}\/\d{1,2}\/\d{4}/)||[''])[0]);
+  h.innerHTML='<h2>📜 Order history · '+H.length+' order'+(H.length>1?'s':'')+'</h2><p class="hint">'+sum+'</p>'+
+   '<div style="overflow-x:auto"><table><tr><th>Date</th><th>Product</th><th>Qty</th><th>Rate</th></tr>'+
+   show.map(x=>`<tr class="${x.rep?'rep':''}"><td>${dd(x.r)}${x.r.time?'<br><small>'+esc(x.r.time)+'</small>':''}</td><td>${esc(x.r.product||'')}${x.rep?' <span class="tag">Repeat</span>':''}</td><td>${esc(x.r.qty||'')}</td><td>${esc(x.r.rate||'')}</td></tr>`).join('')+
+   '</table></div>'+(L.length>15?'<p class="hint">+ '+(L.length-15)+' older orders</p>':'');
+}
+
+/* ---------- live patient suggestions (name / CNIC) ---------- */
+function lev(a,b){const m=a.length,n=b.length;if(!m)return n;if(!n)return m;let p=Array.from({length:n+1},(_,j)=>j);for(let i=1;i<=m;i++){let c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c}return p[n]}
+function suggest(q,mode){
+  const A=Object.values(patients);const out=[];
+  if(mode==='cnic'){const d=digits(q);if(d.length<3)return out;
+    A.forEach(p=>{const c=digits(p.cnic);if(!c)return;
+      if(c.startsWith(d))out.push([0,p]);else if(c.includes(d))out.push([1,p]);
+      else if(d.length>=6&&lev(c,d)<=2)out.push([2,p])});}
+  else{const t=String(q||'').trim().toLowerCase();if(t.length<2)return out;
+    const tk=t.split(/\s+/).filter(Boolean);
+    A.forEach(p=>{const n=String(p.name||'').toLowerCase();if(!n)return;
+      const w=n.split(/\s+/);
+      if(n.startsWith(t))out.push([0,p]);
+      else if(tk.every(x=>n.includes(x)))out.push([1,p]);
+      else if(t.length>=3&&tk.every(x=>w.some(y=>y.startsWith(x)||lev(y,x)<=(x.length>5?2:1))))out.push([2,p])});}
+  return out.sort((a,b)=>a[0]-b[0]).slice(0,8).map(x=>x[1]);
+}
+function setupSuggest(id,mode){
+  const inp=$(id),host=inp.parentElement;host.style.position='relative';
+  const box=document.createElement('div');box.className='sugbox';host.appendChild(box);
+  let list=[],act=-1;
+  const hide=()=>{box.classList.remove('on');act=-1};
+  const pick=p=>{hide();autofillFrom(p);render();toast('Saved patient loaded ✔')};
+  function show(){
+    list=suggest(inp.value,mode);act=-1;
+    const q=inp.value.trim();
+    if(!list.length){
+      if(Object.keys(patients).length&&(mode==='cnic'?digits(q).length>=5:q.length>=3)){box.innerHTML='<div class="none">No similar saved patient – will be a New Patient</div>';box.classList.add('on')}else hide();return}
+    box.innerHTML=list.map((p,i)=>`<div class="it" data-i="${i}"><b>${esc(p.name||'(no name)')}</b><small>${esc(p.cnic||'no CNIC')}${p.pmobile?' · '+esc(p.pmobile):''}${p.product?' · '+esc(p.product):''}</small></div>`).join('');
+    box.classList.add('on');
+  }
+  inp.addEventListener('input',show);
+  inp.addEventListener('focus',()=>{if(inp.value.trim())show()});
+  inp.addEventListener('blur',()=>setTimeout(hide,180));
+  inp.addEventListener('keydown',e=>{
+    if(!box.classList.contains('on')||!list.length)return;
+    const its=[...box.querySelectorAll('.it')];
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();act=(act+(e.key==='ArrowDown'?1:-1)+its.length)%its.length;its.forEach((x,i)=>x.classList.toggle('act',i===act))}
+    else if(e.key==='Enter'&&act>=0){e.preventDefault();pick(list[act])}
+    else if(e.key==='Escape')hide();
+  });
+  box.addEventListener('pointerdown',e=>{const it=e.target.closest('.it');if(!it)return;e.preventDefault();pick(list[+it.dataset.i])});
+}
+setupSuggest('name','name');setupSuggest('cnic','cnic');
+
+/* ---------- events ---------- */
+$('design').innerHTML=DESIGN_LIST.map(x=>`<option value="${x[0]}">🎨 Design: ${x[1]}</option>`).join('');
+$('design').value='classic';   // always start with Classic (Original)
+$('design').addEventListener('change',render);
+let tm;$('smart').addEventListener('input',()=>{clearTimeout(tm);tm=setTimeout(applySmart,350)});
+$('city').addEventListener('input',()=>{cityManual=!!$('city').value.trim()});   // must run before render
+FIELDS.forEach(k=>$(k).addEventListener('input',render));
+['pmobile2','pmobile3'].forEach(k=>$(k).addEventListener('input',render));
+$('moreMob').addEventListener('change',()=>{showMob();render()});
+$('chg').addEventListener('change',()=>{
+  if($('chg').checked){const b=unlocked?chgInfo(data()):null;if(b)startChange(b.r);else $('chg').checked=false}
+  else{endChange(chgKey(data()));CHG.forceNew=true}   // unticked: save as a new entry, and do not offer this patient again until New
+  render();
+});
+$('invoice').addEventListener('change',render);$('icekit').addEventListener('change',render);
+$('name').addEventListener('change',()=>{autofillFrom(findPatient($('name').value,''));render()});
+$('pmobile').addEventListener('input',()=>{if(digits($('pmobile').value).length>=11){autofillFrom(findPatient('','',$('pmobile').value));render()}});
+$('time').addEventListener('input',()=>{timeAuto=false});
+setInterval(()=>{if(timeAuto){$('time').value=nowHM();render()}},20000);
+$('cnic').addEventListener('input',()=>{if(digits($('cnic').value).length>=13){autofillFrom(findPatient('',$('cnic').value));render()}});
+$('cnic').addEventListener('change',()=>{autofillFrom(findPatient('',$('cnic').value));render()});
+$('product').addEventListener('input',e=>{if(!e.inputType||e.inputType==='insertReplacementText'){fillFromProduct();render()}});
+$('product').addEventListener('change',()=>{fillFromProduct();render()});
+$('chips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$('product').value=b.textContent;fillFromProduct();render()});
+$('save').onclick=save;$('copy').onclick=copyRich;
+$('copyTxt').onclick=()=>{if(chgBlocked())return;backup();copyText(build().text,'Plain text copied ✔')};
+$('copySubj').onclick=()=>copyText($('subject').value,'Subject copied ✔');
+$('clear').onclick=()=>{Object.keys(AUTO).forEach(k=>delete AUTO[k]);$('smart').value='';FIELDS.forEach(k=>$(k).value='');$('date').value=todayISO();$('time').value=nowHM();timeAuto=true;$('invoice').checked=true;$('icekit').checked=true;endChange('');CHG.forceNew=false;cityManual=false;$('moreMob').checked=false;$('pmobile2').value='';$('pmobile3').value='';showMob();render()};
+
+
+$('pin').addEventListener('input',()=>{$('pin').value=$('pin').value.replace(/\D/g,'').slice(0,4)});
+$('login').onclick=()=>tryUnlock($('pin').value.trim());
+$('pin').addEventListener('keydown',e=>{if(e.key==='Enter')tryUnlock($('pin').value.trim())});
+$('lock').onclick=()=>{lock();toast('Locked 🔒')};
+$('cloud').onclick=()=>{toast($('cloud').dataset.msg||'☁️');if(unlocked)resync()};
+$('date').value=todayISO();$('time').value=nowHM();applyMode();
+</script>
+</body>
+</html>
