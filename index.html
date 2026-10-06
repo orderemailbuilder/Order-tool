@@ -186,6 +186,11 @@ function chgInfo(d){   // latest backed-up order of this patient from the last 2
   return best;
 }
 function ago(t){const m=Math.max(1,Math.round((Date.now()-t)/60000));if(m<60)return m+(m===1?' minute':' minutes');const h=Math.round(m/60);return h+(h===1?' hour':' hours')}
+function sameWho(r,rec){   // same patient? both CNICs present: the CNIC decides (the name may have been corrected)
+  const a=digits(r.cnic),b=digits(rec.cnic);
+  if(a&&b)return a===b;
+  return pkey(r.name)===pkey(rec.name)&&a===b&&(!!b||mobOverlap(r.pmobile,rec.pmobile));
+}
 function startChange(r){$('chg').checked=true;CHG.ts=String(r.ts||r._t||'');CHG.row=r;CHG.orig={name:pkey(r.name),cnic:digits(r.cnic),prod:pkey(r.product)};CHG.okProd='';CHG.declined=''}
 function endChange(declineKey){$('chg').checked=false;CHG.ts='';CHG.orig=null;CHG.row=null;CHG.okProd='';if(declineKey!==undefined)CHG.declined=declineKey}
 function bothChanged(){   // name AND CNIC changed = a different patient = new order
@@ -519,7 +524,7 @@ async function backup(){
     addProd(d.product,d.rate,d.qty);
     const loc={...rec,_t:+rec.cts};
     const win=d.chg?86400000:1800000;   // change mode = 1 day, otherwise 30 minutes
-    const same=r=>{const t=rowT(r);return t&&Date.now()-t<win&&String(r.pin||'')===String(rec.pin)&&pkey(r.name)===pkey(rec.name)&&digits(r.cnic)===digits(rec.cnic)&&(!!digits(rec.cnic)||mobOverlap(r.pmobile,rec.pmobile))};
+    const same=r=>{const t=rowT(r);return t&&Date.now()-t<win&&String(r.pin||'')===String(rec.pin)&&sameWho(r,rec)};
     let ix=-1;
     if(d.chg&&CHG.ts)ix=rowsAll.findIndex(r=>String(r.ts)===String(CHG.ts));
     if(ix<0&&!CHG.forceNew)ix=rowsAll.map(r=>!!same(r)).lastIndexOf(true);
@@ -655,7 +660,8 @@ function setupSuggest(id,mode){
     list=suggest(inp.value,mode);act=-1;
     const q=inp.value.trim();
     if(!list.length){
-      if(Object.keys(patients).length&&(mode==='cnic'?digits(q).length>=5:q.length>=3)){box.innerHTML='<div class="none">No similar saved patient – will be a New Patient</div>';box.classList.add('on')}else hide();return}
+      if(Object.keys(patients).length&&(mode==='cnic'?digits(q).length>=5:q.length>=3)){const other=mode==='name'?findPatient('',$('cnic').value,$('pmobile').value):null;
+        box.innerHTML=other?'<div class="none">This CNIC/mobile already belongs to saved patient <b>'+esc(other.name||'(no name)')+'</b> – treated as the same patient</div>':'<div class="none">No similar saved patient – will be a New Patient</div>';box.classList.add('on')}else hide();return}
     box.innerHTML=list.map((p,i)=>`<div class="it" data-i="${i}"><b>${esc(p.name||'(no name)')}</b><small>${esc(p.cnic||'no CNIC')}${p.pmobile?' · '+esc(p.pmobile):''}${p.product?' · '+esc(p.product):''}</small></div>`).join('');
     box.classList.add('on');
   }
