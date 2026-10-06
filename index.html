@@ -38,13 +38,14 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
 #pin{width:84px;padding:6px 8px;text-align:center;letter-spacing:2px}
 #cloud{padding:4px 11px;border-radius:99px;font-size:15px;cursor:pointer;background:#6b7773;user-select:none}
 #cloud.ok{background:#1f9d55}#cloud.bad{background:#d64545}
-#chgBar{background:#fff4d6;border:1px solid #f0c24b;border-radius:8px;padding:9px 11px;font-size:13px;line-height:1.5}
-#chgBar button{margin-top:6px;margin-right:6px}
-#chgBar.on{background:#fdecec;border-color:#d64545;color:#8a1c1c}
 #chgWrap{background:#fff4d6;border:1px solid #f0c24b;border-radius:8px;padding:7px 10px}
 #chgWrap.on{background:#fdecec;border-color:#d64545;color:#8a1c1c}
 #chgWrap label{margin:0;cursor:pointer;display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.45}
-#chgWrap input{margin-top:3px;width:auto}
+#chgBtns{margin-top:6px}
+#chgBtns button{margin-right:6px}
+#chgBtns button.act{background:#1f6f5c;color:#fff}
+#chgNote{margin-top:5px;font-size:12.5px}
+#cityHint{color:#a15c00;font-size:12.5px;margin-top:4px}
 #hist{margin-top:14px}#hist table{width:100%;border-collapse:collapse;font-size:13px}
 #hist th,#hist td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:top}
 #hist .rep td{background:#fff8d6}#hist .tag{display:inline-block;padding:0 7px;border-radius:99px;background:#f2c94c;color:#222;font-size:11px;font-weight:700}
@@ -86,8 +87,10 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
       <div><label for="time">Time (live, editable)</label><input id="time" type="time"></div>
       <div class="full"><label for="status">Patient status</label>
         <select id="status"><option value="">Auto (from backup)</option><option>New Patient</option><option>Carry Forward Patient</option></select></div>
-      <div class="full" id="chgWrap" style="display:none"><label for="chg"><input type="checkbox" id="chg"> <span id="chgText"></span></label></div>
-      <div class="full" id="chgBar" style="display:none"></div>
+      <div class="full" id="chgWrap" style="display:none"><input type="checkbox" id="chg" style="display:none">
+        <div id="chgText"></div>
+        <div id="chgBtns"><button type="button" class="b-lite" id="chgUpd">✏️ Update earlier order</button><button type="button" class="b-lite" id="chgNewBtn">➕ Add as new entry</button></div>
+        <div id="chgNote" style="display:none"></div></div>
       <div><label for="name">Patient name</label><input id="name" autocomplete="off"></div>
       <div><label for="cnic">CNIC</label><input id="cnic" inputmode="numeric" autocomplete="off"></div>
             <div class="full"><label for="product">Product name (type first letters for suggestions)</label><input id="product" list="products" autocomplete="off"><div id="chips"></div></div>
@@ -99,7 +102,7 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
       <div id="mob2w" style="display:none"><label for="pmobile2">Mobile 2</label><input id="pmobile2" inputmode="tel" autocomplete="off"></div>
       <div id="mob3w" style="display:none"><label for="pmobile3">Mobile 3</label><input id="pmobile3" inputmode="tel" autocomplete="off"></div>
       <div class="full"><label for="address">Delivery address</label><input id="address"></div>
-      <div class="full"><label for="city">City (detected from the address, editable)</label><input id="city" list="cities" autocomplete="off"></div>
+      <div class="full"><label for="city">City (detected from the address, editable)</label><input id="city" list="cities" autocomplete="off"><div id="cityHint" style="display:none">City not found – please type it.</div></div>
       <div class="full"><label for="notes">Additional notes (optional, shown in email)</label><textarea id="notes" style="min-height:70px"></textarea></div>
     </div>
     <label class="inv" for="invoice"><input type="checkbox" id="invoice" checked> 🧾 Invoice line: “Please provide invoice to the patient.”</label>
@@ -153,14 +156,25 @@ const normMob=s=>{let d=digits(s);if(d.length===12&&d.startsWith('92'))d='0'+d.s
 const rateTxt=r=>{r=(r||'').trim();if(!r)return'';return /^[\d,]+$/.test(r)?'Rs. '+Number(r.replace(/,/g,'')).toLocaleString('en-US'):r};
 
 /* ---------- patients / suggestions ---------- */
-const mobsOf=s=>String(s||'').split(/[\/,;|\n]+/).map(normMob).filter(x=>x.length>=10);
+/* Pakistani numbers -> 03XXXXXXXXX (+92 / 0092 / 92 become 0). Foreign numbers keep their +country code, only spaces/dashes are removed. */
+function cleanMob(v){
+  const t=String(v==null?'':v).trim();if(!t)return'';
+  const d=t.replace(/\D/g,'');if(!d)return'';
+  if(d.indexOf('0092')===0)return'0'+d.slice(4);
+  if(t.charAt(0)==='+')return d.indexOf('92')===0?'0'+d.slice(2):'+'+d;
+  if(d.indexOf('00')===0)return'+'+d.slice(2);
+  if(d.indexOf('92')===0&&d.length>=11)return'0'+d.slice(2);
+  if(d.length===10&&d.charAt(0)==='3')return'0'+d;
+  return d;
+}
+const mobsOf=s=>String(s||'').split(/[\/,;|\n]+/).map(cleanMob).filter(x=>x.replace(/\D/g,'').length>=10);
 const last10=x=>String(x).slice(-10);
 const mobOverlap=(a,b)=>{const B=mobsOf(b).map(last10);return mobsOf(a).some(x=>B.includes(last10(x)))};
 function showMob(){const on=$('moreMob').checked;$('mob2w').style.display=on?'':'none';$('mob3w').style.display=on?'':'none'}
 function mobsForm(){
   const a=[$('pmobile').value.trim()];
   if($('moreMob').checked)a.push($('pmobile2').value.trim(),$('pmobile3').value.trim());
-  return a.filter((x,i,arr)=>x&&arr.indexOf(x)===i);
+  return a.map(cleanMob).filter((x,i,arr)=>x&&arr.indexOf(x)===i);
 }
 const CHG={ts:'',orig:null,row:null,okProd:'',declined:'',forceNew:false};   // forceNew: the user chose a NEW order, so the next backup must add a row   // ts = server timestamp of the earlier row; orig = its name/CNIC/product; declined = patient the user chose NOT to update
 const chgKey=d=>digits(d.cnic)||pkey(d.name);
@@ -178,20 +192,8 @@ function bothChanged(){   // name AND CNIC changed = a different patient = new o
   if(!$('chg').checked||!CHG.orig)return false;
   return pkey($('name').value)!==CHG.orig.name&&!!CHG.orig.cnic&&digits($('cnic').value)!==CHG.orig.cnic;
 }
-function prodPending(){   // product changed while updating an earlier order: ask first
-  if(!$('chg').checked||!CHG.orig||!CHG.orig.prod)return false;
-  const p=pkey($('product').value);
-  return !!p&&p!==CHG.orig.prod&&CHG.okProd!==p;
-}
-function chgBlocked(){
-  if(!prodPending())return false;
-  toast('Please choose: replace the earlier order or add a new order');
-  try{$('chgBar').scrollIntoView({behavior:'smooth',block:'center'})}catch(e){}
-  return true;
-}
 function renderChg(){
-  const wrap=$('chgWrap'),bar=$('chgBar');
-  bar.style.display='none';bar.innerHTML='';
+  const wrap=$('chgWrap');
   if(!unlocked){if($('chg').checked)endChange();wrap.style.display='none';return}
   if(bothChanged()){endChange(chgKey(data()));toast('Name and CNIC both changed – this will be saved as a new order')}
   let r=null,t=0;
@@ -201,14 +203,12 @@ function renderChg(){
   const on=$('chg').checked,what=esc(((r.product||'')+(r.qty?' '+r.qty:'')).trim());
   wrap.style.display='';wrap.className='full'+(on?' on':'');
   $('chgText').innerHTML=on
-    ?'✏️ <b>Updating earlier order:</b> '+what+', sent '+ago(t)+' ago. Untick for a new order.'
-    :'An earlier order exists for this patient: '+what+', sent '+ago(t)+' ago. Tick to update it instead of adding a new order.';
-  if(prodPending()){
-    bar.style.display='';
-    bar.innerHTML='⚠️ The product was changed. Replace the earlier order, or add a new order?<br><button type="button" class="b-lite" id="chgRep">Replace earlier order</button><button type="button" class="b-lite" id="chgAdd">Add as new order</button>';
-    $('chgRep').onclick=()=>{CHG.okProd=pkey($('product').value);render()};
-    $('chgAdd').onclick=()=>{endChange(chgKey(data()));CHG.forceNew=true;render()};
-  }
+    ?'✏️ <b>Updating earlier order:</b> '+what+', sent '+ago(t)+' ago.'
+    :'An earlier order exists for this patient: '+what+', sent '+ago(t)+' ago.';
+  $('chgUpd').classList.toggle('act',on);$('chgNewBtn').classList.toggle('act',!on);
+  const pc=on&&CHG.orig&&CHG.orig.prod&&$('product').value.trim()&&pkey($('product').value)!==CHG.orig.prod;
+  const note=$('chgNote');note.style.display=pc?'':'none';
+  note.textContent=pc?"Product changed – updating the same order. Choose 'Add as new entry' if this is a different order.":'';
 }
 function loadChange(r){   // open the earlier order in the form and switch change mode on
   Object.keys(AUTO).forEach(k=>delete AUTO[k]);
@@ -216,7 +216,7 @@ function loadChange(r){   // open the earlier order in the form and switch chang
   ['name','cnic','product','rate','qty','doctor','address','notes'].forEach(k=>set(k,r[k]));
   const ms=mobsOf(r.pmobile);set('pmobile',ms[0]||'');set('pmobile2',ms[1]||'');set('pmobile3',ms[2]||'');
   $('moreMob').checked=ms.length>1;showMob();
-  const c0=String(r.city||'').trim(),auto=cityStrict($('address').value);
+  const c0=String(r.city||'').trim(),auto=cityStrict($('address').value)||histCity(data());
   cityManual=!!c0&&c0!==auto;$('city').value=cityManual?c0:auto;
   const iso=isoDate(String(r.date||'').trim());if(iso)$('date').value=iso;
   const hm=hm24(r.time);if(hm){$('time').value=hm;timeAuto=false}
@@ -323,7 +323,7 @@ function applySmart(){
   FIELDS.forEach(k=>{$(k).value=r[k]||(k==='date'?todayISO():k==='time'?nowHM():'')});
   timeAuto=!r.time;cityManual=false;
   $('pmobile2').value='';$('pmobile3').value='';$('moreMob').checked=false;
-  const extra=[...new Set((txt.match(/(?<!\d)(?:\+?92|0)3\d{2}[\s-]?\d{7}(?!\d)/g)||[]).map(normMob))].filter(x=>last10(x)!==last10(normMob(r.pmobile))).slice(0,2);
+  const extra=[...new Set((txt.match(/(?<!\d)(?:\+?92[\s-]?|0)3\d{2}[\s-]?\d{7}(?!\d)/g)||[]).map(cleanMob))].filter(x=>last10(x)!==last10(normMob(r.pmobile))).slice(0,2);
   if(extra.length){$('moreMob').checked=true;$('pmobile2').value=extra[0]||'';$('pmobile3').value=extra[1]||''}
   showMob();
   const p=findPatient(r.name,r.cnic,r.pmobile);
@@ -449,7 +449,12 @@ function cityStrict(a){
   return best;
 }
 let cityManual=false;
-function syncCity(){if(cityManual)return;const c=cityStrict($('address').value);if($('city').value!==c)$('city').value=c}
+function histCity(d){let best='',bt=-1;histFor(d).forEach(r=>{const c=String(r.city||'').trim(),t=rowT(r)||0;if(c&&t>=bt){bt=t;best=c}});return best}
+function syncCity(){
+  if(cityManual)return;
+  const c=cityStrict($('address').value)||(unlocked?histCity(data()):'');
+  if($('city').value!==c)$('city').value=c;
+}
 function cityOf(a){
   if(!a)return'';
   let best='',pos=-1;
@@ -465,6 +470,7 @@ function fmtCnic(v){
 function render(){
   syncCity();
   {const cf=fmtCnic($('cnic').value);if($('cnic').value!==cf)$('cnic').value=cf}
+  {const need=!$('city').value.trim()&&$('address').value.trim().length>3;$('cityHint').style.display=need?'':'none';$('city').style.borderColor=need?'#e0a100':''}
   const b=build();$('preview').innerHTML=b.html;$('stBadge').textContent=b.d.status;
   $('subject').value=[b.d.product||'Product','Supply',b.d.city].filter(Boolean).join(' ');
   renderHistory();renderChg();
@@ -472,7 +478,6 @@ function render(){
 
 /* ---------- copy ---------- */
 async function copyRich(){
-  if(chgBlocked())return;
   const b=build();backup();
   try{
     await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([b.html],{type:'text/html'}),'text/plain':new Blob([b.text],{type:'text/plain'})})]);
@@ -531,7 +536,6 @@ async function backup(){
   return ok?'ok':'fail';
 }
 async function save(){
-  if(chgBlocked())return;
   const d=data();
   if(!d.name){toast('Patient name is required');$('name').focus();return}
   const r=await backup();
@@ -693,8 +697,11 @@ $('cnic').addEventListener('change',()=>{autofillFrom(findPatient('',$('cnic').v
 $('product').addEventListener('input',e=>{if(!e.inputType||e.inputType==='insertReplacementText'){fillFromProduct();render()}});
 $('product').addEventListener('change',()=>{fillFromProduct();render()});
 $('chips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$('product').value=b.textContent;fillFromProduct();render()});
+['pmobile','pmobile2','pmobile3'].forEach(k=>$(k).addEventListener('change',()=>{const v=cleanMob($(k).value);if(v&&$(k).value!==v)$(k).value=v;render()}));
+$('chgUpd').onclick=()=>{if(!$('chg').checked){const b=unlocked?chgInfo(data()):null;if(b)startChange(b.r)}render()};
+$('chgNewBtn').onclick=()=>{if($('chg').checked){endChange(chgKey(data()));CHG.forceNew=true}render()};
 $('save').onclick=save;$('copy').onclick=copyRich;
-$('copyTxt').onclick=()=>{if(chgBlocked())return;backup();copyText(build().text,'Plain text copied ✔')};
+$('copyTxt').onclick=()=>{backup();copyText(build().text,'Plain text copied ✔')};
 $('copySubj').onclick=()=>copyText($('subject').value,'Subject copied ✔');
 $('clear').onclick=()=>{Object.keys(AUTO).forEach(k=>delete AUTO[k]);$('smart').value='';FIELDS.forEach(k=>$(k).value='');$('date').value=todayISO();$('time').value=nowHM();timeAuto=true;$('invoice').checked=true;$('icekit').checked=true;endChange('');CHG.forceNew=false;cityManual=false;$('moreMob').checked=false;$('pmobile2').value='';$('pmobile3').value='';showMob();render()};
 
