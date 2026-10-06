@@ -121,6 +121,7 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
 </main>
 <div id="toast"></div>
 
+<div id="ver" style="text-align:center;color:#8a948f;font-size:11px;margin:14px 0"></div>
 <script>
 const $=id=>document.getElementById(id);
 const FIELDS=['date','time','status','name','cnic','pmobile','product','rate','qty','doctor','address','city','notes'];
@@ -128,7 +129,9 @@ const MEM={};let storeOK=true;
 const LS=k=>{if(k in MEM)return MEM[k];try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
 const SS=(k,v)=>{MEM[k]=v;try{localStorage.setItem(k,JSON.stringify(v));if(JSON.parse(localStorage.getItem(k))===undefined)throw 0}catch(e){storeOK=false}};
 let patients={};
-let prods={};let rowsAll=[];let unlocked=false,curPin='',busy=false;
+let prods={};let rowsAll=[];let unlocked=false,isAdmin=false,curPin='',busy=false;
+const APP_VER='2026-10-06-c';
+const pn=x=>{const d=String(x==null?'':x).replace(/\D/g,'');return d?d.padStart(4,'0'):''};
 try{['patients','prods','history','sheetUrl','design'].forEach(k=>localStorage.removeItem(k))}catch(e){}          // product stats: key = lowercase product
 const AUTO={};                       // field -> value last filled automatically
 const pkey=s=>String(s||'').toLowerCase().replace(/\s+/g,' ').trim();
@@ -523,8 +526,8 @@ async function backup(){
     patients[key]={name:d.name,cnic:d.cnic,pmobile:d.pmobile,doctor:d.doctor,address:d.address,product:d.product,rate:d.rate,qty:d.qty};
     addProd(d.product,d.rate,d.qty);
     const loc={...rec,_t:+rec.cts};
-    const win=d.chg?86400000:1800000;   // change mode = 1 day, otherwise 30 minutes
-    const same=r=>{const t=rowT(r);return t&&Date.now()-t<win&&String(r.pin||'')===String(rec.pin)&&sameWho(r,rec)};
+    const win=86400000;   // the same patient within 24 hours = update the earlier row (unless "Add as new entry" was chosen)
+    const same=r=>{const t=rowT(r);return t&&Date.now()-t<win&&(isAdmin||r.pin===undefined||pn(r.pin)===pn(rec.pin))&&sameWho(r,rec)};
     let ix=-1;
     if(d.chg&&CHG.ts)ix=rowsAll.findIndex(r=>String(r.ts)===String(CHG.ts));
     if(ix<0&&!CHG.forceNew)ix=rowsAll.map(r=>!!same(r)).lastIndexOf(true);
@@ -554,7 +557,7 @@ async function sync(pin){
       try{j=JSON.parse(txt)}catch(e){return{err:/<html|<!doctype/i.test(txt)?'html':'bad'}}
       if(Array.isArray(j))return{err:'old'};
       if(j&&j.error)return{err:j.error};
-      if(j&&j.ok&&Array.isArray(j.rows))return{rows:j.rows,role:j.role||'user'};
+      if(j&&j.ok&&Array.isArray(j.rows))return{rows:j.rows,role:j.role||'user',v:j.v||''};
       return{err:'bad'};
     }catch(e){if(a===1)return{err:'net'};await new Promise(r=>setTimeout(r,1200))}
   }
@@ -581,7 +584,7 @@ function applyMode(){
   $('lock').style.display=unlocked?'':'none';
   $('cloud').style.display=unlocked?'':'none';
   $('status').options[0].text=unlocked?'Auto (from backup)':'Select status…';
-  if(!unlocked){patients={};prods={};rowsAll=[];curPin=''}
+  if(!unlocked){patients={};prods={};rowsAll=[];curPin='';isAdmin=false;$('ver').textContent='Page '+APP_VER}
   refreshLists();render();
 }
 function lock(){unlocked=false;applyMode()}
@@ -592,7 +595,8 @@ async function tryUnlock(pin){
   const r=await sync(pin);busy=false;
   if(!r.rows){toast(MSG[r.err]||'Error');return}
   $('pin').value='';
-  const n=loadRows(r.rows);curPin=pin;unlocked=true;applyMode();
+  const n=loadRows(r.rows);curPin=pin;unlocked=true;isAdmin=r.role==='admin';applyMode();
+  $('ver').textContent='Page '+APP_VER+' · Script '+(r.v||'older version');
   setCloud(true,n+' records, '+Object.keys(prods).length+' products loaded');
   toast(r.role==='admin'?'Unlocked ✔ (Admin)':n?'Unlocked ✔':'New PIN ✔ – no earlier data for this PIN (check the PIN if this was a mistake)');
 }
