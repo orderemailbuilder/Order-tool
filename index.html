@@ -78,8 +78,8 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
 <main>
   <section>
     <h2>1. Paste everything here</h2>
-    <textarea id="smart" placeholder="Paste or type anything: name, CNIC, mobile, doctor, product, rate, address... fields are filled automatically."></textarea>
-    <p class="hint">Mobile, CNIC, date, rate, quantity, doctor and status are detected automatically.</p>
+    <textarea id="smart" placeholder="Paste or type anything: name, CNIC, mobile, doctor, product, patient price, address... fields are filled automatically."></textarea>
+    <p class="hint">Mobile, CNIC, date, patient price, quantity, doctor and status are detected automatically.</p>
 
     <h2 style="margin-top:16px">2. Check or edit fields</h2>
     <div class="grid">
@@ -94,7 +94,7 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
       <div><label for="name">Patient name</label><input id="name" autocomplete="off"></div>
       <div><label for="cnic">CNIC</label><input id="cnic" inputmode="numeric" autocomplete="off"></div>
             <div class="full"><label for="product">Product name (type first letters for suggestions)</label><input id="product" list="products" autocomplete="off"><div id="chips"></div></div>
-      <div><label for="rate">Rate</label><input id="rate"></div>
+      <div><label for="rate">Patient Price</label><input id="rate"></div>
       <div><label for="qty">Quantity</label><input id="qty"></div>
       <div class="full"><label for="doctor">Prescriber name</label><input id="doctor"></div>
       <div class="full"><label for="pmobile">Patient mobile (optional, used to detect carry forward)</label><input id="pmobile" list="mobiles" inputmode="tel" autocomplete="off"></div>
@@ -286,7 +286,7 @@ function resolvedStatus(){
 
 /* ---------- smart parser ---------- */
 const KEYS={name:'name',patientname:'name',patient:'name',cnic:'cnic',nic:'cnic',id:'cnic',idcard:'cnic',cnicno:'cnic',
- product:'product',productname:'product',medicine:'product',drug:'product',rate:'rate',price:'rate',
+ product:'product',productname:'product',medicine:'product',drug:'product',rate:'rate',price:'rate',patientprice:'rate',
  quantity:'qty',qty:'qty',doctor:'doctor',doctorname:'doctor',dr:'doctor',prescriber:'doctor',
  patientmobile:'pmobile',patientphone:'pmobile',patientcontact:'pmobile',patientnumber:'pmobile',patientcell:'pmobile',patientmobilenumber:'pmobile',contact:'pmobile',contactnumber:'pmobile',phone:'pmobile',mobile:'pmobile',whatsapp:'pmobile',number:'pmobile',
  address:'address',deliveryaddress:'address',location:'address',changeaddress:'address',newaddress:'address',newdeliveryaddress:'address',status:'status',patientstatus:'status',date:'date'};
@@ -310,7 +310,7 @@ function parse(text){
   if(!r.pmobile){const p=take(PH);if(p)r.pmobile=p}
   if(!r.date){const d=take(/\b\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4}\b/);if(d)r.date=d}
   if(!r.time){const d=take(/\b\d{1,2}:\d{2}\s*(?:am|pm)?/i);if(d)r.time=d}
-  if(!r.rate){const x=take(/(?:rs\.?|pkr|rate)\s*[:\-]?\s*([\d,]{3,})/i,m=>m[1]);if(x)r.rate=x}
+  if(!r.rate){const x=take(/(?:rs\.?|pkr|rate|patient\s*price|price)\s*[:\-]?\s*([\d,]{3,})/i,m=>m[1]);if(x)r.rate=x}
   if(!r.qty){const x=take(/\b(\d+)\s*(packs?|vials?|boxes|box|pcs|injections?|amps?)\b/i,m=>m[1]+' '+m[2][0].toUpperCase()+m[2].slice(1).toLowerCase());if(x)r.qty=x}
   if(!r.doctor){const x=take(/\bdr\.?[ \t]*[A-Za-z]+(?:[ \t]+[A-Za-z]+){0,2}/i);if(x)r.doctor=x.trim().replace(/^dr\.?\s*/i,'Dr. ')}
   if(!r.status){const x=take(/carry\s*forward|follow\s*up|old patient|new patient|repeat patient/i);if(x)r.status=x}
@@ -350,7 +350,7 @@ function model(d,v){
   if(d.pmobile)pat.push(['📱 ','Patient Mobile',v(d.pmobile,'')]);
   pat.push(['','Patient Status',v(d.status,'—')]);
   const S=[{t:'Patient Details',i:'👤 ',r:pat},
-   {t:'Product Details',i:'💊 ',r:[['','Product Name',v(d.product,'—')],['','Rate',v(d.rate,'—')],['','Quantity',v(d.qty,'—')]]},
+   {t:'Product Details',i:'💊 ',r:[['','Product Name',v(d.product,'—')],['','Patient Price',v(d.rate,'—')],['','Quantity',v(d.qty,'—')]]},
    {t:'Prescriber Details',i:'🩺 ',r:[['','Prescriber Name',v(d.doctor,'—')]]},
    {t:'Delivery Address',i:'📍 ',r:[['','Address',v(d.address,'—')]]}];
   if(d.notes)S.push({t:'Additional Notes',i:'📝 ',r:[['','Notes',esc(d.notes).replace(/\n/g,'<br>')]]});
@@ -371,7 +371,7 @@ const DESIGNS={classic:(d,v,f)=>{
 <p style="margin:0">Kindly approve the following order and arrange its timely supply. ⏰</p>`;
   h+=sec('👤 Patient Details',
     li('📅 Date &amp; Time',fmtDate(d.date)+(d.time?', '+fmtTime(d.time):''),'—')+li('🪪 CNIC',d.cnic,'—')+li('Patient Name',d.name,'—')+(d.pmobile?li('📱 Patient Mobile',d.pmobile,''):'')+li('Patient Status',d.status,'—'));
-  h+=sec('💊 Product Details',li('Product Name',d.product,'—')+li('Rate',d.rate,'—')+li('Quantity',d.qty,'—'));
+  h+=sec('💊 Product Details',li('Product Name',d.product,'—')+li('Patient Price',d.rate,'—')+li('Quantity',d.qty,'—'));
   h+=sec('🩺 Prescriber Details',li('Prescriber Name',d.doctor,'—'));
   h+=sec('📍 Delivery Address',`<li style="margin:2px 0"><b>${v(d.address,'—')}</b></li>`);
   if(d.notes)h+=sec('📝 Additional Notes',`<li style="margin:2px 0">${esc(d.notes).replace(/\n/g,'<br>')}</li>`);
@@ -408,7 +408,7 @@ summary(d,v){const M=model(d,v);
   const P=M.S[1].r;
   return `<table width="600" align="center" cellpadding="0" cellspacing="0" style="width:600px;border-collapse:collapse;border:1px solid #d5dee8;background:#ffffff">
 <tr><td style="padding:24px 28px 0;${FF}font-size:11pt;color:#14202b">Respected Sir,<br>${INTRO}</td></tr>
-<tr><td style="padding:16px 28px 0"><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid #cfdbe7"><tr><td colspan="3" bgcolor="#1f4e79" style="background-color:#1f4e79;padding:9px 14px;${FF}font-size:9.5pt;letter-spacing:1.5px;color:#ffffff"><b>ORDER SUMMARY</b></td></tr><tr bgcolor="#f1f5f9">${k('PRODUCT',P[0][2],'44%',1)}${k('RATE',P[1][2],'28%',1)}${k('QUANTITY',P[2][2],'28%',0)}</tr></table></td></tr>
+<tr><td style="padding:16px 28px 0"><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid #cfdbe7"><tr><td colspan="3" bgcolor="#1f4e79" style="background-color:#1f4e79;padding:9px 14px;${FF}font-size:9.5pt;letter-spacing:1.5px;color:#ffffff"><b>ORDER SUMMARY</b></td></tr><tr bgcolor="#f1f5f9">${k('PRODUCT',P[0][2],'44%',1)}${k('PATIENT PRICE',P[1][2],'28%',1)}${k('QUANTITY',P[2][2],'28%',0)}</tr></table></td></tr>
 ${M.S.filter((x,i)=>i!==1).map(sec).join('')}
 ${alertBox(d,M,'20px 28px 0','#fdf3d0','#c62828','#3a2a00','⚠️ ','❄️ ')}
 <tr><td style="padding:20px 28px 26px;${FF}font-size:11pt;color:#14202b">${OUTRO}</td></tr></table>`},
@@ -437,7 +437,7 @@ function build(){
   const d=data(),v=(x,e)=>x?esc(x):`<span style="color:#b00">${e}</span>`;
   const f='font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#000';
   const h=(DESIGNS[$('design').value]||DESIGNS.classic)(d,v,f);
-  let t=`Respected Sir,\n\nKindly approve the following order and arrange its timely supply.\n\nPatient Details\n- Date & Time: ${fmtDate(d.date)}${d.time?', '+fmtTime(d.time):''}\n- CNIC: ${d.cnic}\n- Patient Name: ${d.name}\n${d.pmobile?'- Patient Mobile: '+d.pmobile+'\n':''}- Patient Status: ${d.status}\n\nProduct Details\n- Product Name: ${d.product}\n- Rate: ${d.rate}\n- Quantity: ${d.qty}\n\nPrescriber Details\n- Prescriber Name: ${d.doctor}\n\nDelivery Address\n- ${d.address}\n\n${d.notes?'Additional Notes\n- '+d.notes+'\n\n':''}`;
+  let t=`Respected Sir,\n\nKindly approve the following order and arrange its timely supply.\n\nPatient Details\n- Date & Time: ${fmtDate(d.date)}${d.time?', '+fmtTime(d.time):''}\n- CNIC: ${d.cnic}\n- Patient Name: ${d.name}\n${d.pmobile?'- Patient Mobile: '+d.pmobile+'\n':''}- Patient Status: ${d.status}\n\nProduct Details\n- Product Name: ${d.product}\n- Patient Price: ${d.rate}\n- Quantity: ${d.qty}\n\nPrescriber Details\n- Prescriber Name: ${d.doctor}\n\nDelivery Address\n- ${d.address}\n\n${d.notes?'Additional Notes\n- '+d.notes+'\n\n':''}`;
   if(d.invoice)t+=`>>> Please provide invoice to the patient.\n`;
   if(d.icekit)t+=`>>> Deliver injection in proper ice kit including thermocol box.\n`;
   if(d.invoice||d.icekit)t+='\n';
@@ -632,7 +632,7 @@ function renderHistory(){
   const show=L.slice(0,15);
   const dd=r=>esc(String(r.date||'').trim()||(String(r.saved||'').match(/\d{1,2}\/\d{1,2}\/\d{4}/)||[''])[0]);
   h.innerHTML='<h2>📜 Order history · '+H.length+' order'+(H.length>1?'s':'')+'</h2><p class="hint">'+sum+'</p>'+
-   '<div style="overflow-x:auto"><table><tr><th>Date</th><th>Product</th><th>Qty</th><th>Rate</th></tr>'+
+   '<div style="overflow-x:auto"><table><tr><th>Date</th><th>Product</th><th>Qty</th><th>Patient Price</th></tr>'+
    show.map(x=>`<tr class="${x.rep?'rep':''}"><td>${dd(x.r)}${x.r.time?'<br><small>'+esc(x.r.time)+'</small>':''}</td><td>${esc(x.r.product||'')}${x.rep?' <span class="tag">Repeat</span>':''}</td><td>${esc(x.r.qty||'')}</td><td>${esc(x.r.rate||'')}</td></tr>`).join('')+
    '</table></div>'+(L.length>15?'<p class="hint">+ '+(L.length-15)+' older orders</p>':'');
 }
