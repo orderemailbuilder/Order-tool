@@ -29,6 +29,7 @@ label{display:block;font-size:12.5px;color:var(--mut);margin-bottom:3px}
 .hint{font-size:12.5px;color:var(--mut);margin:6px 0 0}
 #preview{border:1px dashed var(--line);border-radius:8px;padding:14px;background:#fff;font-family:Calibri,Arial,sans-serif;font-size:14.5px;overflow-x:auto}
 .subj{display:flex;gap:8px;margin-bottom:10px}
+@media(max-width:520px){.subj{flex-wrap:wrap}.subj input{flex:1 1 100%}.subj button{flex:1 1 0;white-space:nowrap}}
 .status{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:600;background:#e5f3ef;color:var(--acc2)}
 details{margin:0 16px;max-width:1168px}
 @media(min-width:1232px){details{margin:0 auto}}
@@ -57,6 +58,32 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
 .sugbox .it:last-child{border-bottom:0}.sugbox .it:hover,.sugbox .it.act{background:#e5f3ef}
 .sugbox .it b{display:block;font-size:14.5px}.sugbox .it small{color:#5f6f6a;font-size:12px}
 .sugbox .none{padding:9px 12px;color:#5f6f6a;font-size:12.5px}
+
+#tabs{display:flex;gap:6px;padding:8px 16px 0;max-width:1200px;margin:auto}
+#tabs button{background:#e7ece8;color:var(--ink);border-radius:8px 8px 0 0;padding:8px 16px}
+#tabs button.on{background:var(--acc);color:#fff}
+#repPage{max-width:1200px;margin:auto;padding:16px}
+#repPage section{margin-bottom:14px}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.ms{border:1px solid var(--line);border-radius:8px;padding:8px;background:#fff}
+.ms .mh{font-size:12.5px;color:var(--mut);margin-bottom:4px;display:flex;justify-content:space-between}
+.ms .mh b{color:var(--acc2)}
+#rTable tbody tr{cursor:pointer}#rTable tbody tr.sel td{background:#fff1a6}
+#rAct{margin-top:10px;padding:10px 12px;background:#fff4d6;border:1px solid #f0c24b;border-radius:8px;font-size:13.5px}
+#rAct .b-del{background:#d64545;color:#fff}
+.ms .mb{display:flex;gap:6px;margin-bottom:5px}.ms .mb button{padding:4px 8px;font-size:12px;flex:1}
+.ms .mss{padding:5px 8px;font-size:13px;margin-bottom:4px}
+.ms .msl{max-height:150px;overflow:auto}
+.ms .msl label{display:flex;gap:8px;align-items:center;margin:0;padding:4px 2px;font-size:13.5px;color:var(--ink);cursor:pointer}
+.ms .msl input{width:18px;height:18px;flex:none;accent-color:var(--acc)}
+.rbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.rsum{display:flex;gap:8px;flex-wrap:wrap}
+.rsum div{background:#e5f3ef;color:var(--acc2);border-radius:8px;padding:6px 12px;font-size:13.5px}
+#rTable{overflow-x:auto}#rTable table{width:100%;border-collapse:collapse;font-size:13px}
+#rTable th,#rTable td{border-bottom:1px solid var(--line);padding:5px 7px;text-align:left;vertical-align:top;white-space:nowrap}
+#rTable th{background:#f0f3f0;position:sticky;top:0}
+#cloud{font-size:12px;font-weight:600;color:#fff}
+#lockMsg{max-width:700px;margin:40px auto;padding:22px 18px;text-align:center;background:#fff4d6;border:1px solid #f0c24b;border-radius:10px;font-size:16px;font-weight:600}
 </style>
 </head>
 <body>
@@ -66,15 +93,18 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
   <h1>📨 Order Email Builder</h1>
   <button class="b-save" id="save">💾 Save</button>
   <button class="b-copy" id="copy">📋 Copy Email</button>
+  <button class="b-copy" id="sendMail">✉️ Send Email</button>
   <button class="b-alt" id="copyTxt">Copy plain text</button>
   <button class="b-alt" id="clear">New</button>
-  <button class="b-alt" id="lock" style="display:none">🔓 Lock</button>
+  <button class="b-alt" id="lock" style="display:none">🔓 Logout</button>
   <span id="cloud" style="display:none" title="">☁️</span>
   
 </div>
 
 
 
+<div id="tabs" style="display:none"><button type="button" id="tabEmail" class="on">✉️ Email Builder</button><button type="button" id="tabRep">📊 History</button></div>
+<div id="lockMsg" style="display:none">🔒 Please enter your PIN and tap Login first.<br><span style="font-weight:400;font-size:14px">No entries can be made without logging in.</span></div>
 <main>
   <section>
     <h2>1. Paste everything here</h2>
@@ -113,12 +143,45 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
   <section>
     <h2>Live preview <span class="status" id="stBadge"></span></h2>
     <div class="subj"><select id="design" aria-label="Email design"></select></div>
-    <div class="subj"><input id="subject" aria-label="Subject"><button class="b-lite" id="copySubj">Copy subject</button></div>
+    <div class="subj"><input id="subject" aria-label="Subject"><button class="b-lite" id="copySubj">Copy subject</button><button class="b-copy" id="sendMail2">✉️ Send Email</button></div>
     <div id="preview"></div>
     <p class="hint">Click “Copy Email”, then paste (Ctrl+V) in the Outlook message body.</p>
     <div id="hist"></div>
   </section>
 </main>
+<div id="repPage" style="display:none">
+  <section>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+      <button type="button" class="b-alt" id="rBack">← Email Builder</button>
+      <h2 style="margin:0">📊 History</h2>
+    </div>
+    <div class="rgrid">
+      <div><label for="rFrom">From date</label><input type="date" id="rFrom"></div>
+      <div><label for="rTo">To date</label><input type="date" id="rTo"></div>
+      <div style="display:flex;align-items:flex-end"><button type="button" class="b-lite" id="rReset">Clear filters</button></div>
+    </div>
+    <div class="rgrid" style="margin-top:10px">
+      <div class="ms" id="msCity"></div>
+      <div class="ms" id="msDoc"></div>
+      <div class="ms" id="msProd"></div>
+      <div class="ms" id="msStatus"></div>
+      <div class="ms" id="msPin" style="display:none"></div>
+    </div>
+    <p class="hint">Everything is ticked by default (the list shows all emails of the chosen dates). Untick or use Unselect all to narrow down. If both City and Doctor are narrowed they combine with OR; the other filters combine with AND.</p>
+    <label class="inv" for="rPII" style="margin-top:8px"><input type="checkbox" id="rPII"> 🪪 Include CNIC and mobile (on screen and in files)</label>
+    <div class="rbtns">
+      <button type="button" class="b-copy" id="rXlsx">📗 Excel (.xlsx)</button>
+      <button type="button" class="b-save" id="rPdf">📕 PDF</button>
+    </div>
+    <p class="hint">An internet connection is needed when downloading Excel or PDF.</p>
+  </section>
+  <section>
+    <h2>Results</h2>
+    <div class="rsum" id="rSum"></div>
+    <div id="rAct" style="display:none"></div>
+    <div id="rTable" style="margin-top:10px"></div>
+  </section>
+</div>
 <div id="toast"></div>
 
 <div id="ver" style="text-align:center;color:#8a948f;font-size:11px;margin:14px 0"></div>
@@ -130,18 +193,29 @@ const LS=k=>{if(k in MEM)return MEM[k];try{return JSON.parse(localStorage.getIte
 const SS=(k,v)=>{MEM[k]=v;try{localStorage.setItem(k,JSON.stringify(v));if(JSON.parse(localStorage.getItem(k))===undefined)throw 0}catch(e){storeOK=false}};
 let patients={};
 let prods={};let rowsAll=[];let unlocked=false,isAdmin=false,curPin='',busy=false;
-const APP_VER='2026-10-06-c';
+const APP_VER='2026-10-10-a';
 const pn=x=>{const d=String(x==null?'':x).replace(/\D/g,'');return d?d.padStart(4,'0'):''};
 try{['patients','prods','history','sheetUrl','design'].forEach(k=>localStorage.removeItem(k))}catch(e){}          // product stats: key = lowercase product
 const AUTO={};                       // field -> value last filled automatically
 const pkey=s=>String(s||'').toLowerCase().replace(/\s+/g,' ').trim();
+/* Product / price / quantity suggestions are rebuilt from the saved rows: the most used first, a tie goes to the most recent.
+   For the admin the logged-in PIN's own rows weigh far more than other PINs' rows, so every PIN gets its own preference. */
+function rebuildProds(){
+  prods={};const me=pn(curPin);
+  rowsAll.slice().sort((a,b)=>rowT(a)-rowT(b)).forEach((r,i)=>{
+    const pr=String(r.product||'').trim();if(!pr)return;
+    const w=(isAdmin?(pn(r.pin)===me?1000:1):1)+i/1e7;
+    addProd(pr,rateTxt(String(r.rate||'').trim()),String(r.qty||'').trim(),w);
+  });
+}
 const topOf=o=>Object.keys(o||{}).sort((a,b)=>o[b]-o[a])[0]||'';
-function addProd(name,rate,qty){
+function addProd(name,rate,qty,w){
+  w=w||1;
   const k=pkey(name);if(!k)return;
   const s=prods[k]||(prods[k]={name:String(name).trim(),n:0,rates:{},qtys:{}});
-  s.name=String(name).trim();s.n++;
-  if(rate)s.rates[rate]=(s.rates[rate]||0)+1;
-  if(qty)s.qtys[qty]=(s.qtys[qty]||0)+1;
+  s.name=String(name).trim();s.n+=w;
+  if(rate)s.rates[rate]=(s.rates[rate]||0)+w;
+  if(qty)s.qtys[qty]=(s.qtys[qty]||0)+w;
 }   // key = cnic or lowercase name
 
 const p2=n=>String(n).padStart(2,'0');
@@ -281,7 +355,21 @@ function autofillFrom(p,keep){
 }
 function resolvedStatus(){
   if(!unlocked)return $('status').value;
-  return $('status').value||(findPatient($('name').value,$('cnic').value,$('pmobile').value)?'Carry Forward Patient':'New Patient');
+  if($('status').value)return $('status').value;
+  /* the same patient inside 24 hours = the earlier row is being updated, so it keeps that row's status
+     (a New Patient must not turn into Carry Forward just because Save / Copy Email already stored them) */
+  const who={name:$('name').value.trim(),cnic:$('cnic').value.trim(),pmobile:mobsForm().join(' / ')};
+  let row=null;
+  if($('chg').checked&&CHG.ts)row=rowsAll.find(x=>String(x.ts)===String(CHG.ts))||null;
+  if(!row&&!CHG.forceNew){
+    const now=Date.now();
+    for(let i=rowsAll.length-1;i>=0;i--){
+      const x=rowsAll[i],t=rowT(x);
+      if(t&&now-t<86400000&&(isAdmin||x.pin===undefined||pn(x.pin)===pn(curPin))&&sameWho(x,who)){row=x;break}
+    }
+  }
+  if(row&&['New Patient','Carry Forward Patient'].includes(row.status))return row.status;
+  return findPatient($('name').value,$('cnic').value,$('pmobile').value)?'Carry Forward Patient':'New Patient';
 }
 
 /* ---------- smart parser ---------- */
@@ -486,6 +574,7 @@ function render(){
 
 /* ---------- copy ---------- */
 async function copyRich(){
+  if(!unlocked){toast('Please login with your PIN first');return}
   const b=build();backup();
   try{
     await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([b.html],{type:'text/html'}),'text/plain':new Blob([b.text],{type:'text/plain'})})]);
@@ -493,6 +582,32 @@ async function copyRich(){
   }catch(e){}
   const r=document.createRange();r.selectNodeContents($('preview'));const s=getSelection();s.removeAllRanges();s.addRange(r);
   const ok=document.execCommand('copy');s.removeAllRanges();toast(ok?'Copied ✔ Paste in Outlook':'Copy failed – select the preview and press Ctrl+C');
+}
+/* Send Email: opens the phone's / PC's default mail app with the subject and the plain-text body already filled.
+   A mailto: link carries plain text only, so the designed version is also placed on the clipboard (use it if wanted). */
+function sendMail(){
+  if(!unlocked){toast('Please login with your PIN first');return}
+  const b=build();backup();
+  try{navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([b.html],{type:'text/html'}),'text/plain':new Blob([b.text],{type:'text/plain'})})]).catch(()=>{})}catch(e){}
+  const url='mailto:?subject='+encodeURIComponent($('subject').value)+'&body='+encodeURIComponent(mailText(b.text).replace(/\r?\n/g,'\r\n'));
+  const a=document.createElement('a');a.href=url;a.style.display='none';document.body.appendChild(a);a.click();a.remove();
+  toast(url.length>1900?'Mail app opened ✔ – if the text looks cut, use Copy Email and paste':'Mail app opened ✔ – add the To address and send');
+}
+/* Send Email body = the plain text plus the same emojis the default preview shows (UTF-8 safe inside a mailto link) */
+function mailText(t){
+  return t
+    .replace(/timely supply\./,'timely supply. ⏰')
+    .replace(/^Patient Details$/m,'👤 Patient Details')
+    .replace(/^- Date & Time:/m,'- 📅 Date & Time:')
+    .replace(/^- CNIC:/m,'- 🪪 CNIC:')
+    .replace(/^- Patient Mobile:/m,'- 📱 Patient Mobile:')
+    .replace(/^Product Details$/m,'💊 Product Details')
+    .replace(/^Prescriber Details$/m,'🩺 Prescriber Details')
+    .replace(/^Delivery Address$/m,'📍 Delivery Address')
+    .replace(/^Additional Notes$/m,'📝 Additional Notes')
+    .replace(/^>>> Please provide invoice/m,'⚠️🧾 Please provide invoice')
+    .replace(/^>>> Deliver injection/m,'❄️📦 Deliver injection')
+    .replace(/^Your prompt approval/m,'✅ Your prompt approval');
 }
 async function copyText(txt,msg){
   try{await navigator.clipboard.writeText(txt)}catch(e){const a=document.createElement('textarea');a.value=txt;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove()}
@@ -502,7 +617,7 @@ async function copyText(txt,msg){
 /* ---------- backup + PIN (patient data is fetched only after the PIN) ---------- */
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbyrgtSzvgr2r6LYJrxk0LNYvE1j-KZGYuTbx77iXC5YDOMWBjqXqWAs2dxz64EuBU7CFw/exec';
 const MSG={html:'Google returned a login/error page. In the deployment settings, set "Who has access" to Anyone.',bad:'The script returned an unexpected response.',old:'The Apps Script is outdated. Paste the latest code and deploy a new version.',net:'Network or connection problem.',locked:'Too many attempts. Please try again later.',pin:'Incorrect PIN.'};
-function setCloud(ok,msg){const c=$('cloud');c.className=ok===true?'ok':ok===false?'bad':'';c.dataset.msg=msg||'';c.title=msg||''}
+function setCloud(ok,msg){const c=$('cloud');c.className=ok===true?'ok':ok===false?'bad':'';c.textContent=ok===true?'☁️ Online':ok===false?'☁️ Offline':'☁️';c.dataset.msg=msg||'';c.title=msg||''}
 const sentSig={};let pending=[];
 const typedPin=()=>{const v=$('pin').value.trim();return /^\d{4}$/.test(v)?v:''};   // PIN typed but not logged in is still recorded with the order
 function recFrom(d){return{saved:new Date().toLocaleString('en-GB'),...d,date:fmtDate(d.date),time:fmtTime(d.time),invoice:d.invoice?'Yes':'No',pin:unlocked?curPin:typedPin(),chg:d.chg?'1':'',nw:CHG.forceNew?'1':'',cts:String(Date.now()),rts:d.chg?(CHG.ts||''):''}}
@@ -524,7 +639,6 @@ async function backup(){
   if(unlocked){
     const key=digits(d.cnic)||d.name.toLowerCase();
     patients[key]={name:d.name,cnic:d.cnic,pmobile:d.pmobile,doctor:d.doctor,address:d.address,product:d.product,rate:d.rate,qty:d.qty};
-    addProd(d.product,d.rate,d.qty);
     const loc={...rec,_t:+rec.cts};
     const win=86400000;   // the same patient within 24 hours = update the earlier row (unless "Add as new entry" was chosen)
     const same=r=>{const t=rowT(r);return t&&Date.now()-t<win&&(isAdmin||r.pin===undefined||pn(r.pin)===pn(rec.pin))&&sameWho(r,rec)};
@@ -534,7 +648,7 @@ async function backup(){
     if(ix>=0)rowsAll[ix]=loc;else rowsAll.push(loc);
     CHG.ts=d.chg?String(loc._t):'';
     if(d.chg){CHG.row=loc;CHG.orig={name:pkey(loc.name),cnic:digits(loc.cnic),prod:pkey(loc.product)};CHG.okProd=''}
-    refreshLists();render();
+    rebuildProds();refreshLists();render();
   }
   CHG.forceNew=false;
   if(pending.length)await flush();
@@ -544,6 +658,7 @@ async function backup(){
   return ok?'ok':'fail';
 }
 async function save(){
+  if(!unlocked){toast('Please login with your PIN first');return}
   const d=data();
   if(!d.name){toast('Patient name is required');$('name').focus();return}
   const r=await backup();
@@ -574,7 +689,7 @@ function loadRows(rows){
     if(nm)o.name=nm;if(cn)o.cnic=cn;if(pm)o.pmobile=pm;
     if(t(r.doctor))o.doctor=t(r.doctor);
     if(t(r.address))o.address=t(r.address);
-    if(t(r.product)){o.product=t(r.product);o.rate=t(r.rate);o.qty=t(r.qty);addProd(o.product,o.rate,o.qty)}
+    if(t(r.product)){o.product=t(r.product);o.rate=t(r.rate);o.qty=t(r.qty)}
     patients[k]=o;n++;
   });
   return n;
@@ -583,6 +698,8 @@ function applyMode(){
   $('pin').style.display=unlocked?'none':'';$('login').style.display=unlocked?'none':'';
   $('lock').style.display=unlocked?'':'none';
   $('cloud').style.display=unlocked?'':'none';
+  $('tabs').style.display=unlocked?'':'none';if(!unlocked&&REP.view==='rep')showView('email');
+  layout();
   $('status').options[0].text=unlocked?'Auto (from backup)':'Select status…';
   if(!unlocked){patients={};prods={};rowsAll=[];curPin='';isAdmin=false;$('ver').textContent='Page '+APP_VER}
   refreshLists();render();
@@ -595,14 +712,14 @@ async function tryUnlock(pin){
   const r=await sync(pin);busy=false;
   if(!r.rows){toast(MSG[r.err]||'Error');return}
   $('pin').value='';
-  const n=loadRows(r.rows);curPin=pin;unlocked=true;isAdmin=r.role==='admin';applyMode();
+  const n=loadRows(r.rows);curPin=pin;unlocked=true;isAdmin=r.role==='admin';rebuildProds();applyMode();
   $('ver').textContent='Page '+APP_VER+' · Script '+(r.v||'older version');
   setCloud(true,n+' records, '+Object.keys(prods).length+' products loaded');
-  toast(r.role==='admin'?'Unlocked ✔ (Admin)':n?'Unlocked ✔':'New PIN ✔ – no earlier data for this PIN (check the PIN if this was a mistake)');
+  toast(r.role==='admin'?'You are logged in ✔ (Admin)':n?'You are logged in ✔':'You are logged in ✔ – no earlier data for this PIN (check the PIN if this was a mistake)');
 }
 async function resync(){
   const r=await sync(curPin);
-  if(r.rows){const n=loadRows(r.rows);refreshLists();render();setCloud(true,n+' records, '+Object.keys(prods).length+' products loaded')}
+  if(r.rows){const n=loadRows(r.rows);rebuildProds();refreshLists();render();setCloud(true,n+' records, '+Object.keys(prods).length+' products loaded')}
   else{setCloud(false,MSG[r.err]||'Error');if(r.err==='pin'||r.err==='locked')lock()}
 }
 
@@ -710,8 +827,8 @@ $('chips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b
 ['pmobile','pmobile2','pmobile3'].forEach(k=>$(k).addEventListener('change',()=>{const v=cleanMob($(k).value);if(v&&$(k).value!==v)$(k).value=v;render()}));
 $('chgUpd').onclick=()=>{if(!$('chg').checked){const b=unlocked?chgInfo(data()):null;if(b)startChange(b.r)}render()};
 $('chgNewBtn').onclick=()=>{if($('chg').checked){endChange(chgKey(data()));CHG.forceNew=true}render()};
-$('save').onclick=save;$('copy').onclick=copyRich;
-$('copyTxt').onclick=()=>{backup();copyText(build().text,'Plain text copied ✔')};
+$('save').onclick=save;$('copy').onclick=copyRich;$('sendMail').onclick=sendMail;$('sendMail2').onclick=sendMail;
+$('copyTxt').onclick=()=>{if(!unlocked){toast('Please login with your PIN first');return}backup();copyText(build().text,'Plain text copied ✔')};
 $('copySubj').onclick=()=>copyText($('subject').value,'Subject copied ✔');
 $('clear').onclick=()=>{Object.keys(AUTO).forEach(k=>delete AUTO[k]);$('smart').value='';FIELDS.forEach(k=>$(k).value='');$('date').value=todayISO();$('time').value=nowHM();timeAuto=true;$('invoice').checked=true;$('icekit').checked=true;endChange('');CHG.forceNew=false;cityManual=false;$('moreMob').checked=false;$('pmobile2').value='';$('pmobile3').value='';showMob();render()};
 
@@ -719,8 +836,191 @@ $('clear').onclick=()=>{Object.keys(AUTO).forEach(k=>delete AUTO[k]);$('smart').
 $('pin').addEventListener('input',()=>{$('pin').value=$('pin').value.replace(/\D/g,'').slice(0,4)});
 $('login').onclick=()=>tryUnlock($('pin').value.trim());
 $('pin').addEventListener('keydown',e=>{if(e.key==='Enter')tryUnlock($('pin').value.trim())});
-$('lock').onclick=()=>{lock();toast('Locked 🔒')};
+$('lock').onclick=()=>{lock();toast('Logged out')};
 $('cloud').onclick=()=>{toast($('cloud').dataset.msg||'☁️');if(unlocked)resync()};
+
+/* ---------- History (visible only after PIN login) ---------- */
+const REP={sel:{city:new Set(),doc:new Set(),prod:new Set(),pin:new Set(),status:new Set()},opts:{},view:'email'};
+const rsp=x=>String(x==null?'':x).replace(/\s+/g,' ').trim();
+const rtc=x=>x.replace(/\b[a-z]/g,c=>c.toUpperCase());
+const kCity=v=>rsp(v).toLowerCase();
+const kDoc=v=>rsp(String(v||'').replace(/\./g,' ').replace(/\bdr\b/gi,' ')).toLowerCase();
+const cleanProd=v=>rsp(String(v||'').replace(/\b\d+(?:\.\d+)?\s*(?:mg|mcg|ml|iu|gm|g)\b/gi,' ').replace(/[-_(),]+\s*$/,'').replace(/^[-_(),]+\s*/,''));
+const kProd=v=>cleanProd(v).toLowerCase();
+function qtyNum(q){const m=String(q==null?'':q).match(/\d+(?:\.\d+)?/g);return m?m.reduce((a,x)=>a+parseFloat(x),0):null}   // only the numbers count; units (Inj, Packs…) are ignored
+const fmtN=n=>String(Math.round(n*100)/100);
+function repCnic(c){const d=digits(c);return d.length===13?d.slice(0,5)+'-'+d.slice(5,12)+'-'+d.slice(12):String(c||'').trim()}
+function repPrep(){
+  rowsAll.forEach(r=>{
+    const city=rsp(r.city),prod=cleanProd(r.product),pin=pn(r.pin),st=normStatus(rsp(r.status)),dk=kDoc(r.doctor);
+    r._n={cityK:kCity(city),cityL:city?rtc(city.toLowerCase()):'(blank)',docK:dk,docL:dk?'Dr '+rtc(dk):'(blank)',
+      prodK:kProd(prod),prodL:prod?rtc(prod.toLowerCase()):'(blank)',pinK:pin,pinL:pin||'(no PIN)',stK:st,stL:st||'(blank)',date:rowDateISO(r)};
+  });
+}
+/* The option lists only contain what exists in the chosen date range, and every option starts ticked.
+   reset=true: tick everything again (opening History, changing dates). reset=false: keep the user's ticks. */
+function repBuildOpts(reset){
+  const df=$('rFrom').value,dt=$('rTo').value,okR=df&&dt&&df<=dt;
+  const lab={city:{},doc:{},prod:{},pin:{},status:{}},cnt={city:{},doc:{},prod:{},pin:{},status:{}};
+  if(okR)rowsAll.forEach(r=>{const n=r._n;if(!n||!n.date||n.date<df||n.date>dt)return;
+    [['city',n.cityK,n.cityL],['doc',n.docK,n.docL],['prod',n.prodK,n.prodL],['pin',n.pinK,n.pinL],['status',n.stK,n.stL]].forEach(([t,k,l])=>{
+      if(!(k in lab[t]))lab[t][k]=l;cnt[t][k]=(cnt[t][k]||0)+1})});
+  ['city','doc','prod','pin','status'].forEach(t=>{
+    REP.opts[t]=Object.keys(lab[t]).map(k=>({k,l:lab[t][k],c:cnt[t][k]})).sort((a,b)=>(a.k===''?1:0)-(b.k===''?1:0)||a.l.localeCompare(b.l));
+    const keys=REP.opts[t].map(o=>o.k);
+    REP.sel[t]=reset?new Set(keys):new Set([...REP.sel[t]].filter(k=>keys.includes(k)));
+  });
+}
+const msLabel=t=>{const n=REP.sel[t].size,tot=REP.opts[t].length;return n>=tot?'All ('+tot+')':n+' of '+tot+' selected'};
+function repRenderMs(){['city','doc','prod','status'].concat(isAdmin?['pin']:[]).forEach(msRender)}
+const MS_META={city:['msCity','City'],doc:['msDoc','Doctor'],prod:['msProd','Product'],pin:['msPin','Staff PIN'],status:['msStatus','Patient Status']};
+function msRender(t){
+  const [id,title]=MS_META[t],box=$(id),set=REP.sel[t];
+  box.innerHTML='<div class="mh"><span>'+title+'</span><b>'+msLabel(t)+'</b></div><div class="mb"><button type="button" class="b-lite" data-a="all">✓ Select all</button><button type="button" class="b-lite" data-a="none">✕ Unselect all</button></div><input class="mss" placeholder="Search…" aria-label="'+title+' search"><div class="msl"></div>';
+  const list=box.querySelector('.msl'),q=box.querySelector('.mss');
+  const draw=()=>{const f=q.value.trim().toLowerCase();
+    list.innerHTML=REP.opts[t].filter(o=>!f||o.l.toLowerCase().includes(f)).map(o=>'<label><input type="checkbox" data-k="'+esc(o.k)+'"'+(set.has(o.k)?' checked':'')+'> '+esc(o.l)+' ('+o.c+')</label>').join('')||'<div class="hint">No matches</div>'};
+  q.oninput=draw;
+  const vis=()=>{const f=q.value.trim().toLowerCase();return REP.opts[t].filter(o=>!f||o.l.toLowerCase().includes(f))};
+  box.querySelector('.mb').onclick=e=>{const a=e.target.getAttribute('data-a');if(!a)return;
+    vis().forEach(o=>a==='all'?set.add(o.k):set.delete(o.k));
+    box.querySelector('.mh b').textContent=msLabel(t);draw();repRun()};
+  list.onchange=e=>{const k=e.target.getAttribute('data-k');if(k===null)return;e.target.checked?set.add(k):set.delete(k);box.querySelector('.mh b').textContent=msLabel(t);repRun()};
+  draw();
+}
+function repFiltered(){
+  const f=REP.sel,o=REP.opts,df=$('rFrom').value,dt=$('rTo').value;
+  if(!df||!dt)return[];   // nothing is listed until both dates are chosen
+  const narrow=t=>f[t].size<o[t].length;   // a field with everything ticked does not restrict anything
+  const rc=narrow('city'),rd=narrow('doc'),rp=isAdmin&&narrow('pin'),rpr=narrow('prod'),rs=narrow('status');
+  return rowsAll.filter(r=>{const n=r._n;if(!n||!n.date||n.date<df||n.date>dt)return false;
+    if(rp&&!f.pin.has(n.pinK))return false;
+    if(rpr&&!f.prod.has(n.prodK))return false;
+    if(rs&&!f.status.has(n.stK))return false;
+    if(rc||rd){if(!((rc&&f.city.has(n.cityK))||(rd&&f.doc.has(n.docK))))return false}   // city and doctor combine with OR
+    return true}).sort((a,b)=>(b._n.date||'').localeCompare(a._n.date||'')||rowT(b)-rowT(a));
+}
+function repCols(){
+  const pii=$('rPII').checked,c=[['Date',r=>fmtDate(r._n.date)],['Patient',r=>rsp(r.name)]];
+  if(pii)c.push(['CNIC',r=>repCnic(r.cnic)],['Mobile',r=>{const m=mobsOf(r.pmobile).join(' / ');return m||rsp(r.pmobile)}]);
+  c.push(['Product',r=>rsp(r.product)],['Qty',r=>{const q=qtyNum(r.qty);return q===null?'':fmtN(q)}],['Patient Price',r=>rsp(r.rate)],['City',r=>rsp(r.city)],['Doctor',r=>rsp(r.doctor)],['Status',r=>rsp(r.status)]);
+  return c;
+}
+function repSummary(rows){
+  const m={};
+  rows.forEach(r=>{const k=r._n.prodK,o=m[k]||(m[k]={l:k?rtc(k):'(blank)',n:0,q:0});o.n++;const q=qtyNum(r.qty);if(q!==null)o.q+=q});
+  return Object.values(m).sort((a,b)=>b.n-a.n||a.l.localeCompare(b.l));
+}
+/* Unique patients in the list (CNIC, else name + mobile). A patient is "New" if any of their emails in the list is New Patient. */
+function repPatients(rows){
+  const m=new Map();
+  rows.forEach(r=>{
+    const c=digits(r.cnic),key=c?'c'+c:'n'+pkey(r.name)+'|'+(mobsOf(r.pmobile)[0]||'');
+    const st=r._n.stK,rank=st==='New Patient'?3:st==='Carry Forward Patient'?2:1;
+    if(!m.has(key)||m.get(key)<rank)m.set(key,rank)});
+  let nw=0,cf=0,no=0;m.forEach(v=>v===3?nw++:v===2?cf++:no++);
+  return{total:m.size,nw,cf,no};
+}
+function repRun(){
+  REP.cur=[];
+  const df=$('rFrom').value,dt=$('rTo').value;
+  if(!df||!dt||df>dt){$('rSum').innerHTML='';$('rTable').innerHTML='<p class="hint">'+(df&&dt?'“From date” is after “To date”. Please correct the dates.':'Select both a From date and a To date to see the emails.')+'</p>';REP.pick=null;paintPick();return}
+  const rows=repFiltered(),cols=repCols(),sum=repSummary(rows);REP.cur=rows;
+  const pt=repPatients(rows);
+  const ptHtml='<div><b>'+pt.total+'</b> '+(pt.total===1?'patient':'patients')+': <b>'+pt.nw+'</b> New, <b>'+pt.cf+'</b> Carry Forward'+(pt.no?', '+pt.no+' no status':'')+'</div>';
+  $('rSum').innerHTML='<div><b>'+rows.length+'</b> '+(rows.length===1?'email':'emails')+', total qty <b>'+fmtN(sum.reduce((a,o)=>a+o.q,0))+'</b></div>'+sum.map(o=>'<div>'+esc(o.l)+': '+o.n+(o.n===1?' email':' emails')+', total qty '+fmtN(o.q)+'</div>').join('')+ptHtml;
+  const MAX=500,show=rows.slice(0,MAX);
+  $('rTable').innerHTML=rows.length?'<table><thead><tr>'+cols.map(c=>'<th>'+c[0]+'</th>').join('')+'</tr></thead><tbody>'+show.map((r,i)=>'<tr data-i="'+i+'">'+cols.map(c=>'<td>'+esc(c[1](r))+'</td>').join('')+'</tr>').join('')+'</tbody></table>'+(rows.length>MAX?'<p class="hint">Showing the first '+MAX+' emails on screen; Excel/PDF include all.</p>':''):'<p class="hint">No emails match these filters.</p>';
+  paintPick();
+}
+const DAY7=7*86400000;
+function rowMs(r){const t=rowT(r);if(t)return t;const d=r._n&&r._n.date;return d?new Date(d+'T00:00:00').getTime():0}
+function canDelete(r){const t=rowMs(r);return !!t&&Date.now()-t<DAY7&&(isAdmin||pn(r.pin)===pn(curPin))}
+function paintPick(){
+  const box=$('rAct'),r=REP.pick;
+  document.querySelectorAll('#rTable tr[data-i]').forEach(tr=>tr.classList.toggle('sel',!!r&&REP.cur[+tr.dataset.i]===r));
+  if(!r||!REP.cur.includes(r)){REP.pick=null;box.style.display='none';box.innerHTML='';return}
+  const info='<b>'+esc(rsp(r.name)||'(no name)')+'</b> · '+esc(rsp(r.product)||'(no product)')+' · '+esc(fmtDate(r._n.date));
+  box.style.display='';
+  box.innerHTML=info+'<div class="rbtns">'+(canDelete(r)?'<button type="button" class="b-del" id="rDel">🗑 Delete this email</button>':'<span class="hint" style="margin:0">'+(isAdmin||pn(r.pin)===pn(curPin)?'Emails older than 7 days cannot be deleted.':'You can only delete your own emails.')+'</span>')+'<button type="button" class="b-lite" id="rCancel">Cancel</button></div>';
+  $('rCancel').onclick=()=>{REP.pick=null;paintPick()};
+  const d=$('rDel');if(d)d.onclick=repDelete;
+}
+async function repDelete(){
+  const r=REP.pick;if(!r||!canDelete(r))return;
+  if(!confirm('Delete this email permanently?\n\n'+(rsp(r.name)||'(no name)')+' · '+(rsp(r.product)||'')+' · '+fmtDate(r._n.date)+'\n\nIt will also be removed from the Google Sheet.'))return;
+  const ts=String(r.ts||r._t||r.cts||''),cts=String(r.cts||r._t||r.ts||'');
+  toast('Deleting…');
+  let j=null;
+  try{
+    const res=await fetch(SCRIPT_URL+'?pin='+encodeURIComponent(curPin)+'&action=delete&ts='+encodeURIComponent(ts)+'&cts='+encodeURIComponent(cts)+'&_='+Date.now(),{cache:'no-store'});
+    j=JSON.parse(await res.text());
+  }catch(e){toast('Could not delete – check the internet connection');return}
+  if(j&&j.deleted===true){
+    const k=rowsAll.indexOf(r);if(k>=0)rowsAll.splice(k,1);
+    if(CHG.ts&&String(CHG.ts)===ts)endChange();
+    REP.pick=null;rebuildProds();refreshLists();render();repAfterChange();toast('Deleted ✔');
+    resync().then(()=>{if(REP.view==='rep')repAfterChange()});
+  }else if(j&&j.error){toast('Not deleted: '+j.error)}
+  else toast('Delete is not enabled in the Google Apps Script yet – the script needs the update');
+}
+$('rTable').onclick=e=>{const tr=e.target.closest('tr[data-i]');if(!tr)return;REP.pick=REP.cur[+tr.dataset.i]||null;paintPick()};
+function repOpen(){
+  if(!$('rFrom').value&&!$('rTo').value){$('rFrom').value=todayISO();$('rTo').value=todayISO()}   // History opens on today's emails
+  repPrep();
+  $('msPin').style.display=isAdmin?'':'none';
+  repBuildOpts(true);repRenderMs();repRun();
+}
+function repAfterChange(){repPrep();repBuildOpts(false);repRenderMs();repRun()}   // e.g. after a delete: keep the ticks
+function layout(){
+  const rp=REP.view==='rep',ok=unlocked;
+  document.querySelector('main').style.display=(ok&&!rp)?'':'none';
+  $('repPage').style.display=(ok&&rp)?'':'none';
+  ['save','copy','sendMail','copyTxt','clear'].forEach(i=>$(i).style.display=(ok&&!rp)?'':'none');
+  $('lockMsg').style.display=ok?'none':'';
+}
+function showView(v){
+  REP.view=v;const rp=v==='rep';
+  $('tabEmail').classList.toggle('on',!rp);$('tabRep').classList.toggle('on',rp);
+  layout();
+  if(rp&&unlocked){repOpen();scrollTo(0,0)}
+}
+function repReset(){$('rFrom').value='';$('rTo').value='';repOpen()}
+function repDates(){repBuildOpts(true);repRenderMs();repRun()}
+function loadJS(u){return new Promise((ok,no)=>{const e=document.createElement('script');e.src=u;e.onload=ok;e.onerror=()=>no(new Error('load'));document.head.appendChild(e)})}
+async function needLib(k){
+  if(k==='x'){if(!window.XLSX)await loadJS('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js')}
+  else{if(!window.jspdf)await loadJS('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    if(!(window.jspdf&&window.jspdf.jsPDF.API.autoTable))await loadJS('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js')}
+}
+function repData(){const rows=repFiltered(),cols=repCols();return{rows,cols,head:cols.map(c=>c[0]),body:rows.map(r=>cols.map(c=>String(c[1](r)))),sum:repSummary(rows),pat:repPatients(rows)}}
+const repName=ext=>'History_'+todayISO()+'.'+ext;
+function repRange(){const a=$('rFrom').value,b=$('rTo').value;return a||b?'Date: '+(a?fmtDate(a):'start')+' to '+(b?fmtDate(b):'today'):'All dates'}
+async function repXlsx(){
+  const D=repData();if(!D.rows.length){toast($('rFrom').value&&$('rTo').value?'No emails':'Select From and To dates first');return}
+  try{toast('Preparing Excel…');await needLib('x')}catch(e){toast('Internet connection needed – could not load the Excel component');return}
+  const qi=D.head.indexOf('Qty');
+  const ws=XLSX.utils.aoa_to_sheet([D.head].concat(D.body.map(r=>r.map((v,i)=>i===qi&&v!==''?Number(v):v))));   // text cells: leading 0 of mobile and CNIC dashes stay as typed
+  ws['!cols']=D.head.map((h,i)=>({wch:Math.min(40,Math.max(h.length,...D.body.map(r=>String(r[i]).length))+2)}));
+  const sm=[['Product','Emails','Total quantity']].concat(D.sum.map(o=>[o.l,o.n,o.q]),[['All',D.rows.length,D.sum.reduce((a,o)=>a+o.q,0)],[],['Patients','Count'],['New Patient',D.pat.nw],['Carry Forward Patient',D.pat.cf]],D.pat.no?[['No status',D.pat.no]]:[],[['Total patients',D.pat.total]]);
+  const ws2=XLSX.utils.aoa_to_sheet(sm);ws2['!cols']=[{wch:28},{wch:10},{wch:28}];
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Emails');XLSX.utils.book_append_sheet(wb,ws2,'Summary');
+  XLSX.writeFile(wb,repName('xlsx'));toast('Excel downloaded ✔');
+}
+async function repPdf(){
+  const D=repData();if(!D.rows.length){toast($('rFrom').value&&$('rTo').value?'No emails':'Select From and To dates first');return}
+  try{toast('Preparing PDF…');await needLib('p')}catch(e){toast('Internet connection needed – could not load the PDF component');return}
+  const doc=new window.jspdf.jsPDF({orientation:'landscape',unit:'pt',format:'a4'});
+  doc.setFontSize(14);doc.text('Orders History',30,34);
+  doc.setFontSize(9);doc.text(repRange()+'   |   '+D.rows.length+' emails   |   '+D.pat.total+' patients (New '+D.pat.nw+', Carry Forward '+D.pat.cf+')',30,50);
+  const sline=D.sum.map(o=>o.l+': '+o.n+(o.n===1?' email':' emails')+', total qty '+fmtN(o.q)).join('   |   ');
+  const sl=doc.splitTextToSize(sline,780);doc.text(sl,30,64);
+  doc.autoTable({head:[D.head],body:D.body,startY:64+sl.length*11+4,styles:{fontSize:7,cellPadding:2},headStyles:{fillColor:[14,107,92]},margin:{left:30,right:30}});
+  doc.save(repName('pdf'));toast('PDF downloaded ✔');
+}
+$('tabEmail').onclick=()=>showView('email');$('tabRep').onclick=()=>showView('rep');$('rBack').onclick=()=>showView('email');
+$('rFrom').onchange=$('rTo').onchange=repDates;
+$('rPII').onchange=repRun;$('rReset').onclick=repReset;$('rXlsx').onclick=repXlsx;$('rPdf').onclick=repPdf;
 $('date').value=todayISO();$('time').value=nowHM();applyMode();
 </script>
 </body>
