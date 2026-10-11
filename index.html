@@ -167,7 +167,7 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
       <div class="ms" id="msStatus"></div>
       <div class="ms" id="msPin" style="display:none"></div>
     </div>
-    <p class="hint">Everything is ticked by default (the list shows all emails of the chosen dates). Untick or use Unselect all to narrow down. If both City and Doctor are narrowed they combine with OR; the other filters combine with AND.</p>
+    <p class="hint">Nothing is ticked by default, so the list shows all emails of the chosen dates. Tick a City, Doctor, Product or Status to see only those; every ticked filter must match (AND). Clear removes the ticks of that filter.</p>
     <label class="inv" for="rPII" style="margin-top:8px"><input type="checkbox" id="rPII"> 🪪 Include CNIC and mobile (on screen and in files)</label>
     <div class="rbtns">
       <button type="button" class="b-copy" id="rXlsx">📗 Excel (.xlsx)</button>
@@ -180,6 +180,7 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
     <div class="rsum" id="rSum"></div>
     <div id="rAct" style="display:none"></div>
     <div id="rTable" style="margin-top:10px"></div>
+    <p class="hint" id="rInfo"></p>
   </section>
 </div>
 <div id="toast"></div>
@@ -192,8 +193,8 @@ const MEM={};let storeOK=true;
 const LS=k=>{if(k in MEM)return MEM[k];try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
 const SS=(k,v)=>{MEM[k]=v;try{localStorage.setItem(k,JSON.stringify(v));if(JSON.parse(localStorage.getItem(k))===undefined)throw 0}catch(e){storeOK=false}};
 let patients={};
-let prods={};let rowsAll=[];let unlocked=false,isAdmin=false,curPin='',busy=false;
-const APP_VER='2026-10-10-a';
+let SRV_TABS=null;let prods={};let rowsAll=[];let unlocked=false,isAdmin=false,curPin='',busy=false;
+const APP_VER='2026-10-11-b';
 const pn=x=>{const d=String(x==null?'':x).replace(/\D/g,'');return d?d.padStart(4,'0'):''};
 try{['patients','prods','history','sheetUrl','design'].forEach(k=>localStorage.removeItem(k))}catch(e){}          // product stats: key = lowercase product
 const AUTO={};                       // field -> value last filled automatically
@@ -672,7 +673,7 @@ async function sync(pin){
       try{j=JSON.parse(txt)}catch(e){return{err:/<html|<!doctype/i.test(txt)?'html':'bad'}}
       if(Array.isArray(j))return{err:'old'};
       if(j&&j.error)return{err:j.error};
-      if(j&&j.ok&&Array.isArray(j.rows))return{rows:j.rows,role:j.role||'user',v:j.v||''};
+      if(j&&j.ok&&Array.isArray(j.rows))return{rows:j.rows,role:j.role||'user',v:j.v||'',tabs:Array.isArray(j.tabs)?j.tabs:null};
       return{err:'bad'};
     }catch(e){if(a===1)return{err:'net'};await new Promise(r=>setTimeout(r,1200))}
   }
@@ -712,19 +713,30 @@ async function tryUnlock(pin){
   const r=await sync(pin);busy=false;
   if(!r.rows){toast(MSG[r.err]||'Error');return}
   $('pin').value='';
-  const n=loadRows(r.rows);curPin=pin;unlocked=true;isAdmin=r.role==='admin';rebuildProds();applyMode();
+  SRV_TABS=r.tabs||null;const n=loadRows(r.rows);curPin=pin;unlocked=true;isAdmin=r.role==='admin';rebuildProds();applyMode();
   $('ver').textContent='Page '+APP_VER+' · Script '+(r.v||'older version');
   setCloud(true,n+' records, '+Object.keys(prods).length+' products loaded');
   toast(r.role==='admin'?'You are logged in ✔ (Admin)':n?'You are logged in ✔':'You are logged in ✔ – no earlier data for this PIN (check the PIN if this was a mistake)');
 }
 async function resync(){
   const r=await sync(curPin);
-  if(r.rows){const n=loadRows(r.rows);rebuildProds();refreshLists();render();setCloud(true,n+' records, '+Object.keys(prods).length+' products loaded')}
+  if(r.rows){SRV_TABS=r.tabs||null;const n=loadRows(r.rows);rebuildProds();refreshLists();render();setCloud(true,n+' records, '+Object.keys(prods).length+' products loaded')}
   else{setCloud(false,MSG[r.err]||'Error');if(r.err==='pin'||r.err==='locked')lock()}
 }
 
 /* ---------- order history of the patient (after PIN only) ---------- */
-function rowDateISO(r){return isoDate(String(r.date||'').trim())||isoDate((String(r.saved||'').match(/\d{1,2}\/\d{1,2}\/\d{4}/)||[''])[0])||''}
+const ymdLocal=t=>t.getFullYear()+'-'+p2(t.getMonth()+1)+'-'+p2(t.getDate());
+/* The date of a sheet row, whatever shape the sheet gives it: 14/9/2026, 2026-09-14, an ISO timestamp, "14-Sep-2026",
+   the "saved" text, or finally the row's own timestamp. */
+function rowDateISO(r){
+  const a=String(r.date==null?'':r.date).trim();
+  let d=isoDate(a);
+  if(!d&&/^\d{4}-\d{2}-\d{2}T/.test(a)){const t=new Date(a);d=isNaN(t)?a.slice(0,10):ymdLocal(t)}
+  if(!d&&/[A-Za-z]{3}/.test(a)){const t=new Date(a);if(!isNaN(t))d=ymdLocal(t)}
+  if(!d)d=isoDate((String(r.saved||'').match(/\d{1,2}\/\d{1,2}\/\d{4}/)||[''])[0]);
+  if(!d){const t=+r._t||+r.ts;if(t)d=ymdLocal(new Date(t))}
+  return d||'';
+}
 function histFor(d){
   const c=digits(d.cnic),mm=mobsOf(d.pmobile),n=String(d.name||'').trim().toLowerCase();
   if(!(c.length>=13||mm.length||n))return[];
@@ -868,15 +880,15 @@ function repBuildOpts(reset){
   ['city','doc','prod','pin','status'].forEach(t=>{
     REP.opts[t]=Object.keys(lab[t]).map(k=>({k,l:lab[t][k],c:cnt[t][k]})).sort((a,b)=>(a.k===''?1:0)-(b.k===''?1:0)||a.l.localeCompare(b.l));
     const keys=REP.opts[t].map(o=>o.k);
-    REP.sel[t]=reset?new Set(keys):new Set([...REP.sel[t]].filter(k=>keys.includes(k)));
+    REP.sel[t]=reset?new Set():new Set([...REP.sel[t]].filter(k=>keys.includes(k)));
   });
 }
-const msLabel=t=>{const n=REP.sel[t].size,tot=REP.opts[t].length;return n>=tot?'All ('+tot+')':n+' of '+tot+' selected'};
+const msLabel=t=>{const n=REP.sel[t].size,tot=REP.opts[t].length;return (n===0||n>=tot)?'All ('+tot+')':n+' of '+tot+' selected'};
 function repRenderMs(){['city','doc','prod','status'].concat(isAdmin?['pin']:[]).forEach(msRender)}
 const MS_META={city:['msCity','City'],doc:['msDoc','Doctor'],prod:['msProd','Product'],pin:['msPin','Staff PIN'],status:['msStatus','Patient Status']};
 function msRender(t){
   const [id,title]=MS_META[t],box=$(id),set=REP.sel[t];
-  box.innerHTML='<div class="mh"><span>'+title+'</span><b>'+msLabel(t)+'</b></div><div class="mb"><button type="button" class="b-lite" data-a="all">✓ Select all</button><button type="button" class="b-lite" data-a="none">✕ Unselect all</button></div><input class="mss" placeholder="Search…" aria-label="'+title+' search"><div class="msl"></div>';
+  box.innerHTML='<div class="mh"><span>'+title+'</span><b>'+msLabel(t)+'</b></div><div class="mb"><button type="button" class="b-lite" data-a="all">✓ Select all</button><button type="button" class="b-lite" data-a="none">✕ Clear</button></div><input class="mss" placeholder="Search…" aria-label="'+title+' search"><div class="msl"></div>';
   const list=box.querySelector('.msl'),q=box.querySelector('.mss');
   const draw=()=>{const f=q.value.trim().toLowerCase();
     list.innerHTML=REP.opts[t].filter(o=>!f||o.l.toLowerCase().includes(f)).map(o=>'<label><input type="checkbox" data-k="'+esc(o.k)+'"'+(set.has(o.k)?' checked':'')+'> '+esc(o.l)+' ('+o.c+')</label>').join('')||'<div class="hint">No matches</div>'};
@@ -891,13 +903,14 @@ function msRender(t){
 function repFiltered(){
   const f=REP.sel,o=REP.opts,df=$('rFrom').value,dt=$('rTo').value;
   if(!df||!dt)return[];   // nothing is listed until both dates are chosen
-  const narrow=t=>f[t].size<o[t].length;   // a field with everything ticked does not restrict anything
+  const narrow=t=>f[t].size>0&&f[t].size<o[t].length;   // nothing ticked (or everything ticked) = no restriction; ticking some = only those
   const rc=narrow('city'),rd=narrow('doc'),rp=isAdmin&&narrow('pin'),rpr=narrow('prod'),rs=narrow('status');
   return rowsAll.filter(r=>{const n=r._n;if(!n||!n.date||n.date<df||n.date>dt)return false;
     if(rp&&!f.pin.has(n.pinK))return false;
     if(rpr&&!f.prod.has(n.prodK))return false;
     if(rs&&!f.status.has(n.stK))return false;
-    if(rc||rd){if(!((rc&&f.city.has(n.cityK))||(rd&&f.doc.has(n.docK))))return false}   // city and doctor combine with OR
+    if(rc&&!f.city.has(n.cityK))return false;
+    if(rd&&!f.doc.has(n.docK))return false;   // every ticked filter must match (AND)
     return true}).sort((a,b)=>(b._n.date||'').localeCompare(a._n.date||'')||rowT(b)-rowT(a));
 }
 function repCols(){
@@ -921,7 +934,15 @@ function repPatients(rows){
   let nw=0,cf=0,no=0;m.forEach(v=>v===3?nw++:v===2?cf++:no++);
   return{total:m.size,nw,cf,no};
 }
+/* Tells how much the Google Sheet script actually sent, so a missing older month is easy to spot */
+function repInfo(){
+  const ds=rowsAll.map(r=>r._n&&r._n.date).filter(Boolean).sort(),df=$('rFrom').value;
+  const el=$('rInfo');if(!ds.length){el.textContent='';return}
+  const oldest=ds[0],nod=rowsAll.length-ds.length;
+  el.textContent='Loaded from the Google Sheet: '+rowsAll.length+' emails, oldest '+fmtDate(oldest)+', newest '+fmtDate(ds[ds.length-1])+'.'+(nod?' '+nod+' emails have no readable date and cannot be listed.':'')+' ('+$('ver').textContent+')'+(SRV_TABS?' Tabs read: '+(SRV_TABS.filter(t=>!t.s).map(t=>t.n+' ('+t.r+')').join(', ')||'none')+(SRV_TABS.some(t=>t.s)?'. Skipped: '+SRV_TABS.filter(t=>t.s).map(t=>t.n+' ('+t.s+')').join(', '):'')+'.':'')+(df&&df<oldest?' ⚠ Your From date is earlier than the oldest email the sheet sent. If older emails exist in the sheet, the Google Apps Script needs the update (it must send all tabs/months).':'');
+}
 function repRun(){
+  repInfo();
   REP.cur=[];
   const df=$('rFrom').value,dt=$('rTo').value;
   if(!df||!dt||df>dt){$('rSum').innerHTML='';$('rTable').innerHTML='<p class="hint">'+(df&&dt?'“From date” is after “To date”. Please correct the dates.':'Select both a From date and a To date to see the emails.')+'</p>';REP.pick=null;paintPick();return}
