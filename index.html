@@ -24,6 +24,7 @@ textarea{min-height:130px;resize:vertical}
 @media(max-width:480px){.grid{grid-template-columns:1fr}}
 label{display:block;font-size:12.5px;color:var(--mut);margin-bottom:3px}
 .full{grid-column:1/-1}
+.sh{margin-top:10px;padding:7px 12px;border-radius:8px;background:#e5f3ef;color:#0e6b5c;font-weight:700;font-size:13.5px}
 .inv{display:flex;align-items:center;gap:10px;background:var(--warn);padding:10px;border-radius:8px;font-weight:600;margin-top:12px}
 .inv input{width:22px;height:22px;accent-color:var(--acc)}
 .hint{font-size:12.5px;color:var(--mut);margin:6px 0 0}
@@ -113,31 +114,37 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
 
     <h2 style="margin-top:16px">2. Check or edit fields</h2>
     <div class="grid">
+      <div class="full sh" style="margin-top:0">👤 Patient Details</div>
       <div><label for="date">Date (tap to pick)</label><input id="date" type="date"></div>
       <div><label for="time">Time (live, editable)</label><input id="time" type="time"></div>
+      <div class="full"><label for="name">Patient name</label><input id="name" autocomplete="off"></div>
+      <div class="full"><label for="pmobile">Patient mobile (optional, used to detect carry forward)</label><input id="pmobile" list="mobiles" inputmode="tel" autocomplete="off"></div>
+      <div class="full"><label class="inv" for="moreMob"><input type="checkbox" id="moreMob"> 📱 Add more mobile numbers (up to 3 in total)</label></div>
+      <div id="mob2w" style="display:none"><label for="pmobile2">Mobile 2</label><input id="pmobile2" inputmode="tel" autocomplete="off"></div>
+      <div id="mob3w" style="display:none"><label for="pmobile3">Mobile 3</label><input id="pmobile3" inputmode="tel" autocomplete="off"></div>
+      <div><label for="cnic">CNIC</label><input id="cnic" inputmode="numeric" autocomplete="off"></div>
+      <div><label for="disease">Disease (optional)</label><input id="disease" list="diseases" autocomplete="off"></div>
+      <div class="full"><label for="address">Delivery address</label><input id="address"></div>
+      <div class="full"><label for="city">City (detected from the address, editable)</label><input id="city" list="cities" autocomplete="off"><div id="cityHint" style="display:none">City not found – please type it.</div></div>
       <div class="full"><label for="status">Patient status</label>
         <select id="status"><option value="">Auto (from backup)</option><option>New Patient</option><option>Carry Forward Patient</option></select></div>
       <div class="full" id="chgWrap" style="display:none"><input type="checkbox" id="chg" style="display:none">
         <div id="chgText"></div>
         <div id="chgBtns"><button type="button" class="b-lite" id="chgUpd">✏️ Update earlier order</button><button type="button" class="b-lite" id="chgNewBtn">➕ Add as new entry</button></div>
         <div id="chgNote" style="display:none"></div></div>
-      <div><label for="name">Patient name</label><input id="name" autocomplete="off"></div>
-      <div><label for="cnic">CNIC</label><input id="cnic" inputmode="numeric" autocomplete="off"></div>
-            <div class="full"><label for="product">Product name (type first letters for suggestions)</label><input id="product" list="products" autocomplete="off"><div id="chips"></div></div>
+      <div class="full sh">💊 Product Details</div>
+      <div class="full"><label for="product">Product name (type first letters for suggestions)</label><input id="product" list="products" autocomplete="off"><div id="chips"></div></div>
       <div><label for="rate">Patient Price</label><input id="rate"></div>
       <div><label for="qty">Quantity</label><input id="qty"></div>
-      <div class="full"><label for="doctor">Prescriber name</label><input id="doctor"></div>
-      <div class="full"><label for="pmobile">Patient mobile (optional, used to detect carry forward)</label><input id="pmobile" list="mobiles" inputmode="tel" autocomplete="off"></div>
-      <div class="full"><label class="inv" for="moreMob"><input type="checkbox" id="moreMob"> 📱 Add more mobile numbers (up to 3 in total)</label></div>
-      <div id="mob2w" style="display:none"><label for="pmobile2">Mobile 2</label><input id="pmobile2" inputmode="tel" autocomplete="off"></div>
-      <div id="mob3w" style="display:none"><label for="pmobile3">Mobile 3</label><input id="pmobile3" inputmode="tel" autocomplete="off"></div>
-      <div class="full"><label for="address">Delivery address</label><input id="address"></div>
-      <div class="full"><label for="city">City (detected from the address, editable)</label><input id="city" list="cities" autocomplete="off"><div id="cityHint" style="display:none">City not found – please type it.</div></div>
+      <div class="full sh">🩺 Prescriber Details</div>
+      <div class="full"><label for="doctor">Prescriber name (“Dr.” is added automatically)</label><input id="doctor" value="Dr. " autocomplete="off"></div>
+      <div class="full"><label for="speciality">Speciality (type first letters for suggestions; auto from prescriber)</label><input id="speciality" autocomplete="off"></div>
+      <div class="full sh">📝 Additional Notes</div>
       <div class="full"><label for="notes">Additional notes (optional, shown in email)</label><textarea id="notes" style="min-height:70px"></textarea></div>
     </div>
     <label class="inv" for="invoice"><input type="checkbox" id="invoice" checked> 🧾 Invoice line: “Please provide invoice to the patient.”</label>
     <label class="inv" for="icekit" style="margin-top:8px"><input type="checkbox" id="icekit" checked> ❄️ Ice kit line: “Deliver injection in proper ice kit including thermocol box.”</label>
-    <datalist id="cities"></datalist><datalist id="products"></datalist><datalist id="mobiles"></datalist><datalist id="names"></datalist><datalist id="cnics"></datalist>
+    <datalist id="cities"></datalist><datalist id="products"></datalist><datalist id="mobiles"></datalist><datalist id="names"></datalist><datalist id="cnics"></datalist><datalist id="diseases"></datalist>
   </section>
 
   <section>
@@ -188,25 +195,58 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
 <div id="ver" style="text-align:center;color:#8a948f;font-size:11px;margin:14px 0"></div>
 <script>
 const $=id=>document.getElementById(id);
-const FIELDS=['date','time','status','name','cnic','pmobile','product','rate','qty','doctor','address','city','notes'];
+const FIELDS=['date','time','status','name','cnic','pmobile','product','rate','qty','doctor','address','city','notes','speciality','disease'];
 const MEM={};let storeOK=true;
 const LS=k=>{if(k in MEM)return MEM[k];try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
 const SS=(k,v)=>{MEM[k]=v;try{localStorage.setItem(k,JSON.stringify(v));if(JSON.parse(localStorage.getItem(k))===undefined)throw 0}catch(e){storeOK=false}};
 let patients={};
 let SRV_TABS=null;let prods={};let rowsAll=[];let unlocked=false,isAdmin=false,curPin='',busy=false;
-const APP_VER='2026-10-11-b';
+const APP_VER='2026-10-11-f';
 const pn=x=>{const d=String(x==null?'':x).replace(/\D/g,'');return d?d.padStart(4,'0'):''};
 try{['patients','prods','history','sheetUrl','design'].forEach(k=>localStorage.removeItem(k))}catch(e){}          // product stats: key = lowercase product
 const AUTO={};                       // field -> value last filled automatically
 const pkey=s=>String(s||'').toLowerCase().replace(/\s+/g,' ').trim();
 /* Product / price / quantity suggestions are rebuilt from the saved rows: the most used first, a tie goes to the most recent.
    For the admin the logged-in PIN's own rows weigh far more than other PINs' rows, so every PIN gets its own preference. */
+const dkey=x=>pkey(String(x||'').replace(/\./g,' ').replace(/\bdr\b/gi,' '));
+const DRP='Dr. ';
+/* every prescriber is written the same way: Dr. Name  (Dr / dr. / Doctor / Doc in front are replaced by "Dr. ") */
+function normDoc(v){let t=String(v==null?'':v).replace(/\s+/g,' ').trim(),m;while((m=t.match(/^(?:dr|doc|doctor)\b\.?\s*/i)))t=t.slice(m[0].length);t=t.replace(/^[.,\s]+/,'');return t?DRP+t.replace(/(^|[\s'-])([a-z])/g,(m,x,c)=>x+c.toUpperCase()):''}
+const SPEC_PRESET=['Rheumatologist','Gastroenterologist','Hepatologist','Dermatologist','Orthopedic Surgeon','Endocrinologist','Diabetologist','Cardiologist','Cardiac Surgeon','Neurologist','Neurosurgeon','Nephrologist','Urologist','Pulmonologist','Chest Specialist','Oncologist','Hematologist','Pediatrician','Pediatric Surgeon','Gynecologist','General Physician','Consultant Physician','Family Physician','Internal Medicine Specialist','General Surgeon','Vascular Surgeon','Plastic Surgeon','Ophthalmologist','ENT Specialist','Psychiatrist','Pain Specialist','Anesthesiologist','Radiologist','Pathologist','Infectious Disease Specialist','Immunologist','Allergist','Physical Medicine Specialist','Dentist','Medical Specialist'];
+let specs={},specAll={},disAll={},docAll={};
+function topSpec(doc){const o=specs[dkey(doc)];if(!o)return'';let b=null;Object.keys(o).forEach(k=>{if(!b||o[k].n>b.n)b=o[k]});return b?b.name:''}
+function docItems(){return Object.keys(docAll).map(k=>{const o=docAll[k],f=Object.keys(o.f).sort((a,b)=>o.f[b]-o.f[a])[0];return{l:f,k:dkey(f),n:o.n}})}
+function specItems(){
+  const m={};SPEC_PRESET.forEach(x=>m[x.toLowerCase()]={l:x,k:x.toLowerCase(),n:0});
+  Object.keys(specAll).forEach(k=>{if(m[k])m[k].n=specAll[k].n;else m[k]={l:specAll[k].name,k,n:specAll[k].n}});
+  const mine=specs[dkey($('doctor').value)]||{};Object.keys(mine).forEach(k=>{if(m[k])m[k].n+=1e9});   // this prescriber's own specialities first
+  return Object.values(m);
+}
+function rankItems(t,items){
+  const q=pkey(t);if(!q)return[];const tk=q.split(' '),out=[];
+  items.forEach(x=>{const n=x.k,w=n.split(' ');let sc=-1;
+    if(n.startsWith(q))sc=0;
+    else if(tk.every(a=>w.some(y=>y.startsWith(a))))sc=1;
+    else if(n.includes(q))sc=2;
+    else if(q.length>=3&&tk.every(a=>w.some(y=>y.startsWith(a)||lev(y,a)<=(a.length>5?2:1)||(a.length>=4&&lev(y.slice(0,a.length),a)<=1))))sc=3;   // spelling mistakes still find it
+    if(sc>=0)out.push([sc,x])});
+  return out.sort((a,b)=>a[0]-b[0]||b[1].n-a[1].n||a[1].l.localeCompare(b[1].l)).map(z=>z[1]);
+}
+function fillSpec(){setAuto('speciality',topSpec($('doctor').value))}
 function rebuildProds(){
-  prods={};const me=pn(curPin);
+  prods={};specs={};specAll={};disAll={};docAll={};const me=pn(curPin);
   rowsAll.slice().sort((a,b)=>rowT(a)-rowT(b)).forEach((r,i)=>{
     const pr=String(r.product||'').trim();if(!pr)return;
     const w=(isAdmin?(pn(r.pin)===me?1000:1):1)+i/1e7;
     addProd(pr,rateTxt(String(r.rate||'').trim()),String(r.qty||'').trim(),w);
+  });
+  rowsAll.slice().sort((a,b)=>rowT(a)-rowT(b)).forEach((r,i)=>{
+    const w=(isAdmin?(pn(r.pin)===me?1000:1):1)+i/1e7;
+    const sp=String(r.speciality||'').replace(/\s+/g,' ').trim(),dk=dkey(r.doctor),di=String(r.disease||'').replace(/\s+/g,' ').trim();
+    if(sp){const k=sp.toLowerCase();specAll[k]={name:sp,n:(specAll[k]?specAll[k].n:0)+w};
+      if(dk){const o=specs[dk]||(specs[dk]={});o[k]={name:sp,n:(o[k]?o[k].n:0)+w}}}
+    if(di){const k=di.toLowerCase();disAll[k]={name:di,n:(disAll[k]?disAll[k].n:0)+w}}
+    const dn=normDoc(r.doctor);if(dk&&dn){const o=docAll[dk]||(docAll[dk]={n:0,f:{}});o.n+=w;o.f[dn]=(o.f[dn]||0)+w}
   });
 }
 const topOf=o=>Object.keys(o||{}).sort((a,b)=>o[b]-o[a])[0]||'';
@@ -296,7 +336,7 @@ function renderChg(){
 function loadChange(r){   // open the earlier order in the form and switch change mode on
   Object.keys(AUTO).forEach(k=>delete AUTO[k]);
   const set=(k,v)=>{$(k).value=v==null?'':String(v).trim()};
-  ['name','cnic','product','rate','qty','doctor','address','notes'].forEach(k=>set(k,r[k]));
+  ['name','cnic','product','rate','qty','doctor','address','notes','speciality','disease'].forEach(k=>set(k,r[k]));$('doctor').value=normDoc($('doctor').value)||DRP;
   const ms=mobsOf(r.pmobile);set('pmobile',ms[0]||'');set('pmobile2',ms[1]||'');set('pmobile3',ms[2]||'');
   $('moreMob').checked=ms.length>1;showMob();
   const c0=String(r.city||'').trim(),auto=cityStrict($('address').value)||histCity(data());
@@ -327,12 +367,15 @@ function refreshLists(){
   $('cnics').innerHTML=P0.filter(p=>p.cnic).map(p=>`<option value="${esc(p.cnic)}">${esc(p.name||'')}</option>`).join('');
   const PL=Object.values(prods).sort((a,b)=>b.n-a.n);   // most used first
   $('cities').innerHTML=CITIES.slice().sort().map(c=>`<option value="${c}"></option>`).join('');
+  const byN=o=>Object.values(o).sort((a,b)=>b.n-a.n);
+  $('diseases').innerHTML=byN(disAll).map(x=>`<option value="${esc(x.name)}"></option>`).join('');
   $('products').innerHTML=PL.map(x=>`<option value="${esc(x.name)}"></option>`).join('');
   $('chips').innerHTML=PL.slice(0,6).map(x=>`<button type="button" class="chip">${esc(x.name)}</button>`).join('');
 }
 function setAuto(k,v){
-  const cur=$(k).value.trim();
-  if(!cur||cur===AUTO[k]){$(k).value=v||'';AUTO[k]=v||''}
+  const dr=k==='doctor',n=x=>dr?normDoc(x):String(x||'').trim();
+  const cur=n($(k).value);
+  if(!cur||cur===n(AUTO[k])){const nv=dr?(normDoc(v)||DRP):(v||'');$(k).value=nv;AUTO[k]=nv}
 }
 function fillFromProduct(){
   const key=pkey($('product').value),st=prods[key];if(!key||!st)return;
@@ -347,7 +390,7 @@ function autofillFrom(p,keep){
   if(cur.length>=10&&ms.some(x=>last10(x)===last10(cur)))ms=[cur,...ms.filter(x=>last10(x)!==last10(cur))];
   if(ms[0])$('pmobile').value=ms[0];
   if(ms[1]&&!$('pmobile2').value.trim()&&!$('pmobile3').value.trim()){$('moreMob').checked=true;$('pmobile2').value=ms[1];$('pmobile3').value=ms[2]||'';showMob()}
-  setAuto('doctor',p.doctor);setAuto('address',p.address);
+  setAuto('doctor',p.doctor);setAuto('speciality',topSpec($('doctor').value)||p.speciality);setAuto('disease',p.disease);setAuto('address',p.address);
   const pc=$('product').value.trim();
   if(!pc||pc===AUTO.product){setAuto('product',p.product);setAuto('rate',p.rate);setAuto('qty',p.qty)}
   else if(pkey(pc)===pkey(p.product)){setAuto('rate',p.rate);setAuto('qty',p.qty)}
@@ -376,7 +419,7 @@ function resolvedStatus(){
 /* ---------- smart parser ---------- */
 const KEYS={name:'name',patientname:'name',patient:'name',cnic:'cnic',nic:'cnic',id:'cnic',idcard:'cnic',cnicno:'cnic',
  product:'product',productname:'product',medicine:'product',drug:'product',rate:'rate',price:'rate',patientprice:'rate',
- quantity:'qty',qty:'qty',doctor:'doctor',doctorname:'doctor',dr:'doctor',prescriber:'doctor',
+ quantity:'qty',qty:'qty',doctor:'doctor',doctorname:'doctor',dr:'doctor',prescriber:'doctor',speciality:'speciality',specialty:'speciality',prescriberspeciality:'speciality',doctorspeciality:'speciality',disease:'disease',diagnosis:'disease',
  patientmobile:'pmobile',patientphone:'pmobile',patientcontact:'pmobile',patientnumber:'pmobile',patientcell:'pmobile',patientmobilenumber:'pmobile',contact:'pmobile',contactnumber:'pmobile',phone:'pmobile',mobile:'pmobile',whatsapp:'pmobile',number:'pmobile',
  address:'address',deliveryaddress:'address',location:'address',changeaddress:'address',newaddress:'address',newdeliveryaddress:'address',status:'status',patientstatus:'status',date:'date'};
 function normStatus(s){return /carry|follow|old|repeat|continu/i.test(s)?'Carry Forward Patient':/new/i.test(s)?'New Patient':''}
@@ -418,18 +461,18 @@ function applySmart(){
   const txt=$('smart').value;if(!txt.trim())return;
   const r=parse(txt);Object.keys(AUTO).forEach(k=>delete AUTO[k]);endChange('');
   FIELDS.forEach(k=>{$(k).value=r[k]||(k==='date'?todayISO():k==='time'?nowHM():'')});
-  timeAuto=!r.time;cityManual=false;
+  $('doctor').value=normDoc(r.doctor)||DRP;timeAuto=!r.time;cityManual=false;
   $('pmobile2').value='';$('pmobile3').value='';$('moreMob').checked=false;
   const extra=[...new Set((txt.match(/(?<!\d)(?:\+?92[\s-]?|0)3\d{2}[\s-]?\d{7}(?!\d)/g)||[]).map(cleanMob))].filter(x=>last10(x)!==last10(normMob(r.pmobile))).slice(0,2);
   if(extra.length){$('moreMob').checked=true;$('pmobile2').value=extra[0]||'';$('pmobile3').value=extra[1]||''}
-  showMob();
+  showMob();fillSpec();
   const p=findPatient(r.name,r.cnic,r.pmobile);
   if(p){autofillFrom(p,true)}else fillFromProduct();
   render();
 }
 
 /* ---------- email building ---------- */
-function data(){const d={};FIELDS.forEach(k=>d[k]=$(k).value.trim());d.pmobile=mobsForm().join(' / ');d.chg=$('chg').checked;d.rate=rateTxt(d.rate);d.invoice=$('invoice').checked;d.icekit=$('icekit').checked;d.status=resolvedStatus();return d}
+function data(){const d={};FIELDS.forEach(k=>d[k]=$(k).value.trim());d.doctor=normDoc(d.doctor);d.pmobile=mobsForm().join(' / ');d.chg=$('chg').checked;d.rate=rateTxt(d.rate);d.invoice=$('invoice').checked;d.icekit=$('icekit').checked;d.status=resolvedStatus();return d}
 
 /* ---------- email designs (Outlook-safe: tables + inline CSS) ---------- */
 const DESIGN_LIST=[['classic','Classic (original)'],['executive','1 · Executive Card'],['ledger','2 · Ledger Minimal'],['summary','3 · Order Summary'],['midnight','4 · Midnight & Gold'],['cards','5 · Modern Cards']];
@@ -437,15 +480,18 @@ function model(d,v){
   const dt=d.date?fmtDate(d.date)+(d.time?', '+fmtTime(d.time):''):'';
   const pat=[['📅 ','Date &amp; Time',v(dt,'—')],['🪪 ','CNIC',v(d.cnic,'—')],['','Patient Name',v(d.name,'—')]];
   if(d.pmobile)pat.push(['📱 ','Patient Mobile',v(d.pmobile,'')]);
+  if(d.disease)pat.push(['','Disease',esc(d.disease)]);
   pat.push(['','Patient Status',v(d.status,'—')]);
   const S=[{t:'Patient Details',i:'👤 ',r:pat},
    {t:'Product Details',i:'💊 ',r:[['','Product Name',v(d.product,'—')],['','Patient Price',v(d.rate,'—')],['','Quantity',v(d.qty,'—')]]},
-   {t:'Prescriber Details',i:'🩺 ',r:[['','Prescriber Name',v(d.doctor,'—')]]},
+   {t:'Prescriber Details',i:'🩺 ',r:[['','Prescriber Name',docHtml(d,v)]]},
    {t:'Delivery Address',i:'📍 ',r:[['','Address',v(d.address,'—')]]}];
   if(d.notes)S.push({t:'Additional Notes',i:'📝 ',r:[['','Notes',esc(d.notes).replace(/\n/g,'<br>')]]});
   return{S,title:d.product?esc(d.product):'Order Request',nm:d.name?esc(d.name):'',dt:esc(dt),
    inv:'Please provide invoice to the patient.',ice:'Deliver injection in proper ice kit including thermocol box.'};
 }
+const SP5='&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+const docHtml=(d,v)=>v(d.doctor,'—')+(d.speciality?SP5+'<span style="font-weight:normal">Speciality:</span> '+esc(d.speciality):'');
 const FF='font-family:Calibri,Arial,sans-serif;';
 const INTRO='Kindly approve the following order and arrange its timely supply.',OUTRO='Your prompt approval and support will be highly appreciated.';
 function alertBox(d,M,pad,bg,bd,col,e1,e2){
@@ -459,9 +505,9 @@ const DESIGNS={classic:(d,v,f)=>{
   let h=`<div style="${f}"><p style="margin:0 0 8px">Respected Sir,</p>
 <p style="margin:0">Kindly approve the following order and arrange its timely supply. ⏰</p>`;
   h+=sec('👤 Patient Details',
-    li('📅 Date &amp; Time',fmtDate(d.date)+(d.time?', '+fmtTime(d.time):''),'—')+li('🪪 CNIC',d.cnic,'—')+li('Patient Name',d.name,'—')+(d.pmobile?li('📱 Patient Mobile',d.pmobile,''):'')+li('Patient Status',d.status,'—'));
+    li('📅 Date &amp; Time',fmtDate(d.date)+(d.time?', '+fmtTime(d.time):''),'—')+li('🪪 CNIC',d.cnic,'—')+li('Patient Name',d.name,'—')+(d.pmobile?li('📱 Patient Mobile',d.pmobile,''):'')+(d.disease?li('Disease',d.disease,''):'')+li('Patient Status',d.status,'—'));
   h+=sec('💊 Product Details',li('Product Name',d.product,'—')+li('Patient Price',d.rate,'—')+li('Quantity',d.qty,'—'));
-  h+=sec('🩺 Prescriber Details',li('Prescriber Name',d.doctor,'—'));
+  h+=sec('🩺 Prescriber Details',`<li style="margin:2px 0">Prescriber Name: <b>${docHtml(d,v)}</b></li>`);
   h+=sec('📍 Delivery Address',`<li style="margin:2px 0"><b>${v(d.address,'—')}</b></li>`);
   if(d.notes)h+=sec('📝 Additional Notes',`<li style="margin:2px 0">${esc(d.notes).replace(/\n/g,'<br>')}</li>`);
   if(d.invoice||d.icekit){
@@ -526,7 +572,7 @@ function build(){
   const d=data(),v=(x,e)=>x?esc(x):`<span style="color:#b00">${e}</span>`;
   const f='font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#000';
   const h=(DESIGNS[$('design').value]||DESIGNS.classic)(d,v,f);
-  let t=`Respected Sir,\n\nKindly approve the following order and arrange its timely supply.\n\nPatient Details\n- Date & Time: ${fmtDate(d.date)}${d.time?', '+fmtTime(d.time):''}\n- CNIC: ${d.cnic}\n- Patient Name: ${d.name}\n${d.pmobile?'- Patient Mobile: '+d.pmobile+'\n':''}- Patient Status: ${d.status}\n\nProduct Details\n- Product Name: ${d.product}\n- Patient Price: ${d.rate}\n- Quantity: ${d.qty}\n\nPrescriber Details\n- Prescriber Name: ${d.doctor}\n\nDelivery Address\n- ${d.address}\n\n${d.notes?'Additional Notes\n- '+d.notes+'\n\n':''}`;
+  let t=`Respected Sir,\n\nKindly approve the following order and arrange its timely supply.\n\nPatient Details\n- Date & Time: ${fmtDate(d.date)}${d.time?', '+fmtTime(d.time):''}\n- CNIC: ${d.cnic}\n- Patient Name: ${d.name}\n${d.pmobile?'- Patient Mobile: '+d.pmobile+'\n':''}${d.disease?'- Disease: '+d.disease+'\n':''}- Patient Status: ${d.status}\n\nProduct Details\n- Product Name: ${d.product}\n- Patient Price: ${d.rate}\n- Quantity: ${d.qty}\n\nPrescriber Details\n- Prescriber Name: ${d.doctor}${d.speciality?'     Speciality: '+d.speciality:''}\n\nDelivery Address\n- ${d.address}\n\n${d.notes?'Additional Notes\n- '+d.notes+'\n\n':''}`;
   if(d.invoice)t+=`>>> Please provide invoice to the patient.\n`;
   if(d.icekit)t+=`>>> Deliver injection in proper ice kit including thermocol box.\n`;
   if(d.invoice||d.icekit)t+='\n';
@@ -633,13 +679,13 @@ addEventListener('online',flush);
 async function backup(){
   const d=data();
   if(!d.name&&!digits(d.cnic))return'skip';
-  const sig=JSON.stringify([digits(d.cnic)||d.name.toLowerCase(),d.pmobile,d.product,d.rate,d.qty,d.doctor,d.address,d.notes,d.date,d.chg]);
+  const sig=JSON.stringify([digits(d.cnic)||d.name.toLowerCase(),d.pmobile,d.product,d.rate,d.qty,d.doctor,d.speciality,d.disease,d.address,d.notes,d.date,d.chg]);
   if(sentSig[sig]&&Date.now()-sentSig[sig]<1800000)return'dup';   // same order within 30 min = same order
   sentSig[sig]=Date.now();
   const rec=recFrom(d);
   if(unlocked){
     const key=digits(d.cnic)||d.name.toLowerCase();
-    patients[key]={name:d.name,cnic:d.cnic,pmobile:d.pmobile,doctor:d.doctor,address:d.address,product:d.product,rate:d.rate,qty:d.qty};
+    patients[key]={name:d.name,cnic:d.cnic,pmobile:d.pmobile,doctor:d.doctor,speciality:d.speciality,disease:d.disease,address:d.address,product:d.product,rate:d.rate,qty:d.qty};
     const loc={...rec,_t:+rec.cts};
     const win=86400000;   // the same patient within 24 hours = update the earlier row (unless "Add as new entry" was chosen)
     const same=r=>{const t=rowT(r);return t&&Date.now()-t<win&&(isAdmin||r.pin===undefined||pn(r.pin)===pn(rec.pin))&&sameWho(r,rec)};
@@ -686,9 +732,11 @@ function loadRows(rows){
     if(!nm&&!cn&&!pm)return;
     rowsAll.push(r);
     const k=cn||nm.toLowerCase()||pm;
-    const o=patients[k]||{name:'',cnic:'',pmobile:'',doctor:'',address:'',product:'',rate:'',qty:''};
+    const o=patients[k]||{name:'',cnic:'',pmobile:'',doctor:'',speciality:'',disease:'',address:'',product:'',rate:'',qty:''};
     if(nm)o.name=nm;if(cn)o.cnic=cn;if(pm)o.pmobile=pm;
     if(t(r.doctor))o.doctor=t(r.doctor);
+    if(t(r.speciality))o.speciality=t(r.speciality);
+    if(t(r.disease))o.disease=t(r.disease);
     if(t(r.address))o.address=t(r.address);
     if(t(r.product)){o.product=t(r.product);o.rate=t(r.rate);o.qty=t(r.qty)}
     patients[k]=o;n++;
@@ -818,7 +866,37 @@ $('design').value='classic';   // always start with Classic (Original)
 $('design').addEventListener('change',render);
 let tm;$('smart').addEventListener('input',()=>{clearTimeout(tm);tm=setTimeout(applySmart,350)});
 $('city').addEventListener('input',()=>{cityManual=!!$('city').value.trim()});   // must run before render
-FIELDS.forEach(k=>$(k).addEventListener('input',render));
+FIELDS.forEach(k=>$(k).addEventListener('input',k==='doctor'?()=>{fillSpec();render()}:render));
+$('doctor').addEventListener('change',()=>{$('doctor').value=normDoc($('doctor').value)||DRP;fillSpec();render()});
+$('doctor').addEventListener('focus',()=>{const e=$('doctor');if(e.value===DRP)setTimeout(()=>e.setSelectionRange(DRP.length,DRP.length),0)});
+$('speciality').addEventListener('change',()=>{const t=pkey($('speciality').value),x=specItems().find(i=>i.k===t);if(x)$('speciality').value=x.l;render()});   // exact spelling/capitalisation of a known speciality
+/* suggestion list under an input: opens at the first letter, prefix matches first, close spellings still found */
+function setupPick(id,getItems,query,onPick){
+  const inp=$(id),host=inp.parentElement;host.style.position='relative';
+  const box=document.createElement('div');box.className='sugbox';host.appendChild(box);
+  let list=[],act=-1;
+  const hide=()=>{box.classList.remove('on');act=-1};
+  const pick=x=>{hide();onPick(x);render()};
+  function show(){
+    const t=query(inp.value);if(!t){hide();return}
+    list=rankItems(t,getItems()).slice(0,8);
+    if(!list.length||(list.length===1&&list[0].k===pkey(t))){hide();return}
+    box.innerHTML=list.map((x,i)=>`<div class="it" data-i="${i}"><b>${esc(x.l)}</b></div>`).join('');box.classList.add('on');act=-1;
+  }
+  inp.addEventListener('input',show);
+  inp.addEventListener('focus',()=>{if(query(inp.value))show()});
+  inp.addEventListener('blur',()=>setTimeout(hide,180));
+  inp.addEventListener('keydown',e=>{
+    if(!box.classList.contains('on')||!list.length)return;
+    const its=[...box.querySelectorAll('.it')];
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();act=(act+(e.key==='ArrowDown'?1:-1)+its.length)%its.length;its.forEach((x,i)=>x.classList.toggle('act',i===act))}
+    else if(e.key==='Enter'&&act>=0){e.preventDefault();pick(list[act])}
+    else if(e.key==='Escape')hide();
+  });
+  box.addEventListener('pointerdown',e=>{const it=e.target.closest('.it');if(!it)return;e.preventDefault();pick(list[+it.dataset.i])});
+}
+setupPick('doctor',docItems,v=>normDoc(v).replace(/^Dr\. /,''),x=>{$('doctor').value=x.l;fillSpec()});
+setupPick('speciality',specItems,v=>v.trim(),x=>{$('speciality').value=x.l});
 ['pmobile2','pmobile3'].forEach(k=>$(k).addEventListener('input',render));
 $('moreMob').addEventListener('change',()=>{showMob();render()});
 $('chg').addEventListener('change',()=>{
@@ -842,7 +920,7 @@ $('chgNewBtn').onclick=()=>{if($('chg').checked){endChange(chgKey(data()));CHG.f
 $('save').onclick=save;$('copy').onclick=copyRich;$('sendMail').onclick=sendMail;$('sendMail2').onclick=sendMail;
 $('copyTxt').onclick=()=>{if(!unlocked){toast('Please login with your PIN first');return}backup();copyText(build().text,'Plain text copied ✔')};
 $('copySubj').onclick=()=>copyText($('subject').value,'Subject copied ✔');
-$('clear').onclick=()=>{Object.keys(AUTO).forEach(k=>delete AUTO[k]);$('smart').value='';FIELDS.forEach(k=>$(k).value='');$('date').value=todayISO();$('time').value=nowHM();timeAuto=true;$('invoice').checked=true;$('icekit').checked=true;endChange('');CHG.forceNew=false;cityManual=false;$('moreMob').checked=false;$('pmobile2').value='';$('pmobile3').value='';showMob();render()};
+$('clear').onclick=()=>{Object.keys(AUTO).forEach(k=>delete AUTO[k]);$('smart').value='';FIELDS.forEach(k=>$(k).value='');$('doctor').value=DRP;$('date').value=todayISO();$('time').value=nowHM();timeAuto=true;$('invoice').checked=true;$('icekit').checked=true;endChange('');CHG.forceNew=false;cityManual=false;$('moreMob').checked=false;$('pmobile2').value='';$('pmobile3').value='';showMob();render()};
 
 
 $('pin').addEventListener('input',()=>{$('pin').value=$('pin').value.replace(/\D/g,'').slice(0,4)});
