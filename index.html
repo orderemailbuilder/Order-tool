@@ -24,6 +24,13 @@ textarea{min-height:130px;resize:vertical}
 @media(max-width:480px){.grid{grid-template-columns:1fr}}
 label{display:block;font-size:12.5px;color:var(--mut);margin-bottom:3px}
 .full{grid-column:1/-1}
+#editBar{margin:0 0 12px;padding:10px 12px;border-radius:10px;background:#fff4cc;border:1px solid #f0d878;color:#6a5200;font-size:14px}
+#editBar button{margin-top:8px}
+tr.actrow td{padding:0!important;background:transparent!important;border:0!important;white-space:normal}
+.apnl{position:sticky;left:0;box-sizing:border-box;width:calc(100vw - 48px);max-width:680px;margin:4px 0 10px;padding:10px 12px;border-radius:10px;background:#f1f9f6;border:1px solid #bfe0d6;font-size:14px;white-space:normal}
+.apnl .rbtns{margin:8px 0}
+.apnl .psum{margin-top:6px;padding:8px 10px;border-radius:8px;background:#fff;border:1px solid #d9ebe5;line-height:1.6}
+.apnl .psum .pt{font-weight:700;color:#0e6b5c;margin-bottom:2px}
 .sh{margin-top:10px;padding:7px 12px;border-radius:8px;background:#e5f3ef;color:#0e6b5c;font-weight:700;font-size:13.5px}
 .inv{display:flex;align-items:center;gap:10px;background:var(--warn);padding:10px;border-radius:8px;font-weight:600;margin-top:12px}
 .inv input{width:22px;height:22px;accent-color:var(--acc)}
@@ -107,6 +114,7 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
 <div id="tabs" style="display:none"><button type="button" id="tabEmail" class="on">✉️ Email Builder</button><button type="button" id="tabRep">📊 History</button></div>
 <div id="lockMsg" style="display:none">🔒 Please enter your PIN and tap Login first.<br><span style="font-weight:400;font-size:14px">No entries can be made without logging in.</span></div>
 <main>
+  <div id="editBar" style="display:none"><div id="editInfo"></div><button type="button" class="b-lite" id="editCancel">✕ Cancel edit</button></div>
   <section>
     <h2>1. Paste everything here</h2>
     <textarea id="smart" placeholder="Paste or type anything: name, CNIC, mobile, doctor, product, patient price, address... fields are filled automatically."></textarea>
@@ -200,8 +208,8 @@ const MEM={};let storeOK=true;
 const LS=k=>{if(k in MEM)return MEM[k];try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
 const SS=(k,v)=>{MEM[k]=v;try{localStorage.setItem(k,JSON.stringify(v));if(JSON.parse(localStorage.getItem(k))===undefined)throw 0}catch(e){storeOK=false}};
 let patients={};
-let SRV_TABS=null;let prods={};let rowsAll=[];let unlocked=false,isAdmin=false,curPin='',busy=false;
-const APP_VER='2026-10-11-f';
+let SRV_TABS=null,SRV_V='';let prods={};let rowsAll=[];let unlocked=false,isAdmin=false,curPin='',busy=false;
+const APP_VER='2026-10-11-g';
 const pn=x=>{const d=String(x==null?'':x).replace(/\D/g,'');return d?d.padStart(4,'0'):''};
 try{['patients','prods','history','sheetUrl','design'].forEach(k=>localStorage.removeItem(k))}catch(e){}          // product stats: key = lowercase product
 const AUTO={};                       // field -> value last filled automatically
@@ -309,6 +317,22 @@ function sameWho(r,rec){   // same patient? both CNICs present: the CNIC decides
   if(a&&b)return a===b;
   return pkey(r.name)===pkey(rec.name)&&a===b&&(!!b||mobOverlap(r.pmobile,rec.pmobile));
 }
+const EDIT={ts:'',row:null};   // History -> Edit: correct one existing row in place
+const editOK=()=>/tabs([5-9]|\d{2})/.test(SRV_V);   // the Apps Script must be the version that knows 'edit'
+function renderEditBar(){
+  const b=$('editBar');if(!b)return;
+  if(!EDIT.ts){b.style.display='none';return}
+  const r=EDIT.row;b.style.display='';
+  $('editInfo').innerHTML='✏️ <b>Editing:</b> '+esc(rsp(r.name)||'(no name)')+' · '+esc(rsp(r.product)||'')+' · '+esc(fmtDate(r._n?r._n.date:rowDateISO(r)))+'<br><small>Change what you need, then tap Save. This entry is corrected in the Google Sheet (no new entry is made).</small>';
+}
+function endEdit(){EDIT.ts='';EDIT.row=null;renderEditBar()}
+function startEdit(r){
+  if(!canDelete(r))return;
+  if(!editOK()){toast('Edit needs the latest Google Apps Script (version tabs5 or newer). Please deploy the new script first.');return}
+  endChange('');CHG.forceNew=false;
+  fillFormFrom(r);EDIT.ts=String(r.ts||r._t||'');EDIT.row=r;
+  showView('mail');renderEditBar();render();scrollTo(0,0);toast('Editing – change what you need, then tap Save');
+}
 function startChange(r){$('chg').checked=true;CHG.ts=String(r.ts||r._t||'');CHG.row=r;CHG.orig={name:pkey(r.name),cnic:digits(r.cnic),prod:pkey(r.product)};CHG.okProd='';CHG.declined=''}
 function endChange(declineKey){$('chg').checked=false;CHG.ts='';CHG.orig=null;CHG.row=null;CHG.okProd='';if(declineKey!==undefined)CHG.declined=declineKey}
 function bothChanged(){   // name AND CNIC changed = a different patient = new order
@@ -318,6 +342,7 @@ function bothChanged(){   // name AND CNIC changed = a different patient = new o
 function renderChg(){
   const wrap=$('chgWrap');
   if(!unlocked){if($('chg').checked)endChange();wrap.style.display='none';return}
+  if(EDIT.ts){wrap.style.display='none';return}
   if(bothChanged()){endChange(chgKey(data()));toast('Name and CNIC both changed – this will be saved as a new order')}
   let r=null,t=0;
   if($('chg').checked&&CHG.row){r=CHG.row;t=rowT(r)}
@@ -333,7 +358,7 @@ function renderChg(){
   const note=$('chgNote');note.style.display=pc?'':'none';
   note.textContent=pc?"Product changed – updating the same order. Choose 'Add as new entry' if this is a different order.":'';
 }
-function loadChange(r){   // open the earlier order in the form and switch change mode on
+function fillFormFrom(r){   // put an existing order into the form
   Object.keys(AUTO).forEach(k=>delete AUTO[k]);
   const set=(k,v)=>{$(k).value=v==null?'':String(v).trim()};
   ['name','cnic','product','rate','qty','doctor','address','notes','speciality','disease'].forEach(k=>set(k,r[k]));$('doctor').value=normDoc($('doctor').value)||DRP;
@@ -343,13 +368,16 @@ function loadChange(r){   // open the earlier order in the form and switch chang
   cityManual=!!c0&&c0!==auto;$('city').value=cityManual?c0:auto;
   const iso=isoDate(String(r.date||'').trim());if(iso)$('date').value=iso;
   const hm=hm24(r.time);if(hm){$('time').value=hm;timeAuto=false}
-  if(['New Patient','Carry Forward Patient'].includes(r.status))$('status').value=r.status;
+  $('status').value=['New Patient','Carry Forward Patient'].includes(r.status)?r.status:'';
   $('invoice').checked=String(r.invoice).toLowerCase()==='yes';
-  startChange(r);
+  $('icekit').checked=String(r.icekit).toLowerCase()!=='no';
+}
+function loadChange(r){   // open the earlier order in the form and switch change mode on
+  fillFormFrom(r);startChange(r);
   render();toast('Earlier order loaded – edit it, then Save or Copy');
 }
 function autoChange(keepForm){   // a saved patient was picked: if they have an order from the last 24 hours, switch change mode on
-  if(!unlocked||$('chg').checked)return;
+  if(!unlocked||$('chg').checked||EDIT.ts)return;
   const d=data(),key=chgKey(d);
   if(!key||CHG.declined===key)return;
   const b=chgInfo(d);if(!b)return;
@@ -679,6 +707,7 @@ addEventListener('online',flush);
 async function backup(){
   const d=data();
   if(!d.name&&!digits(d.cnic))return'skip';
+  if(EDIT.ts)return await backupEdit(d);
   const sig=JSON.stringify([digits(d.cnic)||d.name.toLowerCase(),d.pmobile,d.product,d.rate,d.qty,d.doctor,d.speciality,d.disease,d.address,d.notes,d.date,d.chg]);
   if(sentSig[sig]&&Date.now()-sentSig[sig]<1800000)return'dup';   // same order within 30 min = same order
   sentSig[sig]=Date.now();
@@ -704,11 +733,31 @@ async function backup(){
   else if(unlocked)setCloud(true,'Google Sheet connected');
   return ok?'ok':'fail';
 }
+async function backupEdit(d){
+  const rec={...recFrom(d),edit:'1',ets:EDIT.ts,chg:'',nw:'',rts:''};
+  const ix=rowsAll.findIndex(r=>String(r.ts)===EDIT.ts);
+  if(ix>=0){const n={...rowsAll[ix]};
+    Object.keys(rec).forEach(k=>{if(!['saved','pin','cts','chg','nw','rts','edit','ets'].includes(k))n[k]=rec[k]});
+    rowsAll[ix]=n;EDIT.row=n;}
+  rebuildProds();refreshLists();render();
+  if(pending.length)await flush();
+  const ok=await post(rec);
+  if(!ok){pending.push(rec);setCloud(false,'Backup could not be sent – check the internet connection; it will retry automatically')}
+  else setCloud(true,'Google Sheet connected');
+  return ok?'ok':'fail';
+}
 async function save(){
   if(!unlocked){toast('Please login with your PIN first');return}
   const d=data();
   if(!d.name){toast('Patient name is required');$('name').focus();return}
+  const wasEdit=!!EDIT.ts;
   const r=await backup();
+  if(wasEdit){
+    endEdit();$('clear').onclick();showView('rep');repAfterChange();
+    toast(r==='ok'?'Entry updated ✔ (marked edited in the Google Sheet)':'Entry updated – backup pending, check the internet connection');
+    setTimeout(()=>resync().then(()=>{if(REP.view==='rep')repAfterChange()}),2500);   // reload from the sheet so the list shows what the sheet holds
+    return;
+  }
   toast(!unlocked?'Saved ✔':r==='ok'?'Saved ✔ Backed up to Google Sheet':r==='dup'?'Already saved ✔':'Saved – backup pending, check the internet connection');
 }
 async function sync(pin){
@@ -761,14 +810,14 @@ async function tryUnlock(pin){
   const r=await sync(pin);busy=false;
   if(!r.rows){toast(MSG[r.err]||'Error');return}
   $('pin').value='';
-  SRV_TABS=r.tabs||null;const n=loadRows(r.rows);curPin=pin;unlocked=true;isAdmin=r.role==='admin';rebuildProds();applyMode();
+  SRV_TABS=r.tabs||null;SRV_V=r.v||'';const n=loadRows(r.rows);curPin=pin;unlocked=true;isAdmin=r.role==='admin';rebuildProds();applyMode();
   $('ver').textContent='Page '+APP_VER+' · Script '+(r.v||'older version');
   setCloud(true,n+' records, '+Object.keys(prods).length+' products loaded');
   toast(r.role==='admin'?'You are logged in ✔ (Admin)':n?'You are logged in ✔':'You are logged in ✔ – no earlier data for this PIN (check the PIN if this was a mistake)');
 }
 async function resync(){
   const r=await sync(curPin);
-  if(r.rows){SRV_TABS=r.tabs||null;const n=loadRows(r.rows);rebuildProds();refreshLists();render();setCloud(true,n+' records, '+Object.keys(prods).length+' products loaded')}
+  if(r.rows){SRV_TABS=r.tabs||null;SRV_V=r.v||'';const n=loadRows(r.rows);rebuildProds();refreshLists();render();setCloud(true,n+' records, '+Object.keys(prods).length+' products loaded')}
   else{setCloud(false,MSG[r.err]||'Error');if(r.err==='pin'||r.err==='locked')lock()}
 }
 
@@ -796,22 +845,25 @@ function histFor(d){
     return false;
   });
 }
-function renderHistory(){
-  const h=$('hist');if(!h)return;
-  if(!unlocked){h.innerHTML='';return}
-  const d=data(),H=histFor(d);
-  if(!H.length){h.innerHTML=(d.name||d.cnic||d.pmobile)?'<h2>📜 Order history</h2><p class="hint">No earlier orders were found for this patient.</p>':'';return}
+function histBlock(H,limit){
   const seen={};
   const L=H.map((r,i)=>{const k=pkey(r.product);const rep=!!(k&&seen[k]);if(k)seen[k]=1;return{r,i,rep,iso:rowDateISO(r)}});
   L.sort((x,y)=>(y.iso.localeCompare(x.iso))||(y.i-x.i));
   const cnt={},nm={};H.forEach(r=>{const k=pkey(r.product);if(k){cnt[k]=(cnt[k]||0)+1;nm[k]=r.product}});
   const sum=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]).map(k=>esc(nm[k])+' ×'+cnt[k]).join(' · ');
-  const show=L.slice(0,15);
+  const show=L.slice(0,limit);
   const dd=r=>esc(String(r.date||'').trim()||(String(r.saved||'').match(/\d{1,2}\/\d{1,2}\/\d{4}/)||[''])[0]);
-  h.innerHTML='<h2>📜 Order history · '+H.length+' order'+(H.length>1?'s':'')+'</h2><p class="hint">'+sum+'</p>'+
+  return '<p class="hint">'+sum+'</p>'+
    '<div style="overflow-x:auto"><table><tr><th>Date</th><th>Product</th><th>Qty</th><th>Patient Price</th></tr>'+
    show.map(x=>`<tr class="${x.rep?'rep':''}"><td>${dd(x.r)}${x.r.time?'<br><small>'+esc(x.r.time)+'</small>':''}</td><td>${esc(x.r.product||'')}${x.rep?' <span class="tag">Repeat</span>':''}</td><td>${esc(x.r.qty||'')}</td><td>${esc(x.r.rate||'')}</td></tr>`).join('')+
-   '</table></div>'+(L.length>15?'<p class="hint">+ '+(L.length-15)+' older orders</p>':'');
+   '</table></div>'+(L.length>limit?'<p class="hint">+ '+(L.length-limit)+' older orders</p>':'');
+}
+function renderHistory(){
+  const h=$('hist');if(!h)return;
+  if(!unlocked){h.innerHTML='';return}
+  const d=data(),H=histFor(d);
+  if(!H.length){h.innerHTML=(d.name||d.cnic||d.pmobile)?'<h2>📜 Order history</h2><p class="hint">No earlier orders were found for this patient.</p>':'';return}
+  h.innerHTML='<h2>📜 Order history · '+H.length+' order'+(H.length>1?'s':'')+'</h2>'+histBlock(H,15);
 }
 
 /* ---------- live patient suggestions (name / CNIC) ---------- */
@@ -917,10 +969,11 @@ $('chips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b
 ['pmobile','pmobile2','pmobile3'].forEach(k=>$(k).addEventListener('change',()=>{const v=cleanMob($(k).value);if(v&&$(k).value!==v)$(k).value=v;render()}));
 $('chgUpd').onclick=()=>{if(!$('chg').checked){const b=unlocked?chgInfo(data()):null;if(b)startChange(b.r)}render()};
 $('chgNewBtn').onclick=()=>{if($('chg').checked){endChange(chgKey(data()));CHG.forceNew=true}render()};
+$('editCancel').onclick=()=>{endEdit();$('clear').onclick();showView('rep');repAfterChange()};
 $('save').onclick=save;$('copy').onclick=copyRich;$('sendMail').onclick=sendMail;$('sendMail2').onclick=sendMail;
 $('copyTxt').onclick=()=>{if(!unlocked){toast('Please login with your PIN first');return}backup();copyText(build().text,'Plain text copied ✔')};
 $('copySubj').onclick=()=>copyText($('subject').value,'Subject copied ✔');
-$('clear').onclick=()=>{Object.keys(AUTO).forEach(k=>delete AUTO[k]);$('smart').value='';FIELDS.forEach(k=>$(k).value='');$('doctor').value=DRP;$('date').value=todayISO();$('time').value=nowHM();timeAuto=true;$('invoice').checked=true;$('icekit').checked=true;endChange('');CHG.forceNew=false;cityManual=false;$('moreMob').checked=false;$('pmobile2').value='';$('pmobile3').value='';showMob();render()};
+$('clear').onclick=()=>{EDIT.ts='';EDIT.row=null;renderEditBar();Object.keys(AUTO).forEach(k=>delete AUTO[k]);$('smart').value='';FIELDS.forEach(k=>$(k).value='');$('doctor').value=DRP;$('date').value=todayISO();$('time').value=nowHM();timeAuto=true;$('invoice').checked=true;$('icekit').checked=true;endChange('');CHG.forceNew=false;cityManual=false;$('moreMob').checked=false;$('pmobile2').value='';$('pmobile3').value='';showMob();render()};
 
 
 $('pin').addEventListener('input',()=>{$('pin').value=$('pin').value.replace(/\D/g,'').slice(0,4)});
@@ -1035,15 +1088,39 @@ function repRun(){
 const DAY7=7*86400000;
 function rowMs(r){const t=rowT(r);if(t)return t;const d=r._n&&r._n.date;return d?new Date(d+'T00:00:00').getTime():0}
 function canDelete(r){const t=rowMs(r);return !!t&&Date.now()-t<DAY7&&(isAdmin||pn(r.pin)===pn(curPin))}
+function patientSummaryHTML(r){
+  const H=histFor(r);
+  if(!H.length)return'<div class="psum">No orders found for this patient.</div>';
+  const sm=repSummary(H),tq=sm.reduce((a,o)=>a+o.q,0),ds=H.map(rowDateISO).filter(Boolean).sort();
+  return'<div class="psum"><div class="pt">👤 Patient summary</div><div><b>'+H.length+'</b> order'+(H.length>1?'s':'')+' · total qty <b>'+fmtN(tq)+'</b>'+(ds.length?' · first '+esc(fmtDate(ds[0]))+' · last '+esc(fmtDate(ds[ds.length-1])):'')+'</div>'+
+    sm.map(o=>'<div>'+esc(o.l)+': '+o.n+(o.n===1?' order':' orders')+', total qty <b>'+fmtN(o.q)+'</b></div>').join('')+'</div>';
+}
 function paintPick(){
-  const box=$('rAct'),r=REP.pick;
+  document.querySelectorAll('#rTable tr.actrow').forEach(x=>x.remove());
+  const box=$('rAct');box.style.display='none';box.innerHTML='';
+  const r=REP.pick;
   document.querySelectorAll('#rTable tr[data-i]').forEach(tr=>tr.classList.toggle('sel',!!r&&REP.cur[+tr.dataset.i]===r));
-  if(!r||!REP.cur.includes(r)){REP.pick=null;box.style.display='none';box.innerHTML='';return}
+  if(!r||!REP.cur.includes(r)){REP.pick=null;return}
+  const tr=[...document.querySelectorAll('#rTable tr[data-i]')].find(t=>REP.cur[+t.dataset.i]===r);
+  if(!tr){REP.pick=null;return}
+  const mine=isAdmin||pn(r.pin)===pn(curPin),can=canDelete(r);
   const info='<b>'+esc(rsp(r.name)||'(no name)')+'</b> · '+esc(rsp(r.product)||'(no product)')+' · '+esc(fmtDate(r._n.date));
-  box.style.display='';
-  box.innerHTML=info+'<div class="rbtns">'+(canDelete(r)?'<button type="button" class="b-del" id="rDel">🗑 Delete this email</button>':'<span class="hint" style="margin:0">'+(isAdmin||pn(r.pin)===pn(curPin)?'Emails older than 7 days cannot be deleted.':'You can only delete your own emails.')+'</span>')+'<button type="button" class="b-lite" id="rCancel">Cancel</button></div>';
+  const row=document.createElement('tr');row.className='actrow';
+  const td=document.createElement('td');td.colSpan=tr.children.length;
+  td.innerHTML='<div class="apnl">'+info+'<div class="rbtns">'+
+    (can?'<button type="button" class="b-lite" id="rEdit">✏️ Edit</button><button type="button" class="b-del" id="rDel">🗑 Delete</button>':'')+
+    '<button type="button" class="b-lite" id="rHist">📜 Full history</button><button type="button" class="b-lite" id="rCancel">Close</button></div>'+
+    (can?'':'<div class="hint" style="margin:0 0 6px">'+(mine?'Emails older than 7 days cannot be edited or deleted.':'You can only edit or delete your own emails.')+'</div>')+
+    patientSummaryHTML(r)+'<div id="pHist" style="display:none"></div></div>';
+  row.appendChild(td);tr.after(row);
   $('rCancel').onclick=()=>{REP.pick=null;paintPick()};
   const d=$('rDel');if(d)d.onclick=repDelete;
+  const e=$('rEdit');if(e)e.onclick=()=>startEdit(r);
+  $('rHist').onclick=()=>{
+    const h=$('pHist');
+    if(h.style.display==='none'){const H=histFor(r);h.innerHTML=H.length?'<h2 style="margin:10px 0 4px">📜 Order history · '+H.length+' order'+(H.length>1?'s':'')+'</h2>'+histBlock(H,200):'<p class="hint">No orders found.</p>';h.style.display=''}
+    else h.style.display='none';
+  };
 }
 async function repDelete(){
   const r=REP.pick;if(!r||!canDelete(r))return;
@@ -1063,7 +1140,7 @@ async function repDelete(){
   }else if(j&&j.error){toast('Not deleted: '+j.error)}
   else toast('Delete is not enabled in the Google Apps Script yet – the script needs the update');
 }
-$('rTable').onclick=e=>{const tr=e.target.closest('tr[data-i]');if(!tr)return;REP.pick=REP.cur[+tr.dataset.i]||null;paintPick()};
+$('rTable').onclick=e=>{const tr=e.target.closest('tr[data-i]');if(!tr)return;const x=REP.cur[+tr.dataset.i]||null;REP.pick=REP.pick===x?null:x;paintPick()};
 function repOpen(){
   if(!$('rFrom').value&&!$('rTo').value){$('rFrom').value=todayISO();$('rTo').value=todayISO()}   // History opens on today's emails
   repPrep();
