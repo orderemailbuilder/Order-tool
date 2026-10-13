@@ -91,6 +91,9 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
 .dcard .dr{display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-top:1px solid #edf3f1;font-size:13.5px}
 .dcard .dr span{color:#555;flex:0 0 auto}
 .dcard .dr b{text-align:right;word-break:break-word;font-weight:600}
+.fbulk{margin:6px 0 8px;padding:8px 10px;border:1px solid #cfe5df;border-radius:10px;background:#f4faf8}
+.fsel{display:inline-flex;align-items:center;gap:6px;font-weight:600;margin-right:10px}
+.fck,.fsel input{width:18px!important;height:18px;padding:0;margin:0}
 .fchips{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 8px}
 .fchip{padding:6px 12px;border-radius:16px;border:1px solid #bcd6cf;background:#fff;color:#0e6b5c;font-size:13px;font-weight:600}
 .fchip.on{background:#0e6b5c;color:#fff;border-color:#0e6b5c}
@@ -100,7 +103,8 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
 .fcl[disabled]{opacity:.55}
 .fcl.y{background:#fff9c4}.fcl.b{background:#dbeafe}.fcl.g{background:#dcfce7}.fcl.r{background:#fee2e2}.fcl.t{font-weight:700;background:#f3f6f5}
 .fctab{width:100%}.fctab tr{cursor:pointer}
-.fdet td{padding:6px 10px!important;background:#f7fbfa!important;font-size:13px;white-space:normal}
+.fdet td{padding:0!important;background:transparent!important;border:0!important;white-space:normal}
+.fdet .apnl{font-size:13.5px}
 #rAct{margin-top:10px;padding:10px 12px;background:#fff4d6;border:1px solid #f0c24b;border-radius:8px;font-size:13.5px}
 #rAct .b-del{background:#d64545;color:#fff}
 .ms .mb{display:flex;gap:6px;margin-bottom:5px}.ms .mb button{padding:4px 8px;font-size:12px;flex:1}
@@ -252,7 +256,7 @@ const LS=k=>{if(k in MEM)return MEM[k];try{return JSON.parse(localStorage.getIte
 const SS=(k,v)=>{MEM[k]=v;try{localStorage.setItem(k,JSON.stringify(v));if(JSON.parse(localStorage.getItem(k))===undefined)throw 0}catch(e){storeOK=false}};
 let patients={};
 let SRV_TABS=null,SRV_V='';let prods={};let rowsAll=[];let unlocked=false,isAdmin=false,curPin='',busy=false;
-const APP_VER='2026-10-11-l';
+const APP_VER='2026-10-11-n';
 const pn=x=>{const d=String(x==null?'':x).replace(/\D/g,'');return d?d.padStart(4,'0'):''};
 try{['patients','prods','history','sheetUrl','design'].forEach(k=>localStorage.removeItem(k))}catch(e){}          // product stats: key = lowercase product
 const AUTO={};                       // field -> value last filled automatically
@@ -1137,16 +1141,25 @@ const REPEAT_RULES=[
   {k:'upada',due:()=>30},                                  // 1 month
   {k:'rexeva',due:()=>180}                                 // 6 months
 ];
-let NOREP=new Map(),RLAST=[];
+let NOREP=new Map(),RLAST=[],RMAP=new Map();
 const RCLS={due:'norep',rmk:'nrmk',exp:'nexp',drop:'ndrop'};
 const isDrop=r=>String(r.dropped||'').trim().toLowerCase()==='yes';
 const hasRmk=r=>!!String(r.remarks||'').trim();
+/* Reason categories for dropped / expected-date patients. Stored inside the remarks text as a prefix, e.g. "[Unaffordable] text", so no sheet change is needed. */
+const RCATS=['Unaffordable','Changed','Adverse/side Effects','Other'];
+function rmkParse(s){s=String(s||'').trim();const m=s.match(/^\[(Unaffordable|Changed|Adverse\/side Effects|Other)\]\s*/);return m?{cat:m[1],text:s.slice(m[0].length)}:{cat:'',text:s}}
+const rmkCat=r=>rmkParse(r.remarks).cat;
+function rmkEnc(cat,text){const p=cat?'['+cat+'] ':'';return(p+String(text||'').trim().slice(0,500-p.length)).trim()}
+const rkTxt=r=>{const c=rmkCat(r);return'remarked'+(c?' · '+esc(c):'')+(rmkEdited(r)?' · edited':'')};
+const catOpts=sel=>'<option value="">Select reason…</option>'+RCATS.map(c=>'<option'+(c===sel?' selected':'')+'>'+c+'</option>').join('');
+/* Expected date: patients with 3+ packs any time; everyone else only after the due date has passed (as before). */
+const expOK=x=>!!x&&(x.big||x.over||!!x.exp||x.drop);
 const rmkEdited=r=>!!String(r.remarksedited||'').trim();
 const expISO=r=>isoDate(String(r.expected||'').trim());
 const addDays=(iso,n)=>new Date(Date.parse(iso)+n*86400000).toISOString().slice(0,10);
 const dayDiff=(a,b)=>Math.round((Date.parse(a)-Date.parse(b))/86400000);
 function calcNoRep(){
-  NOREP=new Map();RLAST=[];const g=new Map(),today=todayISO();
+  NOREP=new Map();RLAST=[];RMAP=new Map();const g=new Map(),today=todayISO();
   rowsAll.forEach(r=>{
     const pr=String(r.product||'').toLowerCase(),rule=REPEAT_RULES.find(x=>pr.includes(x.k));if(!rule)return;
     const iso=rowDateISO(r);if(!iso)return;
@@ -1158,34 +1171,49 @@ function calcNoRep(){
     const q=qtyNum(o.r.qty),days=dayDiff(today,o.iso),due=o.rule.due(q),over=days>due,exp=expISO(o.r),drop=isDrop(o.r),rm=hasRmk(o.r);
     let st=null;
     if(drop)st='drop';else if(exp)st='exp';else if(over&&rm)st='rmk';else if(over)st='due';
-    const x={r:o.r,rule:o.rule.k,qty:q===null?0:q,iso:o.iso,days,due,over,dueISO:addDays(o.iso,due),exp,drop,rm,st,left:exp?dayDiff(exp,today):null};
-    RLAST.push(x);if(st)NOREP.set(o.r,x);
+    const x={r:o.r,rule:o.rule.k,qty:q===null?0:q,big:q!==null&&q>2,iso:o.iso,days,due,over,dueISO:addDays(o.iso,due),exp,drop,rm,st,left:exp?dayDiff(exp,today):null};
+    RLAST.push(x);RMAP.set(o.r,x);if(st)NOREP.set(o.r,x);
   });
 }
 function nameCell(r){
   let h=esc(rsp(r.name));const n=NOREP.get(r);if(!n)return h;
-  const rk=n.rm?'<div><small class="nb">remarked'+(rmkEdited(r)?' · edited':'')+'</small></div>':'';
+  const rk=n.rm?'<div><small class="nb">'+rkTxt(r)+'</small></div>':'';
   if(n.st==='drop')h+=' <small class="nd">Dropped</small>'+rk;
   else if(n.st==='exp'){
     h+=n.left>=0?' <small class="ng">'+(n.left===0?'expected today':n.left+(n.left===1?' day left':' days left'))+'</small>':' <small class="nr">'+n.days+' day no rep.</small>';
     h+=rk;
   }
-  else if(n.st==='rmk')h+=' <small class="nb">remarked'+(rmkEdited(r)?' · edited':'')+'</small>';
+  else if(n.st==='rmk')h+=' <small class="nb">'+rkTxt(r)+'</small>';
   else h+=' <small class="nr">'+n.days+' day no rep.</small>';
   return h;
 }
 const flagOK=()=>/tabs([8-9]|\d{2})/.test(SRV_V);
-async function flagSave(r,ch){
-  if(!flagOK()){toast('This needs the latest Google Apps Script (version tabs8 or newer). Please deploy the new script first.');return}
-  const ts=String(r.ts||r._t||'');if(!ts){toast('This row has no id – it cannot be saved');return}
-  const rec={pin:curPin,rmk:'1',ets:ts,...ch};
+function flagApply(r,ch){   // update the row here and return what is sent to the sheet
+  const ts=String(r.ts||r._t||'');if(!ts)return null;
   if('remarks' in ch){const old=String(r.remarks||'').trim();r.remarksedited=!ch.remarks?'':(old&&old!==ch.remarks?'edited':String(r.remarksedited||''))}
   Object.assign(r,ch);
+  return{pin:curPin,rmk:'1',ets:ts,...ch};
+}
+async function flagBulk(items,ch,label){
+  if(!flagOK()){toast('This needs the latest Google Apps Script (version tabs8 or newer). Please deploy the new script first.');return}
+  const mine=items.filter(x=>isAdmin||pn(x.r.pin)===pn(curPin));
+  if(!mine.length){toast('You can only change your own patients');return}
+  const recs=[];mine.forEach(x=>{const rec=flagApply(x.r,typeof ch==='function'?ch(x):ch);if(rec)recs.push(rec)});
+  fcRun(true);   // show the result at once
+  if(pending.length)await flush();
+  let fail=0;
+  for(let i=0;i<recs.length;i++){toast('Saving '+(i+1)+' of '+recs.length+'…');const ok=await post(recs[i]);if(!ok){pending.push(recs[i]);fail++}}
+  toast(fail?label+': '+recs.length+' updated here, '+fail+' could not be sent – they retry when online':label+' – '+recs.length+' patient'+(recs.length>1?'s':'')+' ✔');
+  setTimeout(()=>resync().then(()=>{if(REP.view==='rep')repRun();if(REP.view==='fc')fcRun(true,true)}),2500);
+}
+async function flagSave(r,ch){
+  if(!flagOK()){toast('This needs the latest Google Apps Script (version tabs8 or newer). Please deploy the new script first.');return}
+  const rec=flagApply(r,ch);if(!rec){toast('This row has no id – it cannot be saved');return}
   repRun();
   if(pending.length)await flush();
   const ok=await post(rec);
   if(!ok){pending.push(rec);toast('Saved here – sending to the sheet failed, it will retry when online')}
-  else{toast(('remarks' in ch?(ch.remarks?'Remarks saved ✔':'Remarks cleared ✔'):'expected' in ch?(ch.expected?'Expected date saved ✔':'Expected date cleared ✔'):ch.dropped?'Marked as dropped ✔':'Drop removed ✔'));setTimeout(()=>resync().then(()=>{if(REP.view==='rep')repRun()}),2500)}
+  else{toast((ch.dropped&&('remarks' in ch)?'Marked as dropped ✔':'remarks' in ch?(ch.remarks?'Remarks saved ✔':'Remarks cleared ✔'):'expected' in ch?(ch.expected?'Expected date saved ✔':'Expected date cleared ✔'):ch.dropped?'Marked as dropped ✔':'Drop removed ✔'));setTimeout(()=>resync().then(()=>{if(REP.view==='rep')repRun()}),2500)}
 }
 const DAY7=7*86400000;
 function rowMs(r){const t=rowT(r);if(t)return t;const d=r._n&&r._n.date;return d?new Date(d+'T00:00:00').getTime():0}
@@ -1206,7 +1234,7 @@ function patientSummaryHTML(r){
     sm.map(o=>'<div>'+esc(o.l)+': '+o.n+(o.n===1?' order':' orders')+', total qty <b>'+fmtN(o.q)+'</b></div>').join('')+'</div>';
 }
 function flagHTML(r,mine){
-  const n=NOREP.get(r);if(!n)return'';
+  const n=NOREP.get(r);if(!n){const xb=RMAP.get(r);return mine&&xb&&xb.big?'<div class="psum" id="expBox" style="margin-top:8px;display:none"><label for="rExpDate">📅 Expected date of the next order</label><input type="date" id="rExpDate" min="'+todayISO()+'" value=""><div class="rbtns"><button type="button" class="b-lite" id="rExpSave">💾 Save date</button></div></div>':''}
   const prod=esc(rsp(r.product)||'order'),pl=k=>Math.abs(k)+(Math.abs(k)===1?' day':' days');
   let h='<div class="psum" style="margin-top:8px"><div class="pt" style="color:#8a5a00">⏰ '+n.days+' days since the last '+prod+' (repeat due after '+n.due+' days)</div>';
   if(n.exp)h+='<div>📅 Expected date: <b>'+esc(fmtDate(n.exp))+'</b> · '+(n.left>0?pl(n.left)+' left':n.left===0?'today':pl(n.left)+' passed')+'</div>';
@@ -1214,7 +1242,8 @@ function flagHTML(r,mine){
   if(n.rm)h+='<div>💬 Remarks written'+(rmkEdited(r)?' (edited)':'')+' – tap Remarks to read or change</div>';
   h+='</div>';
   if(mine){
-    h+='<div class="psum" id="rmkBox" style="margin-top:8px;display:none"><label for="rRemark">📝 Remarks – why was the order not repeated?'+(rmkEdited(r)?' <b>(edited)</b>':'')+'</label><textarea id="rRemark" rows="3" maxlength="500" style="min-height:70px">'+esc(r.remarks||'')+'</textarea><button type="button" class="b-lite" id="rRemarkSave" style="margin-top:6px">💾 Save remarks</button></div>';
+    h+='<div class="psum" id="dropBox" style="margin-top:8px;display:none"><label for="rDropCat">⛔ Reason for dropping (required)</label><select id="rDropCat" style="width:100%;margin:4px 0">'+catOpts(rmkCat(r))+'</select><label for="rDropTxt">Remarks (optional)</label><textarea id="rDropTxt" rows="3" maxlength="480" style="min-height:70px">'+esc(rmkParse(r.remarks).text)+'</textarea><button type="button" class="b-del" id="rDropSave" style="margin-top:6px">⛔ Confirm drop</button></div>';
+    h+='<div class="psum" id="rmkBox" style="margin-top:8px;display:none"><label for="rRemark">📝 Remarks – why was the order not repeated?'+(rmkEdited(r)?' <b>(edited)</b>':'')+'</label>'+((n.exp||n.drop)?'<select id="rCat" style="width:100%;margin:4px 0">'+catOpts(rmkCat(r))+'</select>':'')+'<textarea id="rRemark" rows="3" maxlength="480" style="min-height:70px">'+esc(rmkParse(r.remarks).text)+'</textarea><button type="button" class="b-lite" id="rRemarkSave" style="margin-top:6px">💾 Save remarks</button></div>';
     h+='<div class="psum" id="expBox" style="margin-top:8px;display:none"><label for="rExpDate">📅 Expected date of the next order</label><input type="date" id="rExpDate" min="'+todayISO()+'" value="'+esc(n.exp||'')+'"><div class="rbtns"><button type="button" class="b-lite" id="rExpSave">💾 Save date</button>'+(n.exp?'<button type="button" class="b-lite" id="rExpClear">✕ Clear date</button>':'')+'</div></div>';
   }
   return h;
@@ -1227,27 +1256,28 @@ function paintPick(){
   if(!r||!REP.cur.includes(r)){REP.pick=null;return}
   const tr=[...document.querySelectorAll('#rTable tr[data-i]')].find(t=>REP.cur[+t.dataset.i]===r);
   if(!tr){REP.pick=null;return}
-  const mine=isAdmin||pn(r.pin)===pn(curPin),can=canDelete(r),n=NOREP.get(r),fl=!!n&&mine;
+  const mine=isAdmin||pn(r.pin)===pn(curPin),can=canDelete(r),n=NOREP.get(r),fl=!!n&&mine,xb=RMAP.get(r),ex=!n&&!!xb&&xb.big&&mine;
   const info='<b>'+esc(rsp(r.name)||'(no name)')+'</b> · '+esc(rsp(r.product)||'(no product)')+' · '+esc(fmtDate(r._n.date));
   const row=document.createElement('tr');row.className='actrow';
   const td=document.createElement('td');td.colSpan=tr.children.length;
   td.innerHTML='<div class="apnl">'+info+'<div class="rbtns">'+
     (can?'<button type="button" class="b-lite" id="rEdit">✏️ Edit</button><button type="button" class="b-del" id="rDel">🗑 Delete</button>':'')+
     (fl?'<button type="button" class="b-lite" id="rRmk">💬 Remarks</button><button type="button" class="b-lite" id="rExp">📅 Expected Date</button>'+(n.drop?'<button type="button" class="b-lite" id="rUndrop">↩️ Undo drop</button>':'<button type="button" class="b-del" id="rDrop">⛔ Drop</button>'):'')+
-    '<button type="button" class="b-lite" id="rDet">🧾 Details</button><button type="button" class="b-lite" id="rHist">📜 History</button><button type="button" class="b-lite" id="rCancel">Close</button></div>'+
+    (ex?'<button type="button" class="b-lite" id="rExp">📅 Expected Date</button>':'')+'<button type="button" class="b-lite" id="rDet">🧾 Details</button><button type="button" class="b-lite" id="rHist">📜 History</button><button type="button" class="b-lite" id="rCancel">Close</button></div>'+
     (can?'':'<div class="hint" style="margin:0 0 6px">'+(mine?'Emails older than 7 days cannot be edited or deleted.':'You can only edit or delete your own emails.')+'</div>')+
     patientSummaryHTML(r)+flagHTML(r,mine)+'<div id="pDet" style="display:none"></div><div id="pHist" style="display:none"></div></div>';
   row.appendChild(td);tr.after(row);
-  const tgl=(a,b)=>{const x=$(a),y=$(b);if(y)y.style.display='none';if(x)x.style.display=x.style.display==='none'?'':'none'};
+  const tgl=(a,b)=>{const x=$(a),y=$(b);if(y)y.style.display='none';const dd=$('dropBox');if(dd)dd.style.display='none';if(x)x.style.display=x.style.display==='none'?'':'none'};
   $('rCancel').onclick=()=>{REP.pick=null;paintPick()};
   const d=$('rDel');if(d)d.onclick=repDelete;
   const e=$('rEdit');if(e)e.onclick=()=>startEdit(r);
   const b1=$('rRmk');if(b1)b1.onclick=()=>tgl('rmkBox','expBox');
   const b2=$('rExp');if(b2)b2.onclick=()=>tgl('expBox','rmkBox');
-  const rs=$('rRemarkSave');if(rs)rs.onclick=()=>flagSave(r,{remarks:$('rRemark').value.trim().slice(0,500)});
+  const rs=$('rRemarkSave');if(rs)rs.onclick=()=>{const sc=$('rCat');if(sc&&!sc.value){toast('Choose the reason category first');return}flagSave(r,{remarks:rmkEnc(sc?sc.value:rmkCat(r),$('rRemark').value)})};
   const es=$('rExpSave');if(es)es.onclick=()=>{const v=$('rExpDate').value;if(!v){toast('Pick a date first');return}flagSave(r,{expected:v})};
   const ec=$('rExpClear');if(ec)ec.onclick=()=>flagSave(r,{expected:''});
-  const dr=$('rDrop');if(dr)dr.onclick=()=>{if(confirm('Mark this patient as dropped?\n\n'+(rsp(r.name)||'(no name)')+' · '+(rsp(r.product)||'')+'\n\nThe row turns red and the patient is not counted in the forecast.'))flagSave(r,{dropped:'Yes'})};
+  const dr=$('rDrop');if(dr)dr.onclick=()=>{const bx=$('dropBox');if(bx){['rmkBox','expBox'].forEach(i=>{const e2=$(i);if(e2)e2.style.display='none'});bx.style.display=bx.style.display==='none'?'':'none'}};
+  const dsv=$('rDropSave');if(dsv)dsv.onclick=()=>{const cat=$('rDropCat').value;if(!cat){toast('Choose the reason first');return}if(confirm('Mark this patient as dropped?\n\nReason: '+cat+'\n'+(rsp(r.name)||'(no name)')+' · '+(rsp(r.product)||'')+'\n\nThe row turns red and the patient is not counted in the forecast.'))flagSave(r,{dropped:'Yes',remarks:rmkEnc(cat,$('rDropTxt').value)})};
   const ud=$('rUndrop');if(ud)ud.onclick=()=>flagSave(r,{dropped:''});
   $('rDet').onclick=()=>{
     const d=$('pDet');$('pHist').style.display='none';
@@ -1336,7 +1366,7 @@ async function repPdf(){
 
 /* ---------- Forecast: repeat orders expected between two dates (product wise) ---------- */
 const LEG_HTML=[['#fff9c4','Yellow – repeat due date passed, order not repeated (“N day no rep.”)'],['#dbeafe','Blue – remarks written (reason noted)'],['#dcfce7','Green – expected date given (“N days left”)'],['#fee2e2','Red – dropped patient']].map(x=>'<span><i style="background:'+x[0]+'"></i>'+x[1]+'</span>').join('');
-const FC={P:null,list:[],sel:new Set(REPEAT_RULES.map(x=>x.k))};
+const FC={P:null,list:[],rc:'',sel:new Set(REPEAT_RULES.map(x=>x.k))};
 const fcSelKeys=()=>{const a=REPEAT_RULES.map(x=>x.k).filter(k=>FC.sel.has(k));return a.length?a:REPEAT_RULES.map(x=>x.k)};
 const fcName=k=>k==='*'?(fcSelKeys().length===REPEAT_RULES.length?'All products':'Selected products'):k.charAt(0).toUpperCase()+k.slice(1);
 function fcChips(){
@@ -1350,7 +1380,7 @@ function fcOpen(){
   $('fcLeg').innerHTML=LEG_HTML;fcChips();fcRun();
 }
 function fcCalc(from,to){
-  calcNoRep();const today=todayISO(),P={},keys=fcSelKeys();
+  repPrep();calcNoRep();const today=todayISO(),P={},keys=fcSelKeys();
   keys.forEach(k=>P[k]={up:[],carry:[],exp:[],rmk:[],drop:[]});
   RLAST.forEach(x=>{
     if(!P[x.rule])return;
@@ -1361,7 +1391,7 @@ function fcCalc(from,to){
       else if(x.exp<from||x.exp<today)cat='carry';
     }
     else if(x.over)cat='carry';
-    else if(x.dueISO>=from&&x.dueISO<=to)cat='up';
+    else if(x.dueISO>=today&&x.dueISO>=from&&x.dueISO<=to)cat='up';
     if(!cat)return;
     P[x.rule][cat].push(x);
     if(cat==='carry'&&x.st==='rmk')P[x.rule].rmk.push(x);
@@ -1372,8 +1402,9 @@ function fcCalc(from,to){
 }
 const fcItems=(c,cat)=>cat==='total'?c.up.concat(c.carry,c.exp):c[cat];
 const fcSum=a=>({n:a.length,q:a.reduce((t,x)=>t+x.qty,0)});
-function fcRun(){
-  const from=$('fcFrom').value,to=$('fcTo').value;$('fcList').innerHTML='';
+function fcRun(keep,keepSel){
+  keep=keep===true;FC.keepSel=keep&&keepSel===true;if(!keep)FC.cur=null;
+  const from=$('fcFrom').value,to=$('fcTo').value;if(!keep)$('fcList').innerHTML='';
   if(!from||!to||from>to){$('fcOut').innerHTML='<p class="hint">Pick a From and To date (From must not be after To).</p>';return}
   const P=FC.P=fcCalc(from,to);
   const sk=fcSelKeys(),keys=(sk.length>1?['*']:[]).concat(sk);
@@ -1384,24 +1415,66 @@ function fcRun(){
     return'<div class="fcard"><div class="fh"><span>'+esc(title)+'</span><span>Total '+fmtN(tot.q)+' qty · '+tot.n+(tot.n===1?' patient':' patients')+'</span></div>'+
       FC_LINES.map(l=>{const sm=fcSum(fcItems(c,l[0]));return'<button type="button" class="fcl '+l[2]+'" data-k="'+k+'" data-c="'+l[0]+'"'+(sm.n?'':' disabled')+'><span>'+l[1]+'</span><b>'+fmtN(sm.q)+' qty · '+sm.n+' pt'+(sm.n===1?'':'s')+'</b></button>'}).join('')+'</div>';
   }).join('');
+  if(keep&&FC.cur&&FC.P[FC.cur.k])fcShow(FC.cur.k,FC.cur.cat,true);else $('fcList').innerHTML='';
 }
-function fcShow(k,cat){
+function fcShow(k,cat,quiet){
+  const prev=FC.keepSel?new Set(fcSelected().map(x=>String(x.r.ts))):null;FC.keepSel=false;   // ticks survive a reload from the sheet
   const c=FC.P[k],line=FC_LINES.find(l=>l[0]===cat);
-  FC.list=fcItems(c,cat).slice().sort((a,b)=>rsp(a.r.name).localeCompare(rsp(b.r.name)));
+  if(!quiet)FC.rc='';
+  const all0=fcItems(c,cat),dvf=x=>cat==='exp'?x.exp:cat==='up'?x.dueISO:cat==='total'?(c.exp.includes(x)?x.exp:x.dueISO):x.iso;
+  FC.list=all0.filter(x=>!FC.rc||(FC.rc==='_'?!rmkCat(x.r):rmkCat(x.r)===FC.rc)).sort((a,b)=>(dvf(b)>dvf(a)?1:dvf(b)<dvf(a)?-1:0)||rsp(a.r.name).localeCompare(rsp(b.r.name)));   // most recent date first
   const sm=fcSum(FC.list),title=fcName(k)+' · '+line[1];
+  const catCnt={};all0.forEach(x=>{const cc=rmkCat(x.r)||'_';catCnt[cc]=(catCnt[cc]||0)+1});
+  const rcChips=(cat==='drop'||cat==='exp'||all0.some(x=>rmkCat(x.r)))?'<div class="fchips" style="margin:6px 0">'+[['','All',all0.length]].concat(RCATS.map(cx=>[cx,cx,catCnt[cx]||0]),catCnt._?[['_','No reason',catCnt._]]:[]).map(o=>'<button type="button" class="fchip'+(FC.rc===o[0]?' on':'')+'" data-rc="'+esc(o[0])+'">'+esc(o[1])+' ('+o[2]+')</button>').join('')+'</div>':'';
   const dh=cat==='exp'?'Expected date':cat==='up'?'Repeat due date':cat==='total'?'Expected / due date':'Last order';
   const dv=x=>cat==='exp'?x.exp:cat==='up'?x.dueISO:cat==='total'?(c.exp.includes(x)?x.exp:x.dueISO):x.iso;
-  $('fcList').innerHTML='<h2 style="margin:12px 0 4px">'+esc(title)+'</h2><p class="hint" style="margin:0 0 6px">'+sm.n+' patient'+(sm.n===1?'':'s')+', total qty '+fmtN(sm.q)+'. Tap a patient to see the details and remarks.</p>'+
-    '<div style="overflow-x:auto"><table class="fctab"><thead><tr><th>Patient</th><th>Product</th><th>Qty</th><th>'+dh+'</th></tr></thead><tbody>'+
-    FC.list.map((x,i)=>'<tr data-i="'+i+'"'+(x.st?' class="'+RCLS[x.st]+'"':'')+'><td>'+esc(rsp(x.r.name)||'(no name)')+'</td><td>'+esc(rsp(x.r.product))+'</td><td>'+fmtN(x.qty)+'</td><td>'+esc(fmtDate(dv(x)))+'</td></tr>').join('')+'</tbody></table></div>';
-  $('fcList').scrollIntoView({behavior:'smooth',block:'start'});
+  FC.cur={k,cat};
+  const act=x=>isAdmin||pn(x.r.pin)===pn(curPin);
+  $('fcList').innerHTML='<h2 style="margin:12px 0 4px">'+esc(title)+'</h2><p class="hint" style="margin:0 0 6px">'+sm.n+' patient'+(sm.n===1?'':'s')+', total qty '+fmtN(sm.q)+'. Tap a patient to see the details and remarks, or tick patients to change many together.</p>'+rcChips+
+    (sm.n?'<div class="fbulk"><label class="fsel"><input type="checkbox" id="fcAll"> Select all</label><span id="fcCnt" class="hint" style="margin:0">0 selected</span><div class="rbtns"><button type="button" class="b-lite" data-b="exp">📅 Expected Date</button><button type="button" class="b-lite" data-b="rmk">💬 Remarks</button>'+(cat==='drop'?'<button type="button" class="b-lite" data-b="undrop">↩️ Undo drop</button>':'<button type="button" class="b-del" data-b="drop">⛔ Drop</button>')+'</div><div id="fcBox"></div></div>':'')+
+    '<div style="overflow-x:auto"><table class="fctab"><thead><tr><th></th><th>Patient</th><th>Product</th><th>Qty</th><th>'+dh+'</th></tr></thead><tbody>'+
+    FC.list.map((x,i)=>'<tr data-i="'+i+'"'+(x.st?' class="'+RCLS[x.st]+'"':'')+'><td><input type="checkbox" class="fck" data-i="'+i+'"'+(act(x)?'':' disabled')+'></td><td>'+esc(rsp(x.r.name)||'(no name)')+(rmkCat(x.r)?' <small class="nb">'+esc(rmkCat(x.r))+'</small>':'')+'</td><td>'+esc(rsp(x.r.product))+'</td><td>'+fmtN(x.qty)+'</td><td>'+esc(fmtDate(dv(x)))+'</td></tr>').join('')+'</tbody></table></div>';
+  if(prev)document.querySelectorAll('#fcList .fck').forEach(c=>{if(prev.has(String(FC.list[+c.dataset.i].r.ts)))c.checked=true});
+  fcCount();
+  if(!quiet)$('fcList').scrollIntoView({behavior:'smooth',block:'start'});
+}
+const fcSelected=()=>[...document.querySelectorAll('#fcList .fck:checked')].map(c=>FC.list[+c.dataset.i]);
+function fcCount(){
+  const all=[...document.querySelectorAll('#fcList .fck:not(:disabled)')],n=all.filter(c=>c.checked).length;
+  const e=$('fcCnt');if(e)e.textContent=n+' selected';
+  const a=$('fcAll');if(a){a.checked=all.length>0&&n===all.length}
+}
+function fcBulkOpen(kind){
+  const sel=fcSelected();
+  if(!sel.length){toast('Tick the patients first');return}
+  const box=$('fcBox'),n=sel.length,t=todayISO();
+  if(kind==='drop'){
+    box.innerHTML='<div class="psum" style="margin-top:8px"><label for="fcDropCat">⛔ Reason for dropping the ticked patients (required)</label><select id="fcDropCat" style="width:100%;margin:4px 0">'+catOpts('')+'</select><label for="fcDropTxt">Remarks (optional – same text for all)</label><textarea id="fcDropTxt" rows="3" maxlength="480" style="min-height:70px"></textarea><button type="button" class="b-del" id="fcDropSave" style="margin-top:6px">⛔ Confirm drop</button></div>';
+    $('fcDropSave').onclick=()=>{const s2=fcSelected(),cat=$('fcDropCat').value,tx=$('fcDropTxt').value.trim();if(!s2.length){toast('Tick the patients first');return}if(!cat){toast('Choose the reason first');return}
+      if(confirm('Mark '+s2.length+' patient'+(s2.length>1?'s':'')+' as dropped?\n\nReason: '+cat+'\n\nThe rows turn red and they are not counted in the forecast total.'))flagBulk(s2,x=>({dropped:'Yes',remarks:rmkEnc(cat,tx||rmkParse(x.r.remarks).text)}),'Dropped')};
+    return}
+  if(kind==='undrop'){flagBulk(sel,{dropped:''},'Drop removed');return}
+  if(kind==='exp'){
+    box.innerHTML='<div class="psum" style="margin-top:8px"><label for="fcExpDate">📅 Expected date for the ticked patients <small>(only 3+ packs, or due date passed)</small></label><input type="date" id="fcExpDate" min="'+t+'"><div class="rbtns"><button type="button" class="b-lite" id="fcExpSave">💾 Save date</button><button type="button" class="b-lite" id="fcExpClear">✕ Clear date</button></div></div>';
+    $('fcExpSave').onclick=()=>{const v=$('fcExpDate').value,s2=fcSelected();if(!s2.length){toast('Tick the patients first');return}if(!v){toast('Pick a date first');return}const ok=s2.filter(expOK);if(!ok.length){toast('Expected date is only for patients with 3+ packs, or whose due date has passed');return}if(ok.length<s2.length&&!confirm((s2.length-ok.length)+' ticked patient(s) are not eligible yet (only 3+ packs, or due date passed) and will be skipped. Continue with the other '+ok.length+'?'))return;flagBulk(ok,{expected:v},'Expected date saved')};
+    $('fcExpClear').onclick=()=>{const s2=fcSelected();if(!s2.length){toast('Tick the patients first');return}flagBulk(s2,{expected:''},'Expected date cleared')};
+  }else if(kind==='rmk'){
+    box.innerHTML='<div class="psum" style="margin-top:8px"><label for="fcRmk">💬 Remarks for the ticked patients (same text for all)</label>'+((FC.cur&&(FC.cur.cat==='drop'||FC.cur.cat==='exp'))?'<select id="fcRmkCat" style="width:100%;margin:4px 0">'+catOpts('')+'</select>':'')+'<textarea id="fcRmk" rows="3" maxlength="480" style="min-height:70px"></textarea><button type="button" class="b-lite" id="fcRmkSave" style="margin-top:6px">💾 Save remarks</button></div>';
+    $('fcRmkSave').onclick=()=>{
+      const v=$('fcRmk').value.trim().slice(0,480),s2=fcSelected(),sc=$('fcRmkCat');
+      if(!s2.length){toast('Tick the patients first');return}if(sc&&!sc.value){toast('Choose the reason category first');return}if(!v&&!(sc&&sc.value)){toast('Write the remarks first');return}
+      const have=s2.filter(x=>x.rm).length;
+      if(have&&!confirm(have+' of the ticked patients already have remarks. They will be replaced (shown as edited). Continue?'))return;
+      flagBulk(s2,x=>({remarks:rmkEnc(sc?sc.value:rmkCat(x.r),v)}),'Remarks saved');
+    };
+  }
 }
 function fcDetail(x){
   const r=x.r,pl=k=>Math.abs(k)+(Math.abs(k)===1?' day':' days');
   return'<b>'+esc(rsp(r.name)||'(no name)')+'</b> · '+esc(rsp(r.product))+' · qty '+fmtN(x.qty)+'<br>Last order: '+esc(fmtDate(x.iso))+' · repeat due: '+esc(fmtDate(x.dueISO))+(x.over?' ('+pl(x.days-x.due)+' late)':'')+
     (x.exp?'<br>📅 Expected: <b>'+esc(fmtDate(x.exp))+'</b> ('+(x.left>0?pl(x.left)+' left':x.left===0?'today':pl(x.left)+' passed')+')':'')+
     (x.drop?'<br>⛔ Dropped':'')+
-    '<br>'+(x.rm?'💬 '+esc(r.remarks)+(rmkEdited(r)?' <i>(edited)</i>':''):'<i>No remarks</i>');
+    '<br>'+(x.rm?'💬 '+(rmkCat(r)?'<b>'+esc(rmkCat(r))+'</b>'+(rmkParse(r.remarks).text?' – ':''):'')+esc(rmkParse(r.remarks).text)+(rmkEdited(r)?' <i>(edited)</i>':''):'<i>No remarks</i>');
 }
 $('fcFrom').onchange=fcRun;$('fcTo').onchange=fcRun;
 $('fcFilt').onclick=e=>{const b=e.target.closest('.fchip');if(!b)return;const k=b.dataset.k;
@@ -1411,10 +1484,26 @@ $('fcFilt').onclick=e=>{const b=e.target.closest('.fchip');if(!b)return;const k=
 $('fcMonth').onclick=()=>{const[a,b]=monthRange();$('fcFrom').value=a;$('fcTo').value=b;fcRun()};
 $('fcOut').onclick=e=>{const b=e.target.closest('.fcl');if(b&&!b.disabled)fcShow(b.dataset.k,b.dataset.c)};
 $('fcList').onclick=e=>{
+  const rcb=e.target.closest('[data-rc]');if(rcb&&FC.cur){FC.rc=rcb.dataset.rc;FC.keepSel=true;fcShow(FC.cur.k,FC.cur.cat,true);return}
+  const bb=e.target.closest('[data-b]');if(bb){fcBulkOpen(bb.dataset.b);return}
+  if(e.target.closest('.fck,.fsel,#fcAll,#fcBox,.fdet'))return;
   const tr=e.target.closest('tr[data-i]');if(!tr)return;
-  const nx=tr.nextElementSibling;
-  if(nx&&nx.classList.contains('fdet')){nx.remove();return}
-  const d=document.createElement('tr');d.className='fdet';const td=document.createElement('td');td.colSpan=4;td.innerHTML=fcDetail(FC.list[+tr.dataset.i]);d.appendChild(td);tr.after(d);
+  const nx=tr.nextElementSibling,wasOpen=nx&&nx.classList.contains('fdet');
+  document.querySelectorAll('#fcList tr.fdet').forEach(x=>x.remove());   // one open panel at a time
+  if(wasOpen)return;
+  const x=FC.list[+tr.dataset.i],r=x.r;
+  const d=document.createElement('tr');d.className='fdet';const td=document.createElement('td');td.colSpan=5;
+  td.innerHTML='<div class="apnl"><div>'+fcDetail(x)+'</div><div class="rbtns"><button type="button" class="b-lite" id="fDet">🧾 Details</button><button type="button" class="b-lite" id="fHist">📜 History</button><button type="button" class="b-lite" id="fClose">Close</button></div>'+patientSummaryHTML(r)+'<div id="fpDet" style="display:none"></div><div id="fpHist" style="display:none"></div></div>';
+  d.appendChild(td);tr.after(d);
+  $('fClose').onclick=()=>d.remove();
+  $('fDet').onclick=()=>{const b=$('fpDet');$('fpHist').style.display='none';if(b.style.display==='none'){b.innerHTML=detailsHTML(r);b.style.display=''}else b.style.display='none'};
+  $('fHist').onclick=()=>{const b=$('fpHist');$('fpDet').style.display='none';
+    if(b.style.display==='none'){const H=histFor(r);b.innerHTML=H.length?'<h2 style="margin:10px 0 4px">📜 Order history · '+H.length+' order'+(H.length>1?'s':'')+'</h2>'+histBlock(H,200):'<p class="hint">No orders found.</p>';b.style.display=''}
+    else b.style.display='none'};
+};
+$('fcList').onchange=e=>{
+  if(e.target.id==='fcAll'){document.querySelectorAll('#fcList .fck:not(:disabled)').forEach(c=>c.checked=e.target.checked);fcCount()}
+  else if(e.target.classList.contains('fck'))fcCount();
 };
 if(!$('rLegend'))$('rSum').insertAdjacentHTML('afterend','<div class="leg" id="rLegend">'+LEG_HTML+'</div>');
 $('tabEmail').onclick=()=>showView('email');$('tabRep').onclick=()=>showView('rep');$('tabFc').onclick=()=>showView('fc');$('rBack').onclick=()=>showView('email');$('fcBack').onclick=()=>showView('email');
