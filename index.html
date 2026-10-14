@@ -143,7 +143,7 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
 @keyframes lgShake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
 
 /* ---------- "New product detected" popup ---------- */
-#npOv{position:fixed;inset:0;z-index:250;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,25,22,.62);overflow:auto}
+#npOv,#cpOv{position:fixed;inset:0;z-index:250;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,25,22,.62);overflow:auto}
 .npc{width:100%;max-width:420px;background:#ffffff;border-radius:16px;padding:20px 20px 16px;box-shadow:0 24px 60px rgba(0,0,0,.4)}
 .npc h3{margin:0 0 6px;color:#0a3d35;font-size:18px}
 .npc p{font-size:13.5px;color:#55625e;margin:0 0 6px;line-height:1.5}
@@ -426,15 +426,20 @@ function hm24(t){const m=String(t||'').match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);if
 function rowT(r){return +r._t||+r.ts||0}
 function chgInfo(d){   // latest backed-up order of this patient from the last 24 hours
   let best=null;const now=Date.now();
-  histFor(d).forEach(r=>{const t=rowT(r);if(t&&now-t<86400000&&(!best||t>best.t))best={r,t}});
+  rowsAll.forEach(r=>{const t=rowT(r);if(t&&now-t<86400000&&samePerson(r,d)&&(!best||t>best.t))best={r,t}});
   return best;
 }
 function ago(t){const m=Math.max(1,Math.round((Date.now()-t)/60000));if(m<60)return m+(m===1?' minute':' minutes');const h=Math.round(m/60);return h+(h===1?' hour':' hours')}
-function sameWho(r,rec){   // same patient? both CNICs present: the CNIC decides (the name may have been corrected)
-  const a=digits(r.cnic),b=digits(rec.cnic);
-  if(a&&b)return a===b;
-  return pkey(r.name)===pkey(rec.name)&&a===b&&(!!b||mobOverlap(r.pmobile,rec.pmobile));
+/* Who is the same patient?  Both CNICs given: the CNIC decides (name or mobile may have changed).
+   Otherwise the name must match first, then the mobile number tells two people with one name apart. */
+function samePerson(a,b){
+  const ca=digits(a.cnic),cb=digits(b.cnic);
+  if(ca.length>=13&&cb.length>=13)return ca===cb;
+  const na=pkey(a.name),nb=pkey(b.name);if(!na||na!==nb)return false;
+  const ma=mobsOf(a.pmobile),mb=mobsOf(b.pmobile);
+  return ma.length&&mb.length?mobOverlap(a.pmobile,b.pmobile):true;
 }
+function sameWho(r,rec){return samePerson(r,rec)}
 const EDIT={ts:'',row:null};   // History -> Edit: correct one existing row in place
 const editOK=()=>/tabs([5-9]|\d{2})/.test(SRV_V);   // the Apps Script must be the version that knows 'edit'
 function renderEditBar(){
@@ -470,7 +475,7 @@ function renderChg(){
   wrap.style.display='';wrap.className='full'+(on?' on':'');
   $('chgText').innerHTML=on
     ?'✏️ <b>Updating earlier order:</b> '+what+', sent '+ago(t)+' ago.'
-    :'An earlier order exists for this patient: '+what+', sent '+ago(t)+' ago.';
+    :'An earlier order exists for this patient: '+what+', sent '+ago(t)+' ago. It is saved as a new entry unless you choose “Update earlier order”.';
   $('chgUpd').classList.toggle('act',on);$('chgNewBtn').classList.toggle('act',!on);
   const pc=on&&CHG.orig&&CHG.orig.prod&&$('product').value.trim()&&pkey($('product').value)!==CHG.orig.prod;
   const note=$('chgNote');note.style.display=pc?'':'none';
@@ -494,7 +499,8 @@ function loadChange(r){   // open the earlier order in the form and switch chang
   fillFormFrom(r);startChange(r);
   render();toast('Earlier order loaded – edit it, then Save or Copy');
 }
-function autoChange(keepForm){   // a saved patient was picked: if they have an order from the last 24 hours, switch change mode on
+function autoChange(keepForm){
+  return;   // "Update earlier order" is never switched on by itself any more – the user chooses it with the banner button   // a saved patient was picked: if they have an order from the last 24 hours, switch change mode on
   if(!unlocked||$('chg').checked||EDIT.ts)return;
   const d=data(),key=chgKey(d);
   if(!key||CHG.declined===key)return;
@@ -559,7 +565,7 @@ function resolvedStatus(){
     }
   }
   if(row&&['New Patient','Carry Forward Patient'].includes(row.status))return row.status;
-  return findPatient($('name').value,$('cnic').value,$('pmobile').value)?'Carry Forward Patient':'New Patient';
+  return rowsAll.some(x=>samePerson(x,who))?'Carry Forward Patient':'New Patient';
 }
 
 /* ---------- smart parser ---------- */
@@ -912,6 +918,7 @@ function render(){
 /* ---------- copy ---------- */
 async function copyRich(){
   if(!unlocked){toast('Please login with your PIN first');return}
+  if(!(await guardPatient()))return;
   const b=build();backup();
   try{
     await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([b.html],{type:'text/html'}),'text/plain':new Blob([b.text],{type:'text/plain'})})]);
@@ -922,8 +929,9 @@ async function copyRich(){
 }
 /* Send Email: opens the phone's / PC's default mail app with the subject and the plain-text body already filled.
    A mailto: link carries plain text only, so the designed version is also placed on the clipboard (use it if wanted). */
-function sendMail(){
+async function sendMail(){
   if(!unlocked){toast('Please login with your PIN first');return}
+  if(!(await guardPatient()))return;
   const b=build();backup();
   try{navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([b.html],{type:'text/html'}),'text/plain':new Blob([b.text],{type:'text/plain'})})]).catch(()=>{})}catch(e){}
   const url='mailto:?subject='+encodeURIComponent($('subject').value)+'&body='+encodeURIComponent(mailText(b.text).replace(/\r?\n/g,'\r\n'));
@@ -957,7 +965,7 @@ const MSG={html:'Google returned a login/error page. In the deployment settings,
 function setCloud(ok,msg){const c=$('cloud');c.className=ok===true?'ok':ok===false?'bad':'';c.textContent=ok===true?'☁️ Online':ok===false?'☁️ Offline':'☁️';c.dataset.msg=msg||'';c.title=msg||''}
 const sentSig={};let pending=[];
 const typedPin=()=>{const v=$('pin').value.trim();return /^\d{4}$/.test(v)?v:''};   // PIN typed but not logged in is still recorded with the order
-function recFrom(d){return{saved:new Date().toLocaleString('en-GB'),...d,date:fmtDate(d.date),time:fmtTime(d.time),invoice:d.invoice?'Yes':'No',pin:unlocked?curPin:typedPin(),chg:d.chg?'1':'',nw:CHG.forceNew?'1':'',cts:String(Date.now()),rts:d.chg?(CHG.ts||''):''}}
+function recFrom(d){return{saved:new Date().toLocaleString('en-GB'),...d,date:fmtDate(d.date),time:fmtTime(d.time),invoice:d.invoice?'Yes':'No',pin:unlocked?curPin:typedPin(),chg:d.chg?'1':'',nw:d.chg?'':'1',cts:String(Date.now()),rts:d.chg?(CHG.ts||''):''}}
 async function post(rec){
   const body=JSON.stringify(rec);
   try{await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',keepalive:true,headers:{'Content-Type':'text/plain;charset=utf-8'},body});return true}
@@ -966,12 +974,52 @@ async function post(rec){
 async function flush(){const q=pending;pending=[];for(const r of q){if(!(await post(r)))pending.push(r)}}
 addEventListener('online',flush);
 /* called on Save / Copy Email / Copy plain text – works silently with or without PIN */
+/* ---------- a "New Patient" who is already in the backup: ask before saving ---------- */
+const sigOf=d=>JSON.stringify([digits(d.cnic)||d.name.toLowerCase(),d.pmobile,d.product,d.rate,d.qty,d.doctor,d.speciality,d.disease,d.address,d.notes,d.date,d.chg]);
+async function guardPatient(){   // true = go on with Save / Copy / Send, false = the user cancelled
+  if(!unlocked||EDIT.ts)return true;
+  const d=data();
+  if(!d.name&&!digits(d.cnic))return true;
+  if(d.chg||d.status!=='New Patient')return true;   // updating on purpose, or a known patient (Carry Forward)
+  const hits=rowsAll.filter(r=>samePerson(r,d));
+  if(!hits.length)return true;
+  const sg=sigOf(d);if(sentSig[sg]&&Date.now()-sentSig[sg]<1800000)return true;   // the same order was just saved (Save, then Copy)
+  return patientPopup(d,hits);
+}
+function patientPopup(d,hits){
+  return new Promise(res=>{
+    const by=(a,b)=>rowT(b)-rowT(a),best=hits.slice().sort(by)[0],t=rowT(best);
+    const mine=r=>isAdmin||r.pin===undefined||pn(r.pin)===pn(curPin);
+    const upd=hits.filter(r=>mine(r)&&rowT(r)&&Date.now()-rowT(r)<86400000).sort(by)[0];
+    const ov=document.createElement('div');ov.id='cpOv';
+    ov.innerHTML='<div class="npc" role="dialog" aria-modal="true"><h3>⚠️ This patient is already in the backup</h3>'+
+     '<p><b>'+esc(rsp(best.name)||'(no name)')+'</b>'+(best.cnic?' · '+esc(best.cnic):'')+(best.pmobile?' · '+esc(best.pmobile):'')+' – last entry: '+esc(((best.product||'')+(best.qty?' '+best.qty:'')).trim())+(t?', '+ago(t)+' ago':'')+'.</p>'+
+     '<p>You are saving this as a <b>New Patient</b>. If it is a different person, change the name, CNIC or mobile below. If it is the same person, choose what to do.</p>'+
+     '<label for="cpName">Patient name</label><input id="cpName" value="'+esc(d.name)+'" autocomplete="off">'+
+     '<label for="cpCnic">CNIC</label><input id="cpCnic" inputmode="numeric" value="'+esc(d.cnic)+'" autocomplete="off">'+
+     '<label for="cpMob">Mobile</label><input id="cpMob" inputmode="tel" value="'+esc((mobsForm()[0])||'')+'" autocomplete="off">'+
+     '<div id="cpErr" role="alert" style="color:#b42318;font-size:13px;font-weight:600;min-height:18px;margin-top:8px"></div>'+
+     '<div class="npb" style="flex-direction:column"><button type="button" id="cpNew" style="background:#0e6b5c;color:#fff">➕ Save as a new entry</button>'+(upd?'<button type="button" id="cpUpd">✏️ Update the earlier entry instead</button>':'')+'<button type="button" id="cpNo">Cancel</button></div></div>';
+    document.body.appendChild(ov);
+    const done=v=>{ov.remove();document.removeEventListener('keydown',kd);res(v)};
+    const kd=e=>{if(e.key==='Escape')done(false)};document.addEventListener('keydown',kd);
+    $('cpNo').onclick=()=>done(false);
+    $('cpNew').onclick=()=>{
+      const nm=$('cpName').value.trim(),cn=$('cpCnic').value.trim(),mb=$('cpMob').value.trim();
+      if(!nm&&!digits(cn)){$('cpErr').textContent='Enter the name or the CNIC';return}
+      $('name').value=nm;$('cnic').value=cn;
+      if(cleanMob(mb)!==cleanMob(mobsForm()[0]||''))$('pmobile').value=mb;
+      render();done(true);
+    };
+    if($('cpUpd'))$('cpUpd').onclick=()=>{startChange(upd);render();done(true)};
+  });
+}
 async function backup(){
   const d=data();
   if(!d.name&&!digits(d.cnic))return'skip';
   checkNewProd(d.product);
   if(EDIT.ts)return await backupEdit(d);
-  const sig=JSON.stringify([digits(d.cnic)||d.name.toLowerCase(),d.pmobile,d.product,d.rate,d.qty,d.doctor,d.speciality,d.disease,d.address,d.notes,d.date,d.chg]);
+  const sig=sigOf(d);
   if(sentSig[sig]&&Date.now()-sentSig[sig]<1800000)return'dup';   // same order within 30 min = same order
   sentSig[sig]=Date.now();
   const rec=recFrom(d);
@@ -983,7 +1031,6 @@ async function backup(){
     const same=r=>{const t=rowT(r);return t&&Date.now()-t<win&&(isAdmin||r.pin===undefined||pn(r.pin)===pn(rec.pin))&&sameWho(r,rec)};
     let ix=-1;
     if(d.chg&&CHG.ts)ix=rowsAll.findIndex(r=>String(r.ts)===String(CHG.ts));
-    if(ix<0&&!CHG.forceNew)ix=rowsAll.map(r=>!!same(r)).lastIndexOf(true);
     if(ix>=0)rowsAll[ix]=loc;else rowsAll.push(loc);
     CHG.ts=d.chg?String(loc._t):'';
     if(d.chg){CHG.row=loc;CHG.orig={name:pkey(loc.name),cnic:digits(loc.cnic),prod:pkey(loc.product)};CHG.okProd=''}
@@ -1014,6 +1061,7 @@ async function save(){
   const d=data();
   if(!d.name){toast('Patient name is required');$('name').focus();return}
   const wasEdit=!!EDIT.ts;
+  if(!(await guardPatient()))return;
   const r=await backup();
   if(wasEdit){
     endEdit();$('clear').onclick();showView('rep');repAfterChange();
@@ -1245,7 +1293,7 @@ $('chgUpd').onclick=()=>{if(!$('chg').checked){const b=unlocked?chgInfo(data()):
 $('chgNewBtn').onclick=()=>{if($('chg').checked){endChange(chgKey(data()));CHG.forceNew=true}render()};
 $('editCancel').onclick=()=>{endEdit();$('clear').onclick();showView('rep');repAfterChange()};
 $('save').onclick=save;$('copy').onclick=copyRich;$('sendMail').onclick=sendMail;$('sendMail2').onclick=sendMail;
-$('copyTxt').onclick=()=>{if(!unlocked){toast('Please login with your PIN first');return}backup();copyText(build().text,'Plain text copied ✔')};
+$('copyTxt').onclick=async()=>{if(!unlocked){toast('Please login with your PIN first');return}if(!(await guardPatient()))return;backup();copyText(build().text,'Plain text copied ✔')};
 $('copySubj').onclick=()=>copyText($('subject').value,'Subject copied ✔');
 $('clear').onclick=()=>{EDIT.ts='';EDIT.row=null;renderEditBar();Object.keys(AUTO).forEach(k=>delete AUTO[k]);$('smart').value='';FIELDS.forEach(k=>$(k).value='');$('doctor').value=DRP;$('date').value=todayISO();$('time').value=nowHM();timeAuto=true;$('invoice').checked=true;$('icekit').checked=true;endChange('');CHG.forceNew=false;cityManual=false;$('moreMob').checked=false;$('pmobile2').value='';$('pmobile3').value='';showMob();render()};
 
