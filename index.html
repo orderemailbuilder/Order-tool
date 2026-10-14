@@ -42,7 +42,7 @@ tr.actrow td{padding:0!important;background:transparent!important;border:0!impor
 details{margin:0 16px;max-width:1168px}
 @media(min-width:1232px){details{margin:0 auto}}
 details summary{cursor:pointer;color:var(--mut);padding:4px 0}
-#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:9;max-width:90%}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:300;max-width:90%}
 #toast.on{opacity:1}
 #pin{width:84px;padding:6px 8px;text-align:center;letter-spacing:2px}
 #cloud{padding:4px 11px;border-radius:99px;font-size:15px;cursor:pointer;background:#6b7773;user-select:none}
@@ -120,12 +120,58 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
 #rTable th{background:#f0f3f0;position:sticky;top:0}
 #cloud{font-size:12px;font-weight:600;color:#fff}
 #lockMsg{max-width:700px;margin:40px auto;padding:22px 18px;text-align:center;background:#fff4d6;border:1px solid #f0c24b;border-radius:10px;font-size:16px;font-weight:600}
+
+/* ---------- premium login screen ---------- */
+#loginScr{position:fixed;inset:0;z-index:200;display:none;flex-direction:column;align-items:center;overflow:auto;padding:24px 18px 16px;background:radial-gradient(900px 520px at 12% 8%,rgba(242,201,76,.20),transparent 60%),radial-gradient(800px 520px at 92% 92%,rgba(46,196,170,.28),transparent 60%),linear-gradient(145deg,#04211d 0%,#0a4f44 52%,#0b3a4a 100%)}
+#loginScr .lgwrap{flex:1;display:flex;align-items:center;justify-content:center;width:100%}
+.lgcard{width:100%;max-width:380px;margin-top:40px;padding:0 26px 28px;border-radius:24px;background:rgba(255,255,255,.97);box-shadow:0 30px 70px rgba(0,0,0,.45);text-align:center;animation:lgIn .5s ease both}
+.lglogo{width:72px;height:72px;margin:-36px auto 14px;border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:34px;background:linear-gradient(135deg,#f6d365,#e0a800);box-shadow:0 14px 28px rgba(224,168,0,.45)}
+.lgt{font-size:22px;margin:0;color:#0a3d35;letter-spacing:.2px}
+.lgs{margin:4px 0 22px;color:var(--mut);font-size:13.5px}
+#loginScr #pin{width:100%;padding:14px 12px;font-size:28px;text-align:center;letter-spacing:14px;text-indent:14px;border:2px solid #d9e2de;border-radius:14px;background:#f6f9f8;margin:0 0 14px}
+#loginScr #pin:focus{border-color:var(--acc);box-shadow:0 0 0 4px rgba(14,107,92,.15);outline:0}
+#loginScr #login{width:100%;padding:14px;font-size:16px;border-radius:14px;color:#fff;background:linear-gradient(135deg,#0e6b5c,#14937c);box-shadow:0 10px 22px rgba(14,107,92,.4);letter-spacing:.3px}
+#loginScr #login:disabled{opacity:.75;cursor:wait}
+#lgMsg{min-height:20px;margin-top:12px;color:#b42318;font-size:13px;font-weight:600}
+#lgRest{padding:26px 0 8px;color:var(--acc2);font-weight:600}
+.lgspin{width:34px;height:34px;margin:0 auto 12px;border:4px solid #cfe5df;border-top-color:var(--acc);border-radius:50%;animation:lgSpin .8s linear infinite}
+.lgfoot{margin-top:18px;color:rgba(255,255,255,.78);font-size:12px;text-align:center;line-height:1.7}
+.lgfoot b{color:#f6d365;font-weight:700;letter-spacing:.3px}
+.lgcard.shake{animation:lgShake .4s}
+@keyframes lgIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes lgSpin{to{transform:rotate(360deg)}}
+@keyframes lgShake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+
+/* ---------- "New product detected" popup ---------- */
+#npOv{position:fixed;inset:0;z-index:250;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,25,22,.62);overflow:auto}
+.npc{width:100%;max-width:420px;background:#ffffff;border-radius:16px;padding:20px 20px 16px;box-shadow:0 24px 60px rgba(0,0,0,.4)}
+.npc h3{margin:0 0 6px;color:#0a3d35;font-size:18px}
+.npc p{font-size:13.5px;color:#55625e;margin:0 0 6px;line-height:1.5}
+.npc label{display:block;margin-top:10px}
+.npc input,.npc select{width:100%}
+#npErr{color:#b42318;font-size:13px;font-weight:600;min-height:18px;margin-top:8px}
+.npb{display:flex;gap:8px;margin-top:6px}.npb button{flex:1;padding:11px}
+#npSave{background:#0e6b5c;color:#fff}
+#prodCfg{margin-top:6px;font-size:13px;color:#0a3d35;background:#eef7f4;border:1px solid #cfe5df;border-radius:10px;padding:6px 10px;line-height:1.9}
+#prodCfg button{margin-left:6px;padding:3px 10px}
 </style>
 </head>
 <body>
+<div id="loginScr">
+  <div class="lgwrap"><div class="lgcard" id="lgCard">
+    <div class="lglogo">📨</div>
+    <h2 class="lgt">Order Email Builder</h2>
+    <p class="lgs">Secure staff access · enter your 4-digit PIN</p>
+    <div id="lgForm">
+      <input id="pin" type="password" inputmode="numeric" autocomplete="new-password" maxlength="4" aria-label="PIN" placeholder="••••">
+      <button id="login" type="button">🔑 Login</button>
+    </div>
+    <div id="lgRest" style="display:none"><div class="lgspin"></div>Signing you in…</div>
+    <div id="lgMsg" role="alert"></div>
+  </div></div>
+  <div class="lgfoot">Powered By <b>Shadab</b><br><span id="lgVer"></span></div>
+</div>
 <div class="bar">
-  <input id="pin" type="password" inputmode="numeric" autocomplete="new-password" maxlength="4" aria-label="PIN" placeholder="PIN">
-  <button class="b-alt" id="login" type="button">🔑 Login</button>
   <h1>📨 Order Email Builder</h1>
   <button class="b-save" id="save">💾 Save</button>
   <button class="b-copy" id="copy">📋 Copy Email</button>
@@ -169,7 +215,7 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
         <div id="chgBtns"><button type="button" class="b-lite" id="chgUpd">✏️ Update earlier order</button><button type="button" class="b-lite" id="chgNewBtn">➕ Add as new entry</button></div>
         <div id="chgNote" style="display:none"></div></div>
       <div class="full sh">💊 Product Details</div>
-      <div class="full"><label for="product">Product name (type first letters for suggestions)</label><input id="product" list="products" autocomplete="off"><div id="chips"></div></div>
+      <div class="full"><label for="product">Product name (type first letters for suggestions)</label><input id="product" list="products" autocomplete="off"><div id="chips"></div><div id="prodCfg" style="display:none"></div></div>
       <div><label for="rate">Patient Price</label><input id="rate"></div>
       <div><label for="qty">Quantity</label><input id="qty"></div>
       <div class="full sh">🩺 Prescriber Details</div>
@@ -177,6 +223,10 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
       <div class="full"><label for="speciality">Speciality (type first letters for suggestions; auto from prescriber)</label><input id="speciality" autocomplete="off"></div>
       <div class="full sh">📝 Additional Notes</div>
       <div class="full"><label for="notes">Additional notes (optional, shown in email)</label><textarea id="notes" style="min-height:70px"></textarea></div>
+      <div class="full sh">✍️ Regards (your signature – saved as your default for every email)</div>
+      <div class="full"><label for="signame">Name</label><input id="signame" autocomplete="off"></div>
+      <div class="full"><label for="sigdesig">Designation</label><input id="sigdesig" autocomplete="off"></div>
+      <div class="full"><label for="siggroup">Group and City</label><input id="siggroup" autocomplete="off"></div>
     </div>
     <label class="inv" for="invoice"><input type="checkbox" id="invoice" checked> 🧾 Invoice line: “Please provide invoice to the patient.”</label>
     <label class="inv" for="icekit" style="margin-top:8px"><input type="checkbox" id="icekit" checked> ❄️ Ice kit line: “Deliver injection in proper ice kit including thermocol box.”</label>
@@ -251,12 +301,33 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
 <script>
 const $=id=>document.getElementById(id);
 const FIELDS=['date','time','status','name','cnic','pmobile','product','rate','qty','doctor','address','city','notes','speciality','disease'];
+/* Regards / signature: kept per PIN on this device, also written into every row of the sheet; after login the latest saved one fills in by itself */
+const SIGF=['signame','sigdesig','siggroup'];
+const sigKey=()=>'sig'+pn(curPin);
+function sigSave(){if(!unlocked)return;const o={};SIGF.forEach(k=>o[k]=$(k).value.trim());SS(sigKey(),o)}
+function sigLoad(){
+  let o=LS(sigKey());
+  if(!o||typeof o!=='object'){
+    o={};const me=pn(curPin);let bt=-1;
+    rowsAll.forEach(r=>{if(pn(r.pin)!==me||!SIGF.some(k=>String(r[k]||'').trim()))return;const t=rowT(r)||0;if(t>=bt){bt=t;o={};SIGF.forEach(k=>o[k]=String(r[k]||'').trim())}});
+  }
+  SIGF.forEach(k=>$(k).value=(o&&o[k])||'');
+}
+const sigLines=d=>[d.signame,d.sigdesig,d.siggroup].map(x=>String(x||'').trim());
+function withSig(h,d,design){
+  const [n,ds,g]=sigLines(d);if(!n&&!ds&&!g)return h;
+  const body=[n?'<b>'+esc(n)+'</b>':'',ds?esc(ds):'',g?esc(g):''].filter(Boolean).join('<br>');
+  const i=h.lastIndexOf(OUTRO);if(i<0)return h;const e=i+OUTRO.length;
+  if(design==='classic'){const j=h.indexOf('</p>',e)+4;return h.slice(0,j)+'<p style="margin:14px 0 0">Regards,<br>'+body+'</p>'+h.slice(j)}
+  const j=h.indexOf('</td>',e);
+  return h.slice(0,j)+'<div style="padding-top:16px;font-style:normal;line-height:1.55">Regards,<br>'+body+'</div>'+h.slice(j);
+}
 const MEM={};let storeOK=true;
 const LS=k=>{if(k in MEM)return MEM[k];try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
 const SS=(k,v)=>{MEM[k]=v;try{localStorage.setItem(k,JSON.stringify(v));if(JSON.parse(localStorage.getItem(k))===undefined)throw 0}catch(e){storeOK=false}};
 let patients={};
 let SRV_TABS=null,SRV_V='';let prods={};let rowsAll=[];let unlocked=false,isAdmin=false,curPin='',busy=false;
-const APP_VER='2026-10-11-n';
+const APP_VER='2026-10-14-p',APP_DATE='14 Oct 2026';
 const pn=x=>{const d=String(x==null?'':x).replace(/\D/g,'');return d?d.padStart(4,'0'):''};
 try{['patients','prods','history','sheetUrl','design'].forEach(k=>localStorage.removeItem(k))}catch(e){}          // product stats: key = lowercase product
 const AUTO={};                       // field -> value last filled automatically
@@ -547,10 +618,10 @@ function applySmart(){
 }
 
 /* ---------- email building ---------- */
-function data(){const d={};FIELDS.forEach(k=>d[k]=$(k).value.trim());d.doctor=normDoc(d.doctor);d.pmobile=mobsForm().join(' / ');d.chg=$('chg').checked;d.rate=rateTxt(d.rate);d.invoice=$('invoice').checked;d.icekit=$('icekit').checked;d.status=resolvedStatus();return d}
+function data(){const d={};FIELDS.forEach(k=>d[k]=$(k).value.trim());SIGF.forEach(k=>d[k]=$(k).value.trim());d.doctor=normDoc(d.doctor);d.pmobile=mobsForm().join(' / ');d.chg=$('chg').checked;d.rate=rateTxt(d.rate);d.invoice=$('invoice').checked;d.icekit=$('icekit').checked;d.status=resolvedStatus();return d}
 
 /* ---------- email designs (Outlook-safe: tables + inline CSS) ---------- */
-const DESIGN_LIST=[['classic','Classic (original)'],['executive','1 · Executive Card'],['ledger','2 · Ledger Minimal'],['summary','3 · Order Summary'],['midnight','4 · Midnight & Gold'],['cards','5 · Modern Cards']];
+const DESIGN_LIST=[['classic','Classic (original)'],['executive','1 · Executive Card'],['ledger','2 · Ledger Minimal'],['summary','3 · Order Summary'],['midnight','4 · Midnight & Gold'],['cards','5 · Modern Cards'],['royalNavy','6 · Royal Navy & Gold'],['emeraldPrestige','7 · Emerald Prestige'],['tealAurora','8 · Teal Aurora'],['bordeauxHeritage','9 · Bordeaux Heritage'],['ivoryLetterhead','10 · Ivory Letterhead'],['copperSlate','11 · Copper Slate'],['plumVelvet','12 · Plum Velvet'],['oceanCards','13 · Ocean Cards'],['roseTimeline','14 · Rose Timeline'],['indigoSteps','15 · Indigo Steps'],['sapphireSidebar','16 · Sapphire Sidebar'],['onyxGold','17 · Onyx & Gold'],['invoicePro','18 · Invoice Pro'],['sunsetDashboard','19 · Sunset Dashboard'],['violetLuxe','20 · Violet Luxe']];
 function model(d,v){
   const dt=d.date?fmtDate(d.date)+(d.time?', '+fmtTime(d.time):''):'';
   const pat=[['📅 ','Date &amp; Time',v(dt,'—')],['🪪 ','CNIC',v(d.cnic,'—')],['','Patient Name',v(d.name,'—')]];
@@ -643,15 +714,158 @@ ${M.S.slice(2).map(full).join('')}
 ${alertBox(d,M,'14px 20px 0','#fff4cf','#b3261e','#3a2a00','⚠️ ','❄️ ')}
 <tr><td style="padding:18px 20px 24px;${FF}font-size:11pt;color:#17212b">${OUTRO}</td></tr></table>`}
 };
+/* ---------- 15 more designs (6–20). Outlook-safe: tables only, inline CSS, bgcolor + background-color, no images / gradients / shadows / flex ---------- */
+const SERIF="font-family:Georgia,'Times New Roman',serif;",SANS="font-family:'Segoe UI',Calibri,Arial,sans-serif;";
+const shell=(inner,bg,bd)=>`<table width="600" align="center" cellpadding="0" cellspacing="0" bgcolor="${bg}" style="width:600px;border-collapse:collapse;background-color:${bg};${bd?'border:'+bd+';':''}">${inner}</table>`;
+const fx=t=>String(t).split(SP5).join('<br>');   // prescriber name and speciality on two lines in narrow layouts
+const bar=(c,h)=>`<tr><td bgcolor="${c}" height="${h}" style="background-color:${c};height:${h}px;font-size:1px;line-height:${h}px">&nbsp;</td></tr>`;
+const xIntro=(P,pad,font,al)=>`<tr><td style="padding:${pad};${font}font-size:11pt;color:${P.t};line-height:1.65;${al?'text-align:'+al+';':''}">Respected Sir,<br>${INTRO} ⏰</td></tr>`;
+const xOutro=(P,pad,font,al)=>`<tr><td style="padding:${pad};${font}font-size:11pt;color:${P.t};line-height:1.6;${al?'text-align:'+al+';':''}">✅ ${OUTRO}</td></tr>`;
+const xAlert=(d,M,pad)=>alertBox(d,M,pad,'#fff4cf','#c62828','#3a2a00','⚠️🧾 ','❄️📦 ');
+const xSub=M=>[M.nm,M.dt].filter(Boolean).join(' &nbsp;·&nbsp; ');
+const pill=(txt,bg,col)=>txt?`<table cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td bgcolor="${bg}" style="background-color:${bg};padding:3px 12px;${SANS}font-size:9.5pt;color:${col}"><b>${txt}</b></td></tr></table>`:'';
+const PAL={
+ navyGold:{d:'#0d1b33',a:'#14284b',b:'#d4af37',c:'#f6f3ea',t:'#16202e',m:'#6b7686',ln:'#e2dcc8',h:'#aab6cc',bg:'#ffffff'},
+ emerald:{d:'#06352c',a:'#0b5d4b',b:'#c9a96e',c:'#f2f7f4',t:'#10231e',m:'#62766f',ln:'#d6e4de',h:'#9bcbbd',bg:'#ffffff'},
+ tealAmber:{d:'#0b3b42',a:'#0f6e78',b:'#f2a93b',c:'#eef7f8',t:'#10262a',m:'#5d7478',ln:'#d3e6e8',h:'#a5d3d8',bg:'#ffffff'},
+ bordeaux:{d:'#6d1a2b',a:'#6d1a2b',b:'#b08d57',c:'#fbf7ef',t:'#2a1a1d',m:'#8a6f6a',ln:'#e0d2b4',h:'#e8cfc9',bg:'#fdfaf3'},
+ navyIvory:{d:'#1b2f55',a:'#1b2f55',b:'#9c7a3c',c:'#f9f6ee',t:'#1c2230',m:'#76706a',ln:'#d6cdb4',h:'#c9d3e6',bg:'#ffffff'},
+ copper:{d:'#23272e',a:'#3b4350',b:'#c8794a',c:'#f6f1ec',t:'#22262c',m:'#7a6f68',ln:'#e5d9cf',h:'#c9ced6',bg:'#ffffff'},
+ plum:{d:'#3b1a4a',a:'#6b2f86',b:'#e8b4c8',c:'#f8f1fa',t:'#2a1633',m:'#7d6a86',ln:'#e5d6ea',h:'#d9bfe3',bg:'#ffffff'},
+ ocean:{d:'#0c4a6e',a:'#0369a1',b:'#38bdf8',c:'#f0f9ff',t:'#0f2a3d',m:'#5b7487',ln:'#cfe4f1',h:'#bae0f5',bg:'#e8f1f7'},
+ rose:{d:'#831843',a:'#be185d',b:'#f9a8d4',c:'#fdf2f8',t:'#3b0a24',m:'#8a5a73',ln:'#f5d0e3',h:'#fbcfe8',bg:'#ffffff'},
+ indigo:{d:'#1e1b4b',a:'#4338ca',b:'#22d3ee',c:'#eef2ff',t:'#16143a',m:'#6366a0',ln:'#d6dafc',h:'#c7d2fe',bg:'#ffffff'},
+ sapphire:{d:'#0a2342',a:'#1d4e89',b:'#5fb0ee',c:'#eef4fb',t:'#0e1d30',m:'#5c7088',ln:'#cddcec',h:'#b8d4f1',bg:'#ffffff'},
+ onyx:{d:'#111111',a:'#1f1f1f',b:'#d4af37',c:'#f7f4ea',t:'#151515',m:'#756f5c',ln:'#e3dcc3',h:'#cfc8b0',bg:'#ffffff'},
+ slate:{d:'#1e293b',a:'#334155',b:'#6366f1',c:'#f1f5f9',t:'#0f172a',m:'#64748b',ln:'#cbd5e1',h:'#cbd5e1',bg:'#ffffff'},
+ sunset:{d:'#2b2d42',a:'#e4572e',b:'#ffb703',c:'#fff4ee',t:'#2b2d42',m:'#8a7f80',ln:'#f3d9cc',h:'#e0e2ee',bg:'#ffffff'},
+ violet:{d:'#241043',a:'#5b21b6',b:'#f5c451',c:'#f5f0ff',t:'#1d1033',m:'#78689a',ln:'#ddd2f3',h:'#d8c9f5',bg:'#ffffff'}
+};
+/* A · Hero banner + key-facts strip */
+const L_hero=(d,v,P)=>{const M=model(d,v),P1=M.S[1].r;
+  const row=r=>`<tr><td width="36%" valign="top" style="${SANS}font-size:10pt;color:${P.m};padding:7px 0;border-bottom:1px dotted ${P.ln}">${r[0]}${r[1]}</td><td valign="top" style="${SANS}font-size:11pt;color:${P.t};padding:7px 0;border-bottom:1px dotted ${P.ln}"><b>${fx(r[2])}</b></td></tr>`;
+  const sec=x=>`<tr><td style="padding:20px 30px 0"><table cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td style="${SANS}font-size:10pt;letter-spacing:2px;color:${P.a};padding-bottom:3px;border-bottom:3px solid ${P.b}"><b>${x.i}${x.t.toUpperCase()}</b></td></tr></table><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-top:6px">${x.r.map(row).join('')}</table></td></tr>`;
+  const kpi=(l,val,w,last)=>`<td width="${w}" valign="top" style="padding:14px 16px;${last?'':'border-right:1px solid '+P.ln+';'}${SANS}"><div style="font-size:8.5pt;letter-spacing:1.5px;color:${P.m}">${l}</div><div style="font-size:13pt;color:${P.a};padding-top:3px"><b>${val}</b></div></td>`;
+  return shell(`<tr><td bgcolor="${P.d}" style="background-color:${P.d};padding:28px 30px 24px;${SANS}"><div style="font-size:9pt;letter-spacing:3px;color:${P.b}">ORDER APPROVAL REQUEST</div><div style="font-size:19pt;font-weight:bold;color:#ffffff;padding-top:6px">${M.title}</div>${xSub(M)?`<div style="font-size:10.5pt;color:${P.h};padding-top:4px">${xSub(M)}</div>`:''}</td></tr>
+${bar(P.b,4)}
+${xIntro(P,'22px 30px 0',SANS)}
+<tr><td style="padding:18px 30px 0"><table width="100%" cellpadding="0" cellspacing="0" bgcolor="${P.c}" style="border-collapse:collapse;background-color:${P.c};border-top:3px solid ${P.b}"><tr>${kpi('PRODUCT',P1[0][2],'44%')}${kpi('PATIENT PRICE',P1[1][2],'28%')}${kpi('QUANTITY',P1[2][2],'28%',1)}</tr></table></td></tr>
+${[M.S[0],M.S[2],M.S[3]].concat(M.S.slice(4)).map(sec).join('')}
+${xAlert(d,M,'22px 30px 0')}
+${xOutro(P,'22px 30px 28px',SANS)}
+${bar(P.d,6)}`,P.bg,'1px solid '+P.ln)};
+/* B · Serif letterhead */
+const L_serif=(d,v,P,orn,up)=>{const M=model(d,v);
+  const row=r=>`<tr><td width="34%" valign="top" style="${SERIF}font-size:10.5pt;font-style:italic;color:${P.m};padding:6px 0;border-bottom:1px solid ${P.ln}">${r[1]}</td><td valign="top" style="${SANS}font-size:11pt;color:${P.t};padding:6px 0;border-bottom:1px solid ${P.ln}"><b>${fx(r[2])}</b></td></tr>`;
+  const sec=x=>`<tr><td style="padding:22px 38px 0"><div style="${SERIF}font-size:${up?'10.5pt':'13pt'};${up?'letter-spacing:2px;':''}color:${P.a};border-bottom:1px solid ${P.b};padding-bottom:5px">${x.i}${up?x.t.toUpperCase():x.t}</div><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse">${x.r.map(row).join('')}</table></td></tr>`;
+  return shell(`<tr><td align="center" style="padding:30px 38px 8px;border-top:6px double ${P.b};${SERIF}"><div style="font-size:9.5pt;letter-spacing:4px;color:${P.m}">ORDER REQUEST</div><div style="font-size:21pt;color:${P.a};padding-top:6px">${M.title}</div><div style="font-size:12pt;color:${P.b};padding-top:2px">${orn}</div>${xSub(M)?`<div style="font-size:10.5pt;font-style:italic;color:${P.m};padding-top:4px">${xSub(M)}</div>`:''}</td></tr>
+${xIntro(P,'14px 38px 0',SERIF)}
+${M.S.map(sec).join('')}
+${xAlert(d,M,'22px 38px 0')}
+<tr><td align="center" style="padding:24px 38px 26px;border-bottom:6px double ${P.b};${SERIF}font-size:11pt;font-style:italic;color:${P.t}">✅ ${OUTRO}</td></tr>`,P.bg)};
+/* C · Coloured section bands */
+const L_band=(d,v,P)=>{const M=model(d,v);
+  const row=r=>`<tr><td width="36%" valign="top" style="${SANS}font-size:10pt;color:${P.m};padding:7px 0;border-bottom:1px solid #ffffff">${r[0]}${r[1]}</td><td valign="top" style="${SANS}font-size:11pt;color:${P.t};padding:7px 0;border-bottom:1px solid #ffffff"><b>${fx(r[2])}</b></td></tr>`;
+  const sec=x=>`<tr><td style="padding:14px 24px 0"><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td bgcolor="${P.a}" style="background-color:${P.a};border-left:6px solid ${P.b};padding:9px 14px;${SANS}font-size:10.5pt;letter-spacing:1.5px;color:#ffffff"><b>${x.i}${x.t.toUpperCase()}</b></td></tr><tr><td bgcolor="${P.c}" style="background-color:${P.c};padding:4px 16px 8px;border:1px solid ${P.ln};border-top:0"><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse">${x.r.map(row).join('')}</table></td></tr></table></td></tr>`;
+  return shell(`<tr><td bgcolor="${P.d}" style="background-color:${P.d};padding:26px 28px;${SANS}"><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td width="8" bgcolor="${P.b}" style="background-color:${P.b};width:8px">&nbsp;</td><td style="padding-left:16px"><div style="font-size:9pt;letter-spacing:3px;color:${P.b}">ORDER REQUEST</div><div style="font-size:19pt;font-weight:bold;color:#ffffff;padding-top:4px">${M.title}</div>${xSub(M)?`<div style="font-size:10.5pt;color:${P.h};padding-top:3px">${xSub(M)}</div>`:''}</td></tr></table></td></tr>
+${xIntro(P,'20px 28px 4px',SANS)}
+${M.S.map(sec).join('')}
+${xAlert(d,M,'18px 24px 0')}
+${xOutro(P,'20px 28px 24px',SANS)}
+${bar(P.b,5)}`,'#ffffff','1px solid '+P.ln)};
+/* D · Paired cards on a tinted page */
+const L_cards=(d,v,P)=>{const M=model(d,v);
+  const row=r=>`<tr><td style="${SANS}font-size:8.5pt;letter-spacing:1px;color:${P.m};padding:9px 0 0">${r[0]}${r[1].toUpperCase()}</td></tr><tr><td style="${SANS}font-size:11pt;color:${P.t};padding:1px 0 6px"><b>${fx(r[2])}</b></td></tr>`;
+  const card=(x,w)=>`<td width="${w}" valign="top" bgcolor="#ffffff" style="background-color:#ffffff;border:1px solid ${P.ln}"><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td bgcolor="${P.a}" style="background-color:${P.a};border-bottom:3px solid ${P.b};padding:9px 14px;${SANS}font-size:10.5pt;color:#ffffff"><b>${x.i}${x.t}</b></td></tr><tr><td style="padding:2px 14px 6px"><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse">${x.r.map(row).join('')}</table></td></tr></table></td>`;
+  const pair=(x,y)=>`<tr><td style="padding:12px 20px 0"><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr>${card(x,'50%')}<td width="12" style="width:12px;font-size:1px">&nbsp;</td>${card(y,'50%')}</tr></table></td></tr>`;
+  const one=x=>`<tr><td style="padding:12px 20px 0"><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr>${card(x,'100%')}</tr></table></td></tr>`;
+  return shell(`<tr><td bgcolor="${P.d}" style="background-color:${P.d};padding:24px 24px 20px;${SANS}"><div style="font-size:9pt;letter-spacing:3px;color:${P.b}">ORDER REQUEST</div><div style="font-size:18pt;font-weight:bold;color:#ffffff;padding-top:4px">${M.title}</div>${xSub(M)?`<div style="font-size:10.5pt;color:${P.h};padding-top:3px">${xSub(M)}</div>`:''}</td></tr>
+${bar(P.b,4)}
+${xIntro(P,'18px 24px 2px',SANS)}
+${pair(M.S[0],M.S[1])}
+${pair(M.S[2],M.S[3])}
+${M.S.slice(4).map(one).join('')}
+${xAlert(d,M,'14px 20px 0')}
+${xOutro(P,'18px 24px 24px',SANS)}`,P.bg)};
+/* E · Numbered timeline */
+const L_num=(d,v,P)=>{const M=model(d,v);
+  const row=r=>`<tr><td width="34%" valign="top" style="${SANS}font-size:10pt;color:${P.m};padding:5px 0">${r[0]}${r[1]}</td><td valign="top" style="${SANS}font-size:11pt;color:${P.t};padding:5px 0"><b>${fx(r[2])}</b></td></tr>`;
+  const step=(x,i,last)=>`<tr><td width="46" valign="top" align="center" style="width:46px;${last?'':'border-right:2px solid '+P.ln+';'}padding:0 0 0 0"><table cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td width="34" height="34" align="center" bgcolor="${P.a}" style="background-color:${P.a};width:34px;height:34px;${SANS}font-size:12pt;color:#ffffff;border:3px solid ${P.b}"><b>${i+1}</b></td></tr></table></td><td valign="top" style="padding:2px 0 ${last?'6':'20'}px 18px"><div style="${SANS}font-size:12pt;color:${P.a};padding-bottom:3px"><b>${x.i}${x.t}</b></div><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse">${x.r.map(row).join('')}</table></td></tr>`;
+  return shell(`<tr><td bgcolor="${P.d}" style="background-color:${P.d};padding:26px 30px;${SANS}"><div style="font-size:9pt;letter-spacing:3px;color:${P.b}">ORDER REQUEST</div><div style="font-size:19pt;font-weight:bold;color:#ffffff;padding-top:4px">${M.title}</div>${xSub(M)?`<div style="font-size:10.5pt;color:${P.h};padding-top:3px">${xSub(M)}</div>`:''}</td></tr>
+${bar(P.b,4)}
+${xIntro(P,'20px 30px 6px',SANS)}
+<tr><td style="padding:14px 30px 0"><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse">${M.S.map((x,i)=>step(x,i,i===M.S.length-1)).join('')}</table></td></tr>
+${xAlert(d,M,'14px 30px 0')}
+${xOutro(P,'20px 30px 26px',SANS)}
+${bar(P.d,6)}`,P.bg,'1px solid '+P.ln)};
+/* F · Colour sidebar per section */
+const L_side=(d,v,P)=>{const M=model(d,v);
+  const row=r=>`<tr><td width="36%" valign="top" style="${SANS}font-size:10pt;color:${P.m};padding:6px 0;border-bottom:1px solid #ffffff">${r[1]}</td><td valign="top" style="${SANS}font-size:11pt;color:${P.t};padding:6px 0;border-bottom:1px solid #ffffff"><b>${fx(r[2])}</b></td></tr>`;
+  const sec=x=>`<tr><td style="padding:10px 24px 0"><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid ${P.ln}"><tr><td width="132" valign="top" bgcolor="${P.a}" style="background-color:${P.a};width:132px;padding:14px 12px;border-right:4px solid ${P.b};${SANS}font-size:10.5pt;color:#ffffff"><div style="font-size:20pt;line-height:1.2">${x.i.trim()}</div><div style="padding-top:4px"><b>${x.t}</b></div></td><td valign="top" bgcolor="${P.c}" style="background-color:${P.c};padding:6px 16px"><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse">${x.r.map(row).join('')}</table></td></tr></table></td></tr>`;
+  return shell(`<tr><td bgcolor="${P.d}" style="background-color:${P.d};padding:26px 28px;${SANS}"><div style="font-size:9pt;letter-spacing:3px;color:${P.b}">ORDER APPROVAL REQUEST</div><div style="font-size:19pt;font-weight:bold;color:#ffffff;padding-top:4px">${M.title}</div>${xSub(M)?`<div style="font-size:10.5pt;color:${P.h};padding-top:3px">${xSub(M)}</div>`:''}</td></tr>
+${bar(P.b,4)}
+${xIntro(P,'20px 28px 8px',SANS)}
+${M.S.map(sec).join('')}
+${xAlert(d,M,'16px 24px 0')}
+${xOutro(P,'20px 28px 26px',SANS)}`,P.bg,'1px solid '+P.ln)};
+/* G · Invoice grid */
+const L_inv=(d,v,P)=>{const M=model(d,v),P1=M.S[1].r,stt=esc(d.status||'—');
+  const gr=r=>`<tr><td width="34%" valign="top" bgcolor="${P.c}" style="background-color:${P.c};border:1px solid ${P.ln};padding:7px 10px;${SANS}font-size:10pt;color:${P.m}">${r[0]}${r[1]}</td><td valign="top" style="border:1px solid ${P.ln};padding:7px 10px;${SANS}font-size:11pt;color:${P.t}"><b>${fx(r[2])}</b></td></tr>`;
+  const grid=x=>`<tr><td style="padding:14px 28px 0"><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td colspan="2" bgcolor="${P.a}" style="background-color:${P.a};padding:8px 10px;${SANS}font-size:10pt;letter-spacing:1.5px;color:#ffffff;border:1px solid ${P.a}"><b>${x.i}${x.t.toUpperCase()}</b></td></tr>${x.r.map(gr).join('')}</table></td></tr>`;
+  const th=(t,w)=>`<td width="${w}" bgcolor="${P.a}" style="background-color:${P.a};padding:8px 10px;${SANS}font-size:9.5pt;letter-spacing:1.5px;color:#ffffff;border:1px solid ${P.a}"><b>${t}</b></td>`;
+  const tdv=(val,w)=>`<td width="${w}" valign="top" style="border:1px solid ${P.ln};padding:11px 10px;${SANS}font-size:12pt;color:${P.t}"><b>${val}</b></td>`;
+  return shell(`${bar(P.a,6)}
+<tr><td style="padding:22px 28px 0"><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td valign="top" style="${SANS}"><div style="font-size:9pt;letter-spacing:3px;color:${P.b}"><b>ORDER APPROVAL REQUEST</b></div><div style="font-size:20pt;color:${P.a};padding-top:4px"><b>${M.title}</b></div>${M.nm?`<div style="font-size:11pt;color:${P.m};padding-top:2px">${M.nm}</div>`:''}</td><td width="190" valign="top" style="border:2px solid ${P.a};padding:10px 14px;${SANS}"><div style="font-size:8.5pt;letter-spacing:1.5px;color:${P.m}">DATE &amp; TIME</div><div style="font-size:10.5pt;color:${P.t};padding-bottom:6px"><b>${M.dt||'—'}</b></div><div style="font-size:8.5pt;letter-spacing:1.5px;color:${P.m}">STATUS</div><div style="font-size:10.5pt;color:${P.a}"><b>${stt}</b></div></td></tr></table></td></tr>
+${xIntro(P,'16px 28px 0',SANS)}
+${grid(M.S[0])}
+<tr><td style="padding:14px 28px 0"><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr>${th('PRODUCT','44%')}${th('PATIENT PRICE','28%')}${th('QUANTITY','28%')}</tr><tr>${tdv(P1[0][2],'44%')}${tdv(P1[1][2],'28%')}${tdv(P1[2][2],'28%')}</tr></table></td></tr>
+${[M.S[2],M.S[3]].concat(M.S.slice(4)).map(grid).join('')}
+${xAlert(d,M,'18px 28px 0')}
+${xOutro(P,'20px 28px 26px',SANS)}
+${bar(P.a,6)}`,P.bg,'1px solid '+P.ln)};
+/* H · Dashboard tiles */
+const L_dash=(d,v,P)=>{const M=model(d,v),P1=M.S[1].r,stt=esc(d.status||'');
+  const tile=(r,w)=>`<td width="${w}" valign="top" bgcolor="${P.c}" style="background-color:${P.c};border-left:4px solid ${P.b};padding:9px 12px"><div style="${SANS}font-size:8.5pt;letter-spacing:1px;color:${P.m}">${r[0]}${r[1].toUpperCase()}</div><div style="${SANS}font-size:11pt;color:${P.t};padding-top:2px"><b>${r[2]}</b></div></td>`;
+  const tiles=rs=>{let h='';for(let i=0;i<rs.length;i+=2){const a=rs[i],b=rs[i+1];h+=`<tr><td style="padding:0 0 8px"><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr>${b?tile(a,'49%')+'<td width="8" style="width:8px;font-size:1px">&nbsp;</td>'+tile(b,'49%'):tile(a,'100%')}</tr></table></td></tr>`}return h};
+  const head=x=>`<tr><td style="padding:16px 26px 8px;${SANS}font-size:10pt;letter-spacing:2px;color:${P.a}"><b>${x.i}${x.t.toUpperCase()}</b></td></tr>`;
+  const grp=x=>head(x)+`<tr><td style="padding:0 26px"><table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse">${tiles(x.r)}</table></td></tr>`;
+  const big=(l,val,w)=>`<td width="${w}" valign="top" style="padding:14px 16px;${SANS}"><div style="font-size:8.5pt;letter-spacing:1.5px;color:${P.b}">${l}</div><div style="font-size:13pt;color:#ffffff;padding-top:3px"><b>${val}</b></div></td>`;
+  return shell(`<tr><td bgcolor="${P.d}" style="background-color:${P.d};padding:26px 26px 22px;${SANS}"><div style="font-size:9pt;letter-spacing:3px;color:${P.b}">ORDER REQUEST</div><div style="font-size:20pt;font-weight:bold;color:#ffffff;padding:4px 0 8px">${M.nm||M.title}</div><table cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td>${pill(stt,P.b,P.d)}</td>${M.dt?`<td style="padding-left:12px;font-size:10.5pt;color:${P.h}">${M.dt}</td>`:''}</tr></table></td></tr>
+${bar(P.b,4)}
+${xIntro(P,'18px 26px 0',SANS)}
+${grp(M.S[0])}
+${head(M.S[1])}<tr><td style="padding:0 26px"><table width="100%" cellpadding="0" cellspacing="0" bgcolor="${P.a}" style="border-collapse:collapse;background-color:${P.a}"><tr>${big('PRODUCT',P1[0][2],'44%')}${big('PATIENT PRICE',P1[1][2],'28%')}${big('QUANTITY',P1[2][2],'28%')}</tr></table></td></tr>
+${[M.S[2],M.S[3]].concat(M.S.slice(4)).map(grp).join('')}
+${xAlert(d,M,'10px 26px 0')}
+${xOutro(P,'18px 26px 24px',SANS)}
+${bar(P.d,6)}`,P.bg,'1px solid '+P.ln)};
+Object.assign(DESIGNS,{
+ royalNavy:(d,v)=>L_hero(d,v,PAL.navyGold),
+ emeraldPrestige:(d,v)=>L_hero(d,v,PAL.emerald),
+ tealAurora:(d,v)=>L_hero(d,v,PAL.tealAmber),
+ bordeauxHeritage:(d,v)=>L_serif(d,v,PAL.bordeaux,'— ✦ —',false),
+ ivoryLetterhead:(d,v)=>L_serif(d,v,PAL.navyIvory,'❖',true),
+ copperSlate:(d,v)=>L_band(d,v,PAL.copper),
+ plumVelvet:(d,v)=>L_band(d,v,PAL.plum),
+ oceanCards:(d,v)=>L_cards(d,v,PAL.ocean),
+ roseTimeline:(d,v)=>L_num(d,v,PAL.rose),
+ indigoSteps:(d,v)=>L_num(d,v,PAL.indigo),
+ sapphireSidebar:(d,v)=>L_side(d,v,PAL.sapphire),
+ onyxGold:(d,v)=>L_side(d,v,PAL.onyx),
+ invoicePro:(d,v)=>L_inv(d,v,PAL.slate),
+ sunsetDashboard:(d,v)=>L_dash(d,v,PAL.sunset),
+ violetLuxe:(d,v)=>L_dash(d,v,PAL.violet)
+});
 function build(){
   const d=data(),v=(x,e)=>x?esc(x):`<span style="color:#b00">${e}</span>`;
   const f='font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#000';
-  const h=(DESIGNS[$('design').value]||DESIGNS.classic)(d,v,f);
+  const h=withSig((DESIGNS[$('design').value]||DESIGNS.classic)(d,v,f),d,$('design').value);
   let t=`Respected Sir,\n\nKindly approve the following order and arrange its timely supply.\n\nPatient Details\n- Date & Time: ${fmtDate(d.date)}${d.time?', '+fmtTime(d.time):''}\n- CNIC: ${d.cnic}\n- Patient Name: ${d.name}\n${d.pmobile?'- Patient Mobile: '+d.pmobile+'\n':''}${d.disease?'- Disease: '+d.disease+'\n':''}- Patient Status: ${d.status}\n\nProduct Details\n- Product Name: ${d.product}\n- Patient Price: ${d.rate}\n- Quantity: ${d.qty}\n\nPrescriber Details\n- Prescriber Name: ${d.doctor}${d.speciality?'     Speciality: '+d.speciality:''}\n\nDelivery Address\n- ${d.address}\n\n${d.notes?'Additional Notes\n- '+d.notes+'\n\n':''}`;
   if(d.invoice)t+=`>>> Please provide invoice to the patient.\n`;
   if(d.icekit)t+=`>>> Deliver injection in proper ice kit including thermocol box.\n`;
   if(d.invoice||d.icekit)t+='\n';
   t+=`Your prompt approval and support will be highly appreciated.`;
+  {const L=sigLines(d).filter(Boolean);if(L.length)t+='\n\nRegards,\n'+L.join('\n')}
   return{html:h,text:t,d};
 }
 const CITIES=['Multan','Lahore','Karachi','Islamabad','Rawalpindi','Faisalabad','Peshawar','Quetta','Sialkot','Gujranwala','Bahawalpur','Sargodha','Sahiwal','Khanewal','Vehari','Lodhran','Muzaffargarh','Dera Ghazi Khan','Rahim Yar Khan','Jhang','Sheikhupura','Gujrat','Hyderabad','Sukkur','Larkana','Abbottabad','Mardan','Mansehra','Okara','Kasur','Bahawalnagar','Layyah','Mianwali','Khushab','Bhakkar','Pakpattan','Toba Tek Singh','Chiniot','Jhelum','Attock','Chakwal','Narowal','Hafizabad','Mandi Bahauddin','Burewala','Kamalia','Jalalpur Pirwala','Shujabad','Mailsi','Kabirwala','Gojra','Wah Cantt','Mirpur','Muzaffarabad','Gilgit','Swat','Kohat','Bannu','Nawabshah','Mirpurkhas','Sanghar','Jacobabad','Gwadar','Turbat','Zhob'];
@@ -686,6 +900,7 @@ function fmtCnic(v){
   return d.length>12?d.slice(0,5)+'-'+d.slice(5,12)+'-'+d.slice(12):d.length>5?d.slice(0,5)+'-'+d.slice(5):d;
 }
 function render(){
+  cfgBar();
   syncCity();
   {const cf=fmtCnic($('cnic').value);if($('cnic').value!==cf)$('cnic').value=cf}
   {const need=!$('city').value.trim()&&$('address').value.trim().length>3;$('cityHint').style.display=need?'':'none';$('city').style.borderColor=need?'#e0a100':''}
@@ -754,6 +969,7 @@ addEventListener('online',flush);
 async function backup(){
   const d=data();
   if(!d.name&&!digits(d.cnic))return'skip';
+  checkNewProd(d.product);
   if(EDIT.ts)return await backupEdit(d);
   const sig=JSON.stringify([digits(d.cnic)||d.name.toLowerCase(),d.pmobile,d.product,d.rate,d.qty,d.doctor,d.speciality,d.disease,d.address,d.notes,d.date,d.chg]);
   if(sentSig[sig]&&Date.now()-sentSig[sig]<1800000)return'dup';   // same order within 30 min = same order
@@ -815,7 +1031,7 @@ async function sync(pin){
       try{j=JSON.parse(txt)}catch(e){return{err:/<html|<!doctype/i.test(txt)?'html':'bad'}}
       if(Array.isArray(j))return{err:'old'};
       if(j&&j.error)return{err:j.error};
-      if(j&&j.ok&&Array.isArray(j.rows))return{rows:j.rows,role:j.role||'user',v:j.v||'',tabs:Array.isArray(j.tabs)?j.tabs:null};
+      if(j&&j.ok&&Array.isArray(j.rows))return{rows:j.rows,role:j.role||'user',v:j.v||'',tabs:Array.isArray(j.tabs)?j.tabs:null,cfg:Array.isArray(j.cfg)?j.cfg:null};
       return{err:'bad'};
     }catch(e){if(a===1)return{err:'net'};await new Promise(r=>setTimeout(r,1200))}
   }
@@ -840,31 +1056,41 @@ function loadRows(rows){
   return n;
 }
 function applyMode(){
-  $('pin').style.display=unlocked?'none':'';$('login').style.display=unlocked?'none':'';
+  $('pin').style.display=unlocked?'none':'';$('login').style.display=unlocked?'none':'';$('loginScr').style.display=unlocked?'none':'flex';document.body.style.overflow=unlocked?'':'hidden';
   $('lock').style.display=unlocked?'':'none';
   $('cloud').style.display=unlocked?'':'none';
   $('tabs').style.display=unlocked?'':'none';if(!unlocked&&REP.view==='rep')showView('email');
   layout();
   $('status').options[0].text=unlocked?'Auto (from backup)':'Select status…';
-  if(!unlocked){patients={};prods={};rowsAll=[];curPin='';isAdmin=false;$('ver').textContent='Page '+APP_VER}
+  if(!unlocked){SIGF.forEach(k=>$(k).value='');patients={};prods={};rowsAll=[];curPin='';isAdmin=false;$('ver').textContent='Page '+APP_VER}
   refreshLists();render();
 }
-function lock(){unlocked=false;applyMode()}
-async function tryUnlock(pin){
+function clearSess(){delete MEM.sess;try{localStorage.removeItem('sess')}catch(e){}}   // the PIN is kept on this device until the user logs out
+function lgErr(m){const e=$('lgMsg');if(e)e.textContent=m||''}
+function lgState(st){$('lgForm').style.display=st==='form'?'':'none';$('lgRest').style.display=st==='rest'?'':'none'}
+function lgBusy(b){const l=$('login');l.disabled=b;l.textContent=b?'Signing in…':'🔑 Login'}
+function lgShake(){const c=$('lgCard');c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake')}
+function lock(){clearSess();unlocked=false;applyMode();lgErr('');lgState('form')}
+async function tryUnlock(pin,silent){
   if(busy)return;
-  if(!/^\d{4}$/.test(pin||'')){toast('Enter a 4-digit PIN');return}
-  busy=true;
-  const r=await sync(pin);busy=false;
-  if(!r.rows){toast(MSG[r.err]||'Error');return}
-  $('pin').value='';
-  SRV_TABS=r.tabs||null;SRV_V=r.v||'';const n=loadRows(r.rows);curPin=pin;unlocked=true;isAdmin=r.role==='admin';rebuildProds();applyMode();
+  if(!/^\d{4}$/.test(pin||'')){lgErr('Enter your 4-digit PIN');lgShake();return}
+  busy=true;lgBusy(true);lgErr('');
+  const r=await sync(pin);busy=false;lgBusy(false);
+  if(!r||!r.rows){
+    const bad=r&&(r.err==='pin'||r.err==='locked');
+    if(silent&&bad)clearSess();
+    const m=silent&&r&&r.err==='pin'?'Your PIN is no longer valid. Please login again.':(MSG[r&&r.err]||'Error');
+    lgErr(m);lgShake();if(!silent)toast(m);return}
+  $('pin').value='';lgErr('');
+  SS('sess',pin);   // stay logged in after a refresh until Logout
+  SRV_TABS=r.tabs||null;SRV_V=r.v||'';const n=loadRows(r.rows);curPin=pin;cfgLoad(r.cfg);unlocked=true;isAdmin=r.role==='admin';sigLoad();rebuildProds();applyMode();
   $('ver').textContent='Page '+APP_VER+' · Script '+(r.v||'older version');
   setCloud(true,n+' records, '+Object.keys(prods).length+' products loaded');
-  toast(r.role==='admin'?'You are logged in ✔ (Admin)':n?'You are logged in ✔':'You are logged in ✔ – no earlier data for this PIN (check the PIN if this was a mistake)');
+  if(!silent)toast(r.role==='admin'?'You are logged in ✔ (Admin)':n?'You are logged in ✔':'You are logged in ✔ – no earlier data for this PIN (check the PIN if this was a mistake)');
 }
 async function resync(){
   const r=await sync(curPin);
-  if(r.rows){SRV_TABS=r.tabs||null;SRV_V=r.v||'';const n=loadRows(r.rows);rebuildProds();refreshLists();render();setCloud(true,n+' records, '+Object.keys(prods).length+' products loaded')}
+  if(r.rows){SRV_TABS=r.tabs||null;SRV_V=r.v||'';const n=loadRows(r.rows);cfgLoad(r.cfg);repPrep();rebuildProds();refreshLists();render();setCloud(true,n+' records, '+Object.keys(prods).length+' products loaded')}
   else{setCloud(false,MSG[r.err]||'Error');if(r.err==='pin'||r.err==='locked')lock()}
 }
 
@@ -966,6 +1192,7 @@ $('design').addEventListener('change',render);
 let tm;$('smart').addEventListener('input',()=>{clearTimeout(tm);tm=setTimeout(applySmart,350)});
 $('city').addEventListener('input',()=>{cityManual=!!$('city').value.trim()});   // must run before render
 FIELDS.forEach(k=>$(k).addEventListener('input',k==='doctor'?()=>{fillSpec();render()}:render));
+SIGF.forEach(k=>$(k).addEventListener('input',()=>{sigSave();render()}));
 $('doctor').addEventListener('change',()=>{$('doctor').value=normDoc($('doctor').value)||DRP;fillSpec();render()});
 $('doctor').addEventListener('focus',()=>{const e=$('doctor');if(e.value===DRP)setTimeout(()=>e.setSelectionRange(DRP.length,DRP.length),0)});
 $('speciality').addEventListener('change',()=>{const t=pkey($('speciality').value),x=specItems().find(i=>i.k===t);if(x)$('speciality').value=x.l;render()});   // exact spelling/capitalisation of a known speciality
@@ -1011,7 +1238,7 @@ setInterval(()=>{if(timeAuto){$('time').value=nowHM();render()}},20000);
 $('cnic').addEventListener('input',()=>{if(digits($('cnic').value).length>=13){autofillFrom(findPatient('',$('cnic').value));render()}});
 $('cnic').addEventListener('change',()=>{autofillFrom(findPatient('',$('cnic').value));render()});
 $('product').addEventListener('input',e=>{if(!e.inputType||e.inputType==='insertReplacementText'){fillFromProduct();render()}});
-$('product').addEventListener('change',()=>{fillFromProduct();render()});
+$('product').addEventListener('change',()=>{fillFromProduct();render();checkNewProd()});
 $('chips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$('product').value=b.textContent;fillFromProduct();render()});
 ['pmobile','pmobile2','pmobile3'].forEach(k=>$(k).addEventListener('change',()=>{const v=cleanMob($(k).value);if(v&&$(k).value!==v)$(k).value=v;render()}));
 $('chgUpd').onclick=()=>{if(!$('chg').checked){const b=unlocked?chgInfo(data()):null;if(b)startChange(b.r)}render()};
@@ -1042,9 +1269,9 @@ const fmtN=n=>String(Math.round(n*100)/100);
 function repCnic(c){const d=digits(c);return d.length===13?d.slice(0,5)+'-'+d.slice(5,12)+'-'+d.slice(12):String(c||'').trim()}
 function repPrep(){
   rowsAll.forEach(r=>{
-    const city=rsp(r.city),prod=cleanProd(r.product),pin=pn(r.pin),st=normStatus(rsp(r.status)),dk=kDoc(r.doctor);
+    const pkl=prodKL(r,cleanProd(r.product)),city=rsp(r.city),prod=cleanProd(r.product),pin=pn(r.pin),st=normStatus(rsp(r.status)),dk=kDoc(r.doctor);
     r._n={cityK:kCity(city),cityL:city?rtc(city.toLowerCase()):'(blank)',docK:dk,docL:dk?'Dr '+rtc(dk):'(blank)',
-      prodK:kProd(prod),prodL:prod?rtc(prod.toLowerCase()):'(blank)',pinK:pin,pinL:pin||'(no PIN)',stK:st,stL:st||'(blank)',date:rowDateISO(r)};
+      prodK:pkl[0],prodL:pkl[1],pinK:pin,pinL:pin||'(no PIN)',stK:st,stL:st||'(blank)',date:rowDateISO(r)};
   });
 }
 /* The option lists only contain what exists in the chosen date range, and every option starts ticked.
@@ -1141,6 +1368,79 @@ const REPEAT_RULES=[
   {k:'upada',due:()=>30},                                  // 1 month
   {k:'rexeva',due:()=>180}                                 // 6 months
 ];
+/* ---------- products added by the user (popup "New product detected") ----------
+   Saved on this device and in the sheet tab "Products" (Code.gs), so every staff member and device gets the same list. */
+let PCFG=(()=>{const o=LS('pcfg');return o&&typeof o==='object'&&!Array.isArray(o)?o:{}})();
+const strOf=v=>{const m=String(v||'').match(/(\d+(?:\.\d+)?)\s*(mg|mcg|ml|iu|gm|g)\b/i);return m?(m[1]+m[2]).toLowerCase():''};
+function prodKL(r,prod){const pk=kProd(prod),cf=PCFG[pk];
+  if(cf&&cf.str&&cf.str.length){const sg=strOf(r.product);return[pk+(sg?' '+sg:''),(cf.label||rtc(pk))+(sg?' '+sg:'')]}   // strength is part of the filter name
+  return[pk,prod?rtc(prod.toLowerCase()):'(blank)']}
+function applyCfg(){
+  for(let i=REPEAT_RULES.length-1;i>=0;i--)if(REPEAT_RULES[i].dyn)REPEAT_RULES.splice(i,1);
+  const have=new Set(rowsAll.map(r=>kProd(r.product)));   // a product you added shows in Forecast only while it has at least one entry
+  Object.values(PCFG).forEach(c=>{
+    if(!c||!c.k||c.mode==='none'||!(c.days>0)||!have.has(c.k))return;
+    const dd=c.days;
+    REPEAT_RULES.push({k:c.k,dyn:1,label:c.label,due:c.mode==='pack'?q=>dd*Math.max(1,Math.ceil(q||1)):()=>dd});
+    FC.sel.add(c.k);
+  });
+}
+function cfgPost(c){const rec={cfg:'1',pin:curPin,ck:c.k,cl:c.label,cm:c.mode,cd:String(c.days||''),cs:(c.str||[]).join(', ')};post(rec).then(ok=>{if(!ok)pending.push(rec)})}
+function cfgLoad(srv){
+  if(Array.isArray(srv)){
+    srv.forEach(c=>{const k=String(c.k||'').trim().toLowerCase();if(!k)return;PCFG[k]={k,label:String(c.l||k),mode:c.m||'none',days:+c.d||0,str:String(c.s||'').split(',').map(x=>x.trim()).filter(Boolean)}});
+    Object.values(PCFG).forEach(c=>{if(!srv.some(x=>String(x.k).trim().toLowerCase()===c.k))cfgPost(c)});   // only on this device so far: send it to the sheet
+  }
+  SS('pcfg',PCFG);applyCfg();
+}
+const modeTxt=c=>c.mode==='pack'?c.days+' days per pack':c.mode==='fixed'?'every '+c.days+' days':'History only';
+/* under the product box: the saved repeat rule / strength of a product you added, with an Edit button (Dalimab, Upada and Rexeva keep their fixed rules) */
+function cfgBar(){
+  const el=$('prodCfg');if(!el)return;
+  const v=$('product').value,b=kProd(v),c=PCFG[b],lp=String(v).toLowerCase();
+  if(!unlocked||!b||!c||REPEAT_RULES.some(x=>!x.dyn&&lp.includes(x.k))){el.style.display='none';el.innerHTML='';return}
+  el.style.display='';
+  el.innerHTML='⚙️ <b>'+esc(c.label)+'</b> · repeat: '+esc(modeTxt(c))+(c.str&&c.str.length?' · strength: '+esc(c.str.join(', ')):' · no strength set')+' <button type="button" class="b-lite" id="prodCfgEdit">✏️ Edit</button>';
+  $('prodCfgEdit').onclick=()=>{if(!NP.open)newProdPopup($('product').value.trim(),b,PCFG[b])};
+}
+const knownProd=v=>{const lp=String(v||'').toLowerCase(),b=kProd(v);return !b||!!PCFG[b]||REPEAT_RULES.some(x=>x.dyn?x.k===b:lp.includes(x.k))};
+const NP={open:false,skip:new Set()};
+function checkNewProd(v){
+  if(!unlocked||NP.open)return;
+  v=String(v!==undefined?v:$('product').value||'').trim();
+  const b=kProd(v);if(!b||b.length<3||knownProd(v)||NP.skip.has(b))return;
+  newProdPopup(v,b);
+}
+function newProdPopup(v,b,cf){   // cf given = edit the saved settings of that product
+  NP.open=true;const sg=cf?'':strOf(v),ov=document.createElement('div');ov.id='npOv';
+  ov.innerHTML='<div class="npc" role="dialog" aria-modal="true">'+(cf?'<h3>✏️ Edit product settings</h3><p>Change the strength or repeat rule of “'+esc(cf.label)+'”. It applies to History and Forecast at once.</p>':'<h3>🆕 New product detected</h3><p>“'+esc(v)+'” is not in History / Forecast yet. Answer these so it shows there like every other product.</p>')+
+   '<label for="npName">Product name</label><input id="npName" value="'+esc(cf?cf.label:rtc(b))+'" autocomplete="off">'+
+   '<label for="npStr">Strength(s) – separate with commas</label><input id="npStr" value="'+esc(cf?(cf.str||[]).join(', '):sg)+'" placeholder="e.g. 50mg, 100mg" autocomplete="off">'+
+   '<label for="npMode">Repeat rule – when should the next order come?</label><select id="npMode"><option value="pack">Days per pack × quantity (like Dalimab: 15 days per pack)</option><option value="fixed">Fixed days after every order (like Upada 30, Rexeva 180)</option><option value="none">No repeat tracking – History only</option></select>'+
+   '<div id="npDw"><label for="npDays" id="npDl">Days per pack</label><input id="npDays" type="number" inputmode="numeric" min="1" max="1000" value="'+(cf&&cf.days?cf.days:30)+'"></div>'+
+   '<div id="npErr" role="alert"></div><div class="npb"><button type="button" id="npSave">'+(cf?'💾 Save changes':'💾 Save product')+'</button><button type="button" id="npSkip">'+(cf?'Cancel':'Ask me later')+'</button></div></div>';
+  document.body.appendChild(ov);
+  const close=()=>{ov.remove();NP.open=false;document.removeEventListener('keydown',esc2)};
+  const esc2=e=>{if(e.key==='Escape'){if(!cf)NP.skip.add(b);close()}};
+  document.addEventListener('keydown',esc2);
+  const mode=()=>$('npMode').value;
+  $('npMode').onchange=()=>{$('npDw').style.display=mode()==='none'?'none':'';$('npDl').textContent=mode()==='pack'?'Days per pack':'Days after every order'};
+  if(cf){$('npMode').value=cf.mode||'pack';$('npMode').onchange()}
+  $('npSkip').onclick=()=>{if(!cf)NP.skip.add(b);close()};
+  $('npSave').onclick=()=>{
+    const name=$('npName').value.trim().replace(/\s+/g,' '),m=mode(),days=+$('npDays').value,err=t=>{$('npErr').textContent=t};
+    if(!name){err('Please enter the product name');return}
+    if(m!=='none'&&!(days>=1&&days<=1000)){err('Enter the number of days (1 – 1000)');return}
+    const str=[];$('npStr').value.split(',').forEach(x=>{const t=strOf(x)||x.trim().toLowerCase().replace(/\s+/g,'');if(t&&!str.includes(t))str.push(t)});
+    if(sg&&!str.includes(sg))str.push(sg);
+    const c={k:b,label:name,mode:m,days:m==='none'?0:days,str};
+    PCFG[b]=c;SS('pcfg',PCFG);applyCfg();cfgPost(c);close();
+    repPrep();if(REP.view==='rep')repAfterChange();
+    fcChips();if(REP.view==='fc')fcRun(true,true);
+    cfgBar();toast(cf?'Product settings updated ✔':'Product saved ✔ – it now shows in History'+(m==='none'?'':' and Forecast'));
+  };
+  setTimeout(()=>{const e=$('npStr');if(e&&!e.value)e.focus()},50);
+}
 let NOREP=new Map(),RLAST=[],RMAP=new Map();
 const RCLS={due:'norep',rmk:'nrmk',exp:'nexp',drop:'ndrop'};
 const isDrop=r=>String(r.dropped||'').trim().toLowerCase()==='yes';
@@ -1161,30 +1461,31 @@ const dayDiff=(a,b)=>Math.round((Date.parse(a)-Date.parse(b))/86400000);
 function calcNoRep(){
   NOREP=new Map();RLAST=[];RMAP=new Map();const g=new Map(),today=todayISO();
   rowsAll.forEach(r=>{
-    const pr=String(r.product||'').toLowerCase(),rule=REPEAT_RULES.find(x=>pr.includes(x.k));if(!rule)return;
+    const pr=String(r.product||'').toLowerCase(),rule=REPEAT_RULES.find(x=>x.dyn?kProd(r.product)===x.k:pr.includes(x.k));if(!rule)return;
     const iso=rowDateISO(r);if(!iso)return;
     const c=digits(r.cnic),m=mobsOf(r.pmobile)[0]||'',nm=pkey(r.name);if(!c&&!nm&&!m)return;
     const key=(c?'c'+c:'n'+nm+'|'+m)+'#'+rule.k,o=g.get(key);
     if(!o||iso>o.iso||(iso===o.iso&&rowT(r)>=rowT(o.r)))g.set(key,{r,iso,rule});
   });
   g.forEach(o=>{
-    const q=qtyNum(o.r.qty),days=dayDiff(today,o.iso),due=o.rule.due(q),over=days>due,exp=expISO(o.r),drop=isDrop(o.r),rm=hasRmk(o.r);
+    const q=qtyNum(o.r.qty),days=dayDiff(today,o.iso),due=o.rule.due(q),over=days>due,exp=expISO(o.r),drop=isDrop(o.r),rm=hasRmk(o.r),expP=!!exp&&exp<today;
     let st=null;
-    if(drop)st='drop';else if(exp)st='exp';else if(over&&rm)st='rmk';else if(over)st='due';
-    const x={r:o.r,rule:o.rule.k,qty:q===null?0:q,big:q!==null&&q>2,iso:o.iso,days,due,over,dueISO:addDays(o.iso,due),exp,drop,rm,st,left:exp?dayDiff(exp,today):null};
+    if(drop)st='drop';else if(exp&&!expP)st='exp';else if(over||expP)st=rm?'rmk':'due';   // an expected date that has passed no longer counts: back to the due date of the last order
+    const x={r:o.r,rule:o.rule.k,qty:q===null?0:q,big:q!==null&&q>2,expP,expD:expP?dayDiff(today,exp):0,iso:o.iso,days,due,over,dueISO:addDays(o.iso,due),exp,drop,rm,st,left:exp?dayDiff(exp,today):null};
     RLAST.push(x);RMAP.set(o.r,x);if(st)NOREP.set(o.r,x);
   });
 }
 function nameCell(r){
   let h=esc(rsp(r.name));const n=NOREP.get(r);if(!n)return h;
   const rk=n.rm?'<div><small class="nb">'+rkTxt(r)+'</small></div>':'';
+  const cnt=n.expP?'exp. passed '+n.expD+(n.expD===1?' day':' days')+(n.over?' · '+n.days+' day no rep.':''):n.days+' day no rep.';
   if(n.st==='drop')h+=' <small class="nd">Dropped</small>'+rk;
   else if(n.st==='exp'){
-    h+=n.left>=0?' <small class="ng">'+(n.left===0?'expected today':n.left+(n.left===1?' day left':' days left'))+'</small>':' <small class="nr">'+n.days+' day no rep.</small>';
+    h+=' <small class="ng">'+(n.left===0?'expected today':n.left+(n.left===1?' day left':' days left'))+'</small>';
     h+=rk;
   }
-  else if(n.st==='rmk')h+=' <small class="nb">'+rkTxt(r)+'</small>';
-  else h+=' <small class="nr">'+n.days+' day no rep.</small>';
+  else if(n.st==='rmk')h+=n.expP?' <small class="nr">'+cnt+'</small>'+rk:' <small class="nb">'+rkTxt(r)+'</small>';
+  else h+=' <small class="nr">'+cnt+'</small>';
   return h;
 }
 const flagOK=()=>/tabs([8-9]|\d{2})/.test(SRV_V);
@@ -1204,7 +1505,7 @@ async function flagBulk(items,ch,label){
   let fail=0;
   for(let i=0;i<recs.length;i++){toast('Saving '+(i+1)+' of '+recs.length+'…');const ok=await post(recs[i]);if(!ok){pending.push(recs[i]);fail++}}
   toast(fail?label+': '+recs.length+' updated here, '+fail+' could not be sent – they retry when online':label+' – '+recs.length+' patient'+(recs.length>1?'s':'')+' ✔');
-  setTimeout(()=>resync().then(()=>{if(REP.view==='rep')repRun();if(REP.view==='fc')fcRun(true,true)}),2500);
+  setTimeout(()=>resync().then(()=>{if(REP.view==='rep')repAfterChange();if(REP.view==='fc')fcRun(true,true)}),2500);
 }
 async function flagSave(r,ch){
   if(!flagOK()){toast('This needs the latest Google Apps Script (version tabs8 or newer). Please deploy the new script first.');return}
@@ -1213,7 +1514,7 @@ async function flagSave(r,ch){
   if(pending.length)await flush();
   const ok=await post(rec);
   if(!ok){pending.push(rec);toast('Saved here – sending to the sheet failed, it will retry when online')}
-  else{toast((ch.dropped&&('remarks' in ch)?'Marked as dropped ✔':'remarks' in ch?(ch.remarks?'Remarks saved ✔':'Remarks cleared ✔'):'expected' in ch?(ch.expected?'Expected date saved ✔':'Expected date cleared ✔'):ch.dropped?'Marked as dropped ✔':'Drop removed ✔'));setTimeout(()=>resync().then(()=>{if(REP.view==='rep')repRun()}),2500)}
+  else{toast((ch.dropped&&('remarks' in ch)?'Marked as dropped ✔':'remarks' in ch?(ch.remarks?'Remarks saved ✔':'Remarks cleared ✔'):'expected' in ch?(ch.expected?'Expected date saved ✔':'Expected date cleared ✔'):ch.dropped?'Marked as dropped ✔':'Drop removed ✔'));setTimeout(()=>resync().then(()=>{if(REP.view==='rep')repAfterChange()}),2500)}
 }
 const DAY7=7*86400000;
 function rowMs(r){const t=rowT(r);if(t)return t;const d=r._n&&r._n.date;return d?new Date(d+'T00:00:00').getTime():0}
@@ -1368,8 +1669,9 @@ async function repPdf(){
 const LEG_HTML=[['#fff9c4','Yellow – repeat due date passed, order not repeated (“N day no rep.”)'],['#dbeafe','Blue – remarks written (reason noted)'],['#dcfce7','Green – expected date given (“N days left”)'],['#fee2e2','Red – dropped patient']].map(x=>'<span><i style="background:'+x[0]+'"></i>'+x[1]+'</span>').join('');
 const FC={P:null,list:[],rc:'',sel:new Set(REPEAT_RULES.map(x=>x.k))};
 const fcSelKeys=()=>{const a=REPEAT_RULES.map(x=>x.k).filter(k=>FC.sel.has(k));return a.length?a:REPEAT_RULES.map(x=>x.k)};
-const fcName=k=>k==='*'?(fcSelKeys().length===REPEAT_RULES.length?'All products':'Selected products'):k.charAt(0).toUpperCase()+k.slice(1);
+const fcName=k=>k==='*'?(fcSelKeys().length===REPEAT_RULES.length?'All products':'Selected products'):(()=>{const rl=REPEAT_RULES.find(x=>x.k===k);return rl&&rl.label||k.charAt(0).toUpperCase()+k.slice(1)})();
 function fcChips(){
+  applyCfg();
   const all=fcSelKeys().length===REPEAT_RULES.length;
   $('fcFilt').innerHTML='<button type="button" class="fchip'+(all?' on':'')+'" data-k="*">All</button>'+REPEAT_RULES.map(x=>'<button type="button" class="fchip'+(!all&&FC.sel.has(x.k)?' on':'')+'" data-k="'+x.k+'">'+fcName(x.k)+'</button>').join('');
 }
@@ -1380,17 +1682,16 @@ function fcOpen(){
   $('fcLeg').innerHTML=LEG_HTML;fcChips();fcRun();
 }
 function fcCalc(from,to){
-  repPrep();calcNoRep();const today=todayISO(),P={},keys=fcSelKeys();
+  applyCfg();repPrep();calcNoRep();const today=todayISO(),P={},keys=fcSelKeys();
   keys.forEach(k=>P[k]={up:[],carry:[],exp:[],rmk:[],drop:[]});
   RLAST.forEach(x=>{
     if(!P[x.rule])return;
     let cat=null;
-    if(x.drop){if(x.dueISO>=from&&x.dueISO<=to)cat='drop'}
-    else if(x.exp){
-      if(x.exp>=today&&x.exp>=from&&x.exp<=to)cat='exp';
-      else if(x.exp<from||x.exp<today)cat='carry';
+    if(x.drop){if(x.dueISO>=from&&x.dueISO<=to)cat='drop'}   // dropped: only in the month its repeat was due
+    else if(x.exp&&!x.expP){   // expected date still ahead: shown in the month its repeat was due; a manual date inside the current month also shows in that month
+      if((x.dueISO>=from&&x.dueISO<=to)||(x.exp>=from&&x.exp<=to&&x.exp.slice(0,7)===today.slice(0,7)))cat='exp';
     }
-    else if(x.over)cat='carry';
+    else if(x.over)cat='carry';   // no expected date, or it has passed: counted from the due date of the last order
     else if(x.dueISO>=today&&x.dueISO>=from&&x.dueISO<=to)cat='up';
     if(!cat)return;
     P[x.rule][cat].push(x);
@@ -1431,9 +1732,9 @@ function fcShow(k,cat,quiet){
   FC.cur={k,cat};
   const act=x=>isAdmin||pn(x.r.pin)===pn(curPin);
   $('fcList').innerHTML='<h2 style="margin:12px 0 4px">'+esc(title)+'</h2><p class="hint" style="margin:0 0 6px">'+sm.n+' patient'+(sm.n===1?'':'s')+', total qty '+fmtN(sm.q)+'. Tap a patient to see the details and remarks, or tick patients to change many together.</p>'+rcChips+
-    (sm.n?'<div class="fbulk"><label class="fsel"><input type="checkbox" id="fcAll"> Select all</label><span id="fcCnt" class="hint" style="margin:0">0 selected</span><div class="rbtns"><button type="button" class="b-lite" data-b="exp">📅 Expected Date</button><button type="button" class="b-lite" data-b="rmk">💬 Remarks</button>'+(cat==='drop'?'<button type="button" class="b-lite" data-b="undrop">↩️ Undo drop</button>':'<button type="button" class="b-del" data-b="drop">⛔ Drop</button>')+'</div><div id="fcBox"></div></div>':'')+
+    (sm.n?'<div class="fbulk"><label class="fsel"><input type="checkbox" id="fcAll"> Select all</label><span id="fcCnt" class="hint" style="margin:0">0 selected</span><div class="rbtns" id="fcBtns" style="display:none"><button type="button" class="b-lite" data-b="exp">📅 Expected Date</button><button type="button" class="b-lite" data-b="rmk">💬 Remarks</button>'+(cat==='drop'?'<button type="button" class="b-lite" data-b="undrop">↩️ Undo drop</button>':'<button type="button" class="b-del" data-b="drop">⛔ Drop</button>')+'</div><div id="fcBox"></div></div>':'')+
     '<div style="overflow-x:auto"><table class="fctab"><thead><tr><th></th><th>Patient</th><th>Product</th><th>Qty</th><th>'+dh+'</th></tr></thead><tbody>'+
-    FC.list.map((x,i)=>'<tr data-i="'+i+'"'+(x.st?' class="'+RCLS[x.st]+'"':'')+'><td><input type="checkbox" class="fck" data-i="'+i+'"'+(act(x)?'':' disabled')+'></td><td>'+esc(rsp(x.r.name)||'(no name)')+(rmkCat(x.r)?' <small class="nb">'+esc(rmkCat(x.r))+'</small>':'')+'</td><td>'+esc(rsp(x.r.product))+'</td><td>'+fmtN(x.qty)+'</td><td>'+esc(fmtDate(dv(x)))+'</td></tr>').join('')+'</tbody></table></div>';
+    FC.list.map((x,i)=>'<tr data-i="'+i+'"'+(x.st?' class="'+RCLS[x.st]+'"':'')+'><td><input type="checkbox" class="fck" data-i="'+i+'"'+(act(x)?'':' disabled')+'></td><td>'+(nameCell(x.r)||'(no name)')+(NOREP.has(x.r)?'':(rmkCat(x.r)?' <small class="nb">'+esc(rmkCat(x.r))+'</small>':''))+'</td><td>'+esc(rsp(x.r.product))+'</td><td>'+fmtN(x.qty)+'</td><td>'+esc(fmtDate(dv(x)))+'</td></tr>').join('')+'</tbody></table></div>';
   if(prev)document.querySelectorAll('#fcList .fck').forEach(c=>{if(prev.has(String(FC.list[+c.dataset.i].r.ts)))c.checked=true});
   fcCount();
   if(!quiet)$('fcList').scrollIntoView({behavior:'smooth',block:'start'});
@@ -1442,6 +1743,7 @@ const fcSelected=()=>[...document.querySelectorAll('#fcList .fck:checked')].map(
 function fcCount(){
   const all=[...document.querySelectorAll('#fcList .fck:not(:disabled)')],n=all.filter(c=>c.checked).length;
   const e=$('fcCnt');if(e)e.textContent=n+' selected';
+  const fb=$('fcBtns');if(fb)fb.style.display=n>0?'':'none';if(!n){const bx=$('fcBox');if(bx)bx.innerHTML=''}
   const a=$('fcAll');if(a){a.checked=all.length>0&&n===all.length}
 }
 function fcBulkOpen(kind){
@@ -1492,10 +1794,23 @@ $('fcList').onclick=e=>{
   document.querySelectorAll('#fcList tr.fdet').forEach(x=>x.remove());   // one open panel at a time
   if(wasOpen)return;
   const x=FC.list[+tr.dataset.i],r=x.r;
+  const mine=isAdmin||pn(r.pin)===pn(curPin),canE=mine&&expOK(x),pr=rmkParse(r.remarks),needCat=!!(x.exp||x.drop);
+  const fcBtnsH=mine?'<button type="button" class="b-lite" id="fRmk">💬 Remarks</button>'+(canE?'<button type="button" class="b-lite" id="fExp">📅 Expected Date</button>':'')+(x.drop?'<button type="button" class="b-lite" id="fUndrop">↩️ Undo drop</button>':'<button type="button" class="b-del" id="fDrop">⛔ Drop</button>'):'';
+  const fcBoxesH=mine?'<div class="psum" id="fRmkBox" style="margin-top:8px;display:none"><label for="fRemark">📝 Remarks'+(rmkEdited(r)?' <b>(edited)</b>':'')+'</label>'+(needCat?'<select id="fCat" style="width:100%;margin:4px 0">'+catOpts(pr.cat)+'</select>':'')+'<textarea id="fRemark" rows="3" maxlength="480" style="min-height:70px">'+esc(pr.text)+'</textarea><button type="button" class="b-lite" id="fRemarkSave" style="margin-top:6px">💾 Save remarks</button></div>'+
+    (canE?'<div class="psum" id="fExpBox" style="margin-top:8px;display:none"><label for="fExpDate">📅 Expected date of the next order</label><input type="date" id="fExpDate" min="'+todayISO()+'" value="'+esc(x.exp&&!x.expP?x.exp:'')+'"><div class="rbtns"><button type="button" class="b-lite" id="fExpSave">💾 Save date</button>'+(x.exp?'<button type="button" class="b-lite" id="fExpClear">✕ Clear date</button>':'')+'</div></div>':'')+
+    '<div class="psum" id="fDropBox" style="margin-top:8px;display:none"><label for="fDropCat">⛔ Reason for dropping (required)</label><select id="fDropCat" style="width:100%;margin:4px 0">'+catOpts(pr.cat)+'</select><label for="fDropTxt">Remarks (optional)</label><textarea id="fDropTxt" rows="3" maxlength="480" style="min-height:70px">'+esc(pr.text)+'</textarea><button type="button" class="b-del" id="fDropSave" style="margin-top:6px">⛔ Confirm drop</button></div>':'';
   const d=document.createElement('tr');d.className='fdet';const td=document.createElement('td');td.colSpan=5;
-  td.innerHTML='<div class="apnl"><div>'+fcDetail(x)+'</div><div class="rbtns"><button type="button" class="b-lite" id="fDet">🧾 Details</button><button type="button" class="b-lite" id="fHist">📜 History</button><button type="button" class="b-lite" id="fClose">Close</button></div>'+patientSummaryHTML(r)+'<div id="fpDet" style="display:none"></div><div id="fpHist" style="display:none"></div></div>';
+  td.innerHTML='<div class="apnl"><div>'+fcDetail(x)+'</div><div class="rbtns">'+fcBtnsH+'<button type="button" class="b-lite" id="fDet">🧾 Details</button><button type="button" class="b-lite" id="fHist">📜 History</button><button type="button" class="b-lite" id="fClose">Close</button></div>'+patientSummaryHTML(r)+fcBoxesH+'<div id="fpDet" style="display:none"></div><div id="fpHist" style="display:none"></div></div>';
   d.appendChild(td);tr.after(d);
   $('fClose').onclick=()=>d.remove();
+  const hideB=keep=>['fRmkBox','fExpBox','fDropBox'].forEach(i=>{const e2=$(i);if(e2&&i!==keep)e2.style.display='none'});
+  const tg=(btn,box)=>{const b=$(btn);if(b)b.onclick=()=>{hideB(box);const e2=$(box);if(e2)e2.style.display=e2.style.display==='none'?'':'none'}};
+  tg('fRmk','fRmkBox');tg('fExp','fExpBox');tg('fDrop','fDropBox');
+  const q1=$('fRemarkSave');if(q1)q1.onclick=()=>{const sc=$('fCat');if(sc&&!sc.value){toast('Choose the reason category first');return}flagBulk([x],{remarks:rmkEnc(sc?sc.value:rmkCat(r),$('fRemark').value)},'Remarks saved')};
+  const q2=$('fExpSave');if(q2)q2.onclick=()=>{const v=$('fExpDate').value;if(!v){toast('Pick a date first');return}flagBulk([x],{expected:v},'Expected date saved')};
+  const q3=$('fExpClear');if(q3)q3.onclick=()=>flagBulk([x],{expected:''},'Expected date cleared');
+  const q4=$('fDropSave');if(q4)q4.onclick=()=>{const cat=$('fDropCat').value;if(!cat){toast('Choose the reason first');return}if(confirm('Mark this patient as dropped?\n\nReason: '+cat+'\n'+(rsp(r.name)||'(no name)')+' · '+(rsp(r.product)||'')+'\n\nThe row turns red and the patient is not counted in the forecast.'))flagBulk([x],{dropped:'Yes',remarks:rmkEnc(cat,$('fDropTxt').value)},'Dropped')};
+  const q5=$('fUndrop');if(q5)q5.onclick=()=>flagBulk([x],{dropped:''},'Drop removed');
   $('fDet').onclick=()=>{const b=$('fpDet');$('fpHist').style.display='none';if(b.style.display==='none'){b.innerHTML=detailsHTML(r);b.style.display=''}else b.style.display='none'};
   $('fHist').onclick=()=>{const b=$('fpHist');$('fpDet').style.display='none';
     if(b.style.display==='none'){const H=histFor(r);b.innerHTML=H.length?'<h2 style="margin:10px 0 4px">📜 Order history · '+H.length+' order'+(H.length>1?'s':'')+'</h2>'+histBlock(H,200):'<p class="hint">No orders found.</p>';b.style.display=''}
@@ -1510,6 +1825,13 @@ $('tabEmail').onclick=()=>showView('email');$('tabRep').onclick=()=>showView('re
 $('rFrom').onchange=$('rTo').onchange=repDates;
 $('rPII').onchange=repRun;$('rReset').onclick=repReset;$('rXlsx').onclick=repXlsx;$('rPdf').onclick=repPdf;
 $('date').value=todayISO();$('time').value=nowHM();applyMode();
+$('lgVer').textContent='Version '+APP_VER+' · Updated On '+APP_DATE;
+async function restoreSession(){
+  const p=LS('sess');if(!/^\d{4}$/.test(p||'')||unlocked||busy)return;
+  lgState('rest');await tryUnlock(p,true);if(!unlocked)lgState('form');
+}
+restoreSession();
+window.addEventListener('online',()=>{if(!unlocked)restoreSession()});
 </script>
 </body>
 </html>
