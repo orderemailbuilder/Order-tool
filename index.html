@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Order Email Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f4f5f2;--ink:#1b2422;--mut:#66726f;--line:#d9ded9;--acc:#0e6b5c;--acc2:#0a4f44;--card:#fff;--warn:#fff1a6}
 *{box-sizing:border-box}
@@ -90,6 +91,9 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
 .dcard .pt{font-weight:700;color:#0e6b5c;margin-bottom:4px}
 .dcard .dr{display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-top:1px solid #edf3f1;font-size:13.5px}
 .dcard .dr span{color:#555;flex:0 0 auto}
+.mcol{display:flex;flex-direction:column;gap:8px;align-items:flex-end}.mrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:flex-end}
+.cbtn{display:inline-flex;align-items:center;gap:4px;padding:7px 12px;border-radius:999px;font-weight:700;font-size:13px;text-decoration:none;color:#fff;box-shadow:0 6px 14px -6px rgba(0,0,0,.45);transition:transform .2s}.cbtn:active{transform:scale(.95)}
+.cbtn.call{background:linear-gradient(135deg,#3b82f6,#1d4ed8)}.cbtn.wa{background:linear-gradient(135deg,#25d366,#128c4a)}
 .dcard .dr b{text-align:right;word-break:break-word;font-weight:600}
 .fbulk{margin:6px 0 8px;padding:8px 10px;border:1px solid #cfe5df;border-radius:10px;background:#f4faf8}
 .fsel{display:inline-flex;align-items:center;gap:6px;font-weight:600;margin-right:10px}
@@ -154,6 +158,86 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
 #npSave{background:#0e6b5c;color:#fff}
 #prodCfg{margin-top:6px;font-size:13px;color:#0a3d35;background:#eef7f4;border:1px solid #cfe5df;border-radius:10px;padding:6px 10px;line-height:1.9}
 #prodCfg button{margin-left:6px;padding:3px 10px}
+/* ===== PREMIUM LAYER (visual only – no logic touched) ===== */
+:root{--f-ui:"Plus Jakarta Sans","Segoe UI",system-ui,Arial,sans-serif;--f-hd:"Sora","Plus Jakarta Sans","Segoe UI",system-ui,sans-serif;--gold:#f2c94c;--ease:cubic-bezier(.22,.8,.24,1);--sh1:0 1px 2px rgba(10,40,35,.06),0 8px 24px -8px rgba(10,40,35,.14);--sh2:0 2px 4px rgba(10,40,35,.08),0 22px 44px -14px rgba(10,40,35,.28)}
+html{scroll-behavior:smooth}
+body{font-family:var(--f-ui);-webkit-font-smoothing:antialiased;background:linear-gradient(180deg,#eef3f0,#f6f4ee 60%,#eef3f0);background-attachment:fixed}
+body::before,body::after{content:"";position:fixed;z-index:-1;width:60vmax;height:60vmax;border-radius:50%;filter:blur(90px);opacity:.38;pointer-events:none}
+body::before{top:-22vmax;left:-18vmax;background:radial-gradient(circle,#2ec4aa,transparent 65%);animation:drift1 22s ease-in-out infinite alternate}
+body::after{bottom:-26vmax;right:-20vmax;background:radial-gradient(circle,#f2c94c,transparent 65%);animation:drift2 26s ease-in-out infinite alternate}
+@keyframes drift1{to{transform:translate(18vmax,12vmax) scale(1.15)}}
+@keyframes drift2{to{transform:translate(-16vmax,-10vmax) scale(1.2)}}
+h1,h2,.lgt{font-family:var(--f-hd);letter-spacing:-.2px}
+#prog{position:fixed;top:0;left:0;height:3px;width:0;z-index:300;background:linear-gradient(90deg,#2ec4aa,#f2c94c,#ff8a5b);box-shadow:0 0 12px rgba(242,201,76,.8);transition:width .1s linear}
+/* header */
+.bar{background:linear-gradient(120deg,rgba(8,34,30,.94),rgba(14,70,61,.92));backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%);box-shadow:0 10px 30px -12px rgba(0,0,0,.55);border-bottom:1px solid rgba(255,255,255,.08)}
+.bar::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,transparent,#f2c94c,#2ec4aa,transparent);background-size:200% 100%;animation:sheen 5s linear infinite}
+@keyframes sheen{to{background-position:-200% 0}}
+.bar h1{font-weight:700;font-size:18px;background:linear-gradient(90deg,#fff,#f6d365 60%,#fff);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:sheen 7s linear infinite}
+/* buttons */
+button{position:relative;overflow:hidden;transition:transform .25s var(--ease),box-shadow .25s var(--ease),filter .2s;letter-spacing:.1px}
+button:hover{transform:translateY(-2px);filter:none}
+button:active{transform:translateY(0) scale(.97)}
+.b-save{background:linear-gradient(135deg,#ffe08a,#f2c94c 55%,#e0a800);box-shadow:0 8px 18px -6px rgba(224,168,0,.65)}
+.b-copy{background:linear-gradient(135deg,#14937c,#0e6b5c);box-shadow:0 8px 18px -6px rgba(14,107,92,.6)}
+.b-alt{background:linear-gradient(135deg,#4a5b56,#2f3c38);box-shadow:0 8px 18px -8px rgba(0,0,0,.5)}
+.b-lite{background:linear-gradient(135deg,#fff,#e7ece8);box-shadow:inset 0 0 0 1px var(--line),0 4px 10px -6px rgba(0,0,0,.2)}
+button:hover.b-save{box-shadow:0 14px 26px -8px rgba(224,168,0,.8)}
+button:hover.b-copy{box-shadow:0 14px 26px -8px rgba(14,107,92,.8)}
+.rip{position:absolute;border-radius:50%;background:rgba(255,255,255,.55);transform:scale(0);animation:rip .6s ease-out forwards;pointer-events:none}
+@keyframes rip{to{transform:scale(3.2);opacity:0}}
+/* tabs */
+#tabs{gap:8px;padding:14px 16px 4px}
+#tabs button{border-radius:999px;padding:10px 20px;background:rgba(255,255,255,.7);backdrop-filter:blur(8px);box-shadow:inset 0 0 0 1px var(--line),var(--sh1)}
+#tabs button.on{background:linear-gradient(135deg,#14937c,#0a4f44);box-shadow:0 12px 24px -8px rgba(14,107,92,.7)}
+/* cards */
+main>*,section{animation:rise .7s var(--ease) backwards}
+main>*:nth-child(2){animation-delay:.1s}
+@keyframes rise{from{opacity:0;transform:translateY(22px)}}
+section{position:relative;border:1px solid rgba(255,255,255,.7);border-radius:18px;padding:18px;background:rgba(255,255,255,.88);backdrop-filter:blur(10px);box-shadow:var(--sh1);transition:box-shadow .35s var(--ease),transform .35s var(--ease)}
+section:hover{box-shadow:var(--sh2)}
+section::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(380px circle at var(--mx,50%) var(--my,0%),rgba(46,196,170,.14),transparent 60%)}
+section:hover::before{opacity:1}
+h2{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+h2::before{content:"";width:5px;height:18px;border-radius:4px;background:linear-gradient(#2ec4aa,#f2c94c)}
+.sh{background:linear-gradient(90deg,#e1f4ee,#f4fbf8);border-left:4px solid #14937c}
+/* fields */
+textarea,input,select{border:1.5px solid #d6ddd9;border-radius:11px;padding:10px 12px;background:#fbfdfc;transition:border-color .2s,box-shadow .25s,background .2s,transform .2s}
+textarea:hover,input:hover,select:hover{border-color:#a9c9c0}
+textarea:focus,input:focus,select:focus{outline:0;border-color:#14937c;background:#fff;box-shadow:0 0 0 4px rgba(20,147,124,.16),0 8px 18px -10px rgba(14,107,92,.5)}
+label{font-weight:600;letter-spacing:.2px;transition:color .2s}
+.grid>div:focus-within>label,.full:focus-within>label{color:var(--acc)}
+.inv{background:linear-gradient(90deg,#fff1a6,#ffe58a);border-radius:12px;box-shadow:0 6px 16px -8px rgba(224,168,0,.7)}
+#preview{border:1.5px dashed #b9cfc8;border-radius:14px;box-shadow:inset 0 0 0 4px #f6faf8}
+/* tables */
+#rTable th{background:linear-gradient(#f4f8f6,#e8efec);font-weight:700;text-transform:uppercase;font-size:11.5px;letter-spacing:.6px}
+table tr{transition:background .2s}
+#rTable tbody tr:hover td{filter:brightness(.97)}
+#rTable tbody tr{animation:rise .45s var(--ease) backwards}
+#rTable tbody tr:nth-child(2){animation-delay:.03s}#rTable tbody tr:nth-child(3){animation-delay:.06s}#rTable tbody tr:nth-child(4){animation-delay:.09s}#rTable tbody tr:nth-child(5){animation-delay:.12s}#rTable tbody tr:nth-child(n+6){animation-delay:.15s}
+/* login */
+#loginScr{background:radial-gradient(900px 520px at 12% 8%,rgba(242,201,76,.22),transparent 60%),radial-gradient(800px 520px at 92% 92%,rgba(46,196,170,.30),transparent 60%),linear-gradient(145deg,#03120f,#07352d 55%,#0b4a3f)}
+#loginScr canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#loginScr .orb{position:absolute;border-radius:50%;filter:blur(2px);pointer-events:none;background:radial-gradient(circle at 30% 28%,rgba(255,255,255,.55),var(--oc) 45%,transparent 72%);opacity:.55;animation:floaty var(--d) ease-in-out infinite alternate}
+@keyframes floaty{to{transform:translate3d(var(--x),var(--y),0) scale(1.12)}}
+#loginScr .lgwrap{position:relative;z-index:2;perspective:1100px}
+.lgfoot{position:relative;z-index:2}
+.lgcard{position:relative;background:linear-gradient(160deg,rgba(255,255,255,.97),rgba(240,250,246,.93));border:1px solid rgba(255,255,255,.7);box-shadow:0 40px 90px -20px rgba(0,0,0,.7),0 0 0 1px rgba(242,201,76,.25),inset 0 1px 0 #fff;transform-style:preserve-3d;transition:transform .25s ease-out;will-change:transform;overflow:hidden;overflow:visible}
+.lgcard::before{content:"";position:absolute;inset:0;border-radius:24px;pointer-events:none;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.65) 50%,transparent 60%);background-size:250% 100%;animation:glint 6s ease-in-out infinite}
+@keyframes glint{0%,60%{background-position:150% 0}100%{background-position:-100% 0}}
+.lglogo{transform:translateZ(50px);animation:bob 4s ease-in-out infinite;position:relative}
+.lglogo::after{content:"";position:absolute;inset:-6px;border-radius:26px;border:2px solid rgba(246,211,101,.6);animation:ping 2.6s ease-out infinite}
+@keyframes bob{50%{transform:translateZ(50px) translateY(-6px) rotateY(12deg)}}
+@keyframes ping{to{transform:scale(1.35);opacity:0}}
+.lgt{transform:translateZ(28px);font-weight:800;background:linear-gradient(90deg,#0a3d35,#14937c);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.lgs{transform:translateZ(18px)}
+#loginScr #pin{border-radius:16px;background:#fff;transition:border-color .2s,box-shadow .3s,transform .25s}
+#loginScr #pin:focus{transform:translateY(-2px);box-shadow:0 0 0 5px rgba(20,147,124,.18),0 14px 26px -12px rgba(14,107,92,.6)}
+#loginScr #login{transform:translateZ(30px);background:linear-gradient(135deg,#0e6b5c,#14937c,#1fb89c);background-size:200% 100%;transition:background-position .5s,box-shadow .3s,transform .25s var(--ease)}
+#loginScr #login:hover{background-position:100% 0;transform:translateZ(30px) translateY(-3px);box-shadow:0 18px 32px -10px rgba(14,107,92,.8)}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:linear-gradient(#2ec4aa,#14937c);border-radius:10px;border:2px solid #eef3f0}::-webkit-scrollbar-track{background:transparent}
+::selection{background:#f2c94c;color:#222}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001s!important;animation-iteration-count:1!important;transition-duration:.001s!important}}
 </style>
 </head>
 <body>
@@ -185,7 +269,7 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
 
 
 
-<div id="tabs" style="display:none"><button type="button" id="tabEmail" class="on">✉️ Email Builder</button><button type="button" id="tabRep">📊 History</button><button type="button" id="tabFc">📈 Forecast</button></div>
+<div id="tabs" style="display:none"><button type="button" id="tabEmail" class="on">✉️ Email Builder</button><button type="button" id="tabRep">📊 History</button><button type="button" id="tabFc">📈 Forecast</button><button type="button" id="tabStaff" style="display:none">👥 Staff Management</button></div>
 <div id="lockMsg" style="display:none">🔒 Please enter your PIN and tap Login first.<br><span style="font-weight:400;font-size:14px">No entries can be made without logging in.</span></div>
 <main>
   <div id="editBar" style="display:none"><div id="editInfo"></div><button type="button" class="b-lite" id="editCancel">✕ Cancel edit</button></div>
@@ -261,6 +345,7 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
     <div id="fcList"></div>
   </section>
 </div>
+<div id="stfPage" style="display:none"><div style="max-width:1200px;margin:auto;padding:16px"><section><h2>👥 Staff Management</h2><p class="hint">Only PINs listed here can log in (plus your admin PIN). A manager sees the data of everyone below. <b>🔗 Merge</b> lets a seat also see another seat's data; unmerge any time.</p><div id="stfBody"></div></section></div></div>
 <div id="repPage" style="display:none">
   <section>
     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
@@ -326,8 +411,8 @@ const MEM={};let storeOK=true;
 const LS=k=>{if(k in MEM)return MEM[k];try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
 const SS=(k,v)=>{MEM[k]=v;try{localStorage.setItem(k,JSON.stringify(v));if(JSON.parse(localStorage.getItem(k))===undefined)throw 0}catch(e){storeOK=false}};
 let patients={};
-let SRV_TABS=null,SRV_V='';let prods={};let rowsAll=[];let unlocked=false,isAdmin=false,curPin='',busy=false;
-const APP_VER='2026-10-14-p',APP_DATE='14 Oct 2026';
+let SRV_TABS=null,SRV_V='';let prods={};let rowsAll=[];let unlocked=false,isAdmin=false,curPin='',busy=false;let STAFF=[],ME=null,SEEALL=false;
+const APP_VER='2026-10-15-w',APP_DATE='15 Oct 2026';
 const pn=x=>{const d=String(x==null?'':x).replace(/\D/g,'');return d?d.padStart(4,'0'):''};
 try{['patients','prods','history','sheetUrl','design'].forEach(k=>localStorage.removeItem(k))}catch(e){}          // product stats: key = lowercase product
 const AUTO={};                       // field -> value last filled automatically
@@ -487,7 +572,7 @@ function fillFormFrom(r){   // put an existing order into the form
   ['name','cnic','product','rate','qty','doctor','address','notes','speciality','disease'].forEach(k=>set(k,r[k]));$('doctor').value=normDoc($('doctor').value)||DRP;
   const ms=mobsOf(r.pmobile);set('pmobile',ms[0]||'');set('pmobile2',ms[1]||'');set('pmobile3',ms[2]||'');
   $('moreMob').checked=ms.length>1;showMob();
-  const c0=String(r.city||'').trim(),auto=cityStrict($('address').value)||histCity(data());
+  const c0=String(r.city||'').trim(),auto=cityStrict($('address').value);
   cityManual=!!c0&&c0!==auto;$('city').value=cityManual?c0:auto;
   const iso=isoDate(String(r.date||'').trim());if(iso)$('date').value=iso;
   const hm=hm24(r.time);if(hm){$('time').value=hm;timeAuto=false}
@@ -876,21 +961,25 @@ function build(){
 }
 const CITIES=['Multan','Lahore','Karachi','Islamabad','Rawalpindi','Faisalabad','Peshawar','Quetta','Sialkot','Gujranwala','Bahawalpur','Sargodha','Sahiwal','Khanewal','Vehari','Lodhran','Muzaffargarh','Dera Ghazi Khan','Rahim Yar Khan','Jhang','Sheikhupura','Gujrat','Hyderabad','Sukkur','Larkana','Abbottabad','Mardan','Mansehra','Okara','Kasur','Bahawalnagar','Layyah','Mianwali','Khushab','Bhakkar','Pakpattan','Toba Tek Singh','Chiniot','Jhelum','Attock','Chakwal','Narowal','Hafizabad','Mandi Bahauddin','Burewala','Kamalia','Jalalpur Pirwala','Shujabad','Mailsi','Kabirwala','Gojra','Wah Cantt','Mirpur','Muzaffarabad','Gilgit','Swat','Kohat','Bannu','Nawabshah','Mirpurkhas','Sanghar','Jacobabad','Gwadar','Turbat','Zhob'];
 CITIES.push('Kot Addu','Rajanpur','Jampur','Taunsa','Alipur','Jatoi','Liaquatpur','Khanpur','Ahmedpur East','Dunyapur','Mian Channu','Arifwala','Haroonabad','Chishtian','Hasilpur','Yazman','Kharian','Wazirabad','Daska','Pattoki','Jaranwala','Samundri','Depalpur','Shorkot','Bhalwal','Taxila','Murree','Haripur','Nowshera','Charsadda','Dera Ismail Khan','Mingora','Skardu','Chitral','Khuzdar','Sibi','Hub','Thatta','Badin','Dadu','Jamshoro','Shikarpur','Khairpur','Ghotki','Umerkot','Tando Allahyar','Tando Adam');
+{const _extra=["Sadiqabad", "Liaqat Pur", "Uch Sharif", "Bahawalpur City", "Hasan Abdal", "Fateh Jang", "Pindi Gheb", "Talagang", "Lawa", "Kallar Kahar", "Pind Dadan Khan", "Dinga", "Kharian Cantt", "Lalamusa", "Sarai Alamgir", "Phalia", "Malakwal", "Sillanwali", "Bhera", "Shahpur", "Kot Momin", "Sahiwal City", "Chichawatni", "Harappa", "Qaboola", "Burewala City", "Lodhran City", "Karor Lal Esan", "Karor Pacca", "Duniya Pur", "Kahror Pakka", "Jalalpur Jattan", "Kunjah", "Sambrial", "Pasrur", "Zafarwal", "Shakargarh", "Ferozewala", "Muridke", "Kamoke", "Gakhar Mandi", "Eminabad", "Hafizabad City", "Pindi Bhattian", "Sangla Hill", "Sheikhupura City", "Nankana Sahib", "Safdarabad", "Sharaqpur", "Ellahabad", "Chunian", "Khudian", "Raiwind", "Changa Manga", "Mandi Faizabad", "Bhai Pheru", "Kot Radha Kishan", "Jand", "Pir Mahal", "Rajana", "Kamalia City", "Gojra City", "Shorkot City", "Ahmedpur Sial", "Athara Hazari", "Chowk Azam", "Chowk Sarwar Shaheed", "Karor", "Fatehpur", "Kot Sultan", "Choubara", "Daira Din Panah", "Jatoi City", "Alipur City", "Muzaffargarh City", "Basti Malook", "Shah Jamal", "Khangarh", "Mehmood Kot", "Kot Chutta", "Taunsa Sharif", "Tibbi Qaisrani", "Fort Munro", "Rojhan", "Mithankot", "Rajanpur City", "Fazilpur", "Dajal", "Kot Mithan", "Jhang Sadar", "Shorkot Cantt", "Ahmadpur Lamma", "Khanpur City", "Bahawalnagar City", "Fort Abbas", "Minchinabad", "Fortabbas", "Chak Jhumra", "Tandlianwala", "Mamukanjan", "Sumandri", "Gujar Khan", "Kallar Syedan", "Rawat", "Kahuta", "Sohawa", "Dina", "Mangla", "Dhirkot", "Kotli", "Bhimber", "Rawalakot", "Bagh", "Haveli", "Sheikhan", "Dargai", "Timergara", "Batkhela", "Shabqadar", "Tangi", "Takht Bhai", "Swabi", "Topi", "Kalam", "Besham", "Thakot", "Balakot", "Havelian", "Oghi", "Lakki Marwat", "Tank", "Karak", "Hangu", "Parachinar", "Kulachi", "Daud Khel", "Isa Khel", "Kundian", "Piplan", "Mianwali City", "Jauharabad", "Quaidabad", "Noorpur Thal", "Naushera", "Mitha Tiwana", "Chowk Munda", "Liaquat Pur", "Mehrabpur", "Kandiaro", "Moro", "Naushahro Feroze", "Daharki", "Mirpur Mathelo", "Ubauro", "Pano Aqil", "Rohri", "Kot Diji", "Ratodero", "Warah", "Qambar", "Shahdadkot", "Kamber", "Sehwan", "Hala", "Matiari", "Tando Muhammad Khan", "Tando Jam", "Kotri", "Sakrand", "Shahdadpur", "Sanghar City", "Khipro", "Jhudo", "Digri", "Naukot", "Mithi", "Diplo", "Chachro", "Nagarparkar", "Kunri", "Samaro", "Mehar", "Johi", "Bhan Syedabad", "Surjani", "Gadap", "Malir", "Landhi", "Bin Qasim", "Gulshan e Iqbal", "Dera Murad Jamali", "Usta Muhammad", "Nasirabad", "Jaffarabad", "Kharan", "Panjgur", "Kalat", "Mastung", "Chaman", "Loralai", "Qila Saifullah", "Pishin", "Ziarat", "Dalbandin", "Nushki", "Awaran", "Lasbela", "Uthal", "Bela", "Ormara", "Pasni"];_extra.forEach(c=>{if(!CITIES.some(x=>x.toLowerCase()===c.toLowerCase()))CITIES.push(c)})}
 const CITY_ALIASES=[[/\bd\.?\s?g\.?\s?khan\b|\bdgk\b/,'Dera Ghazi Khan'],[/\bmuzaffar\s+garh\b/,'Muzaffargarh'],[/\bkot\s?addu\b|\bkotaddu\b/,'Kot Addu'],[/\blodhra\b/,'Lodhran'],[/\brahim\s?yar\s?khan\b|\bryk\b|\br\.y\.?\s?khan\b/,'Rahim Yar Khan'],[/\bpindi\b/,'Rawalpindi'],[/\bd\.?\s?i\.?\s?khan\b/,'Dera Ismail Khan']];
-/* Known cities only (no guessing). The last city named in the address wins, e.g. "Multan Road, Vehari" -> Vehari */
+/* City is ALWAYS the last word(s) of the address. A directory name that appears earlier in the address is ignored,
+   e.g. "Multan Road, Vehari" -> Vehari, "House 5 Multan Road" -> (nothing, type it by hand) */
 function cityStrict(a){
   if(!a)return'';
-  let best='',pos=-1;
-  const consider=(re,name)=>{let m;while((m=re.exec(a))){if(m.index>=pos){pos=m.index;best=name}if(m[0]==='')re.lastIndex++}};
-  CITIES.forEach(c=>consider(new RegExp('\\b'+c.replace(/ /g,'\\s+')+'\\b','ig'),c));
-  CITY_ALIASES.forEach(([re,name])=>consider(new RegExp(re.source,'ig'),name));
+  let t=String(a).replace(/[\s.,;:\-–|\/\\()]+$/,'').replace(/\s+(pakistan|pk)$/i,'').replace(/[\s.,;:\-–|\/\\()]+$/,'');
+  if(!t)return'';
+  let best='',len=0;
+  const hit=(re,name)=>{const m=new RegExp('(?:^|[^A-Za-z])('+re+')$','i').exec(t);if(m&&m[1].length>len){len=m[1].length;best=name}};
+  CITIES.forEach(c=>hit(c.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/ /g,'\\s+'),c));
+  CITY_ALIASES.forEach(([re,name])=>hit(re.source.replace(/\\b/g,''),name));
   return best;
 }
 let cityManual=false;
 function histCity(d){let best='',bt=-1;histFor(d).forEach(r=>{const c=String(r.city||'').trim(),t=rowT(r)||0;if(c&&t>=bt){bt=t;best=c}});return best}
 function syncCity(){
   if(cityManual)return;
-  const c=cityStrict($('address').value)||(unlocked?histCity(data()):'');
+  const ad=$('address').value.trim(),c=cityStrict(ad)||(!ad&&!EDIT.ts&&unlocked?histCity(data()):'');
   if($('city').value!==c)$('city').value=c;
 }
 function cityOf(a){
@@ -962,7 +1051,7 @@ async function copyText(txt,msg){
 /* ---------- backup + PIN (patient data is fetched only after the PIN) ---------- */
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbyrgtSzvgr2r6LYJrxk0LNYvE1j-KZGYuTbx77iXC5YDOMWBjqXqWAs2dxz64EuBU7CFw/exec';
 const MSG={html:'Google returned a login/error page. In the deployment settings, set "Who has access" to Anyone.',bad:'The script returned an unexpected response.',old:'The Apps Script is outdated. Paste the latest code and deploy a new version.',net:'Network or connection problem.',locked:'Too many attempts. Please try again later.',pin:'Incorrect PIN.'};
-function setCloud(ok,msg){const c=$('cloud');c.className=ok===true?'ok':ok===false?'bad':'';c.textContent=ok===true?'☁️ Online':ok===false?'☁️ Offline':'☁️';c.dataset.msg=msg||'';c.title=msg||''}
+function setCloud(ok,msg){const c=$('cloud');c.className=ok===true?'ok':ok===false?'bad':'';c.textContent=ok===true?'☁️ Online'+(ME&&ME.name?' · '+(ME.no?ME.no+'. ':'')+ME.name:''):ok===false?'☁️ Offline':'☁️';c.dataset.msg=msg||'';c.title=msg||''}
 const sentSig={};let pending=[];
 const typedPin=()=>{const v=$('pin').value.trim();return /^\d{4}$/.test(v)?v:''};   // PIN typed but not logged in is still recorded with the order
 function recFrom(d){return{saved:new Date().toLocaleString('en-GB'),...d,date:fmtDate(d.date),time:fmtTime(d.time),invoice:d.invoice?'Yes':'No',pin:unlocked?curPin:typedPin(),chg:d.chg?'1':'',nw:d.chg?'':'1',cts:String(Date.now()),rts:d.chg?(CHG.ts||''):''}}
@@ -974,44 +1063,63 @@ async function post(rec){
 async function flush(){const q=pending;pending=[];for(const r of q){if(!(await post(r)))pending.push(r)}}
 addEventListener('online',flush);
 /* called on Save / Copy Email / Copy plain text – works silently with or without PIN */
-/* ---------- a "New Patient" who is already in the backup: ask before saving ---------- */
+/* ---------- ask before saving when the patient may already be in the backup ----------
+   1) the name was changed but the CNIC or the mobile number is already saved for another name  -> new patient, or the same patient?
+   2) status is New Patient but the same patient is already saved
+   3) same mobile number but a different CNIC                                                    */
 const sigOf=d=>JSON.stringify([digits(d.cnic)||d.name.toLowerCase(),d.pmobile,d.product,d.rate,d.qty,d.doctor,d.speciality,d.disease,d.address,d.notes,d.date,d.chg]);
 async function guardPatient(){   // true = go on with Save / Copy / Send, false = the user cancelled
   if(!unlocked||EDIT.ts)return true;
   const d=data();
   if(!d.name&&!digits(d.cnic))return true;
-  if(d.chg||d.status!=='New Patient')return true;   // updating on purpose, or a known patient (Carry Forward)
+  if(d.chg)return true;   // updating an earlier order on purpose
+  const cd=digits(d.cnic),nd=pkey(d.name);
+  const clash=rowsAll.filter(r=>pkey(r.name)!==nd&&((cd.length>=13&&digits(r.cnic)===cd)||mobOverlap(r.pmobile,d.pmobile)));
   const hits=rowsAll.filter(r=>samePerson(r,d));
-  if(!hits.length)return true;
+  const mobHits=rowsAll.filter(r=>{const rc=digits(r.cnic);return pkey(r.name)===nd&&rc.length>=13&&cd.length>=13&&rc!==cd&&mobOverlap(r.pmobile,d.pmobile)});
+  let kind='',list=[];
+  if(clash.length){kind='name';list=clash}
+  else if(hits.length&&d.status==='New Patient'){kind='same';list=hits}
+  else if(mobHits.length){kind='mob';list=mobHits}
+  if(!kind)return true;
   const sg=sigOf(d);if(sentSig[sg]&&Date.now()-sentSig[sg]<1800000)return true;   // the same order was just saved (Save, then Copy)
-  return patientPopup(d,hits);
+  return patientPopup(d,list,kind);
 }
-function patientPopup(d,hits){
+function patientPopup(d,hits,kind){
   return new Promise(res=>{
     const by=(a,b)=>rowT(b)-rowT(a),best=hits.slice().sort(by)[0],t=rowT(best);
     const mine=r=>isAdmin||r.pin===undefined||pn(r.pin)===pn(curPin);
-    const upd=hits.filter(r=>mine(r)&&rowT(r)&&Date.now()-rowT(r)<86400000).sort(by)[0];
+    const upd=kind==='mob'?null:hits.filter(r=>mine(r)&&rowT(r)&&Date.now()-rowT(r)<86400000).sort(by)[0];   // a row with another CNIC is never overwritten
+    const cSame=digits(best.cnic).length>=13&&digits(best.cnic)===digits(d.cnic),mSame=mobOverlap(best.pmobile,d.pmobile);
+    const what=cSame&&mSame?'CNIC and mobile number are':cSame?'CNIC is':'mobile number is';
+    const head={name:'⚠️ Name changed – this '+(cSame&&mSame?'CNIC and mobile':cSame?'CNIC':'mobile number')+' is already in the backup',same:'⚠️ This patient is already in the backup',mob:'⚠️ This mobile number is already in the backup'}[kind];
+    const txt={name:'The '+what+' already saved for <b>'+esc(rsp(best.name)||'(no name)')+'</b>, but you entered a different name. Is this a <b>new patient</b>, or the <b>same patient</b>? Correct the name, CNIC or mobile below if something was typed wrongly.',
+      same:'You are saving this as a <b>New Patient</b>. If it is a different person, change the name, CNIC or mobile below. If it is the same person, choose what to do.',
+      mob:'This <b>mobile number</b> is already saved for the patient above, but with a <b>different CNIC</b>. If the CNIC was typed wrongly, correct it below. If this really is a new patient, save it as a new entry.'}[kind];
     const ov=document.createElement('div');ov.id='cpOv';
-    ov.innerHTML='<div class="npc" role="dialog" aria-modal="true"><h3>⚠️ This patient is already in the backup</h3>'+
+    ov.innerHTML='<div class="npc" role="dialog" aria-modal="true"><h3>'+head+'</h3>'+
      '<p><b>'+esc(rsp(best.name)||'(no name)')+'</b>'+(best.cnic?' · '+esc(best.cnic):'')+(best.pmobile?' · '+esc(best.pmobile):'')+' – last entry: '+esc(((best.product||'')+(best.qty?' '+best.qty:'')).trim())+(t?', '+ago(t)+' ago':'')+'.</p>'+
-     '<p>You are saving this as a <b>New Patient</b>. If it is a different person, change the name, CNIC or mobile below. If it is the same person, choose what to do.</p>'+
+     '<p>'+txt+'</p>'+
      '<label for="cpName">Patient name</label><input id="cpName" value="'+esc(d.name)+'" autocomplete="off">'+
      '<label for="cpCnic">CNIC</label><input id="cpCnic" inputmode="numeric" value="'+esc(d.cnic)+'" autocomplete="off">'+
      '<label for="cpMob">Mobile</label><input id="cpMob" inputmode="tel" value="'+esc((mobsForm()[0])||'')+'" autocomplete="off">'+
      '<div id="cpErr" role="alert" style="color:#b42318;font-size:13px;font-weight:600;min-height:18px;margin-top:8px"></div>'+
-     '<div class="npb" style="flex-direction:column"><button type="button" id="cpNew" style="background:#0e6b5c;color:#fff">➕ Save as a new entry</button>'+(upd?'<button type="button" id="cpUpd">✏️ Update the earlier entry instead</button>':'')+'<button type="button" id="cpNo">Cancel</button></div></div>';
+     '<div class="npb" style="flex-direction:column"><button type="button" id="cpNew" style="background:#0e6b5c;color:#fff">'+(kind==='name'?'➕ New patient – save as a new entry':'➕ Save as a new entry')+'</button>'+
+     (kind==='name'?(upd?'<button type="button" id="cpUpd">✏️ Same patient – update the older entry</button>':'<button type="button" id="cpRep">🔁 Same patient – save as a repeat order</button>'):(upd?'<button type="button" id="cpUpd">✏️ Update the earlier entry instead</button>':''))+
+     '<button type="button" id="cpNo">Cancel</button></div></div>';
     document.body.appendChild(ov);
     const done=v=>{ov.remove();document.removeEventListener('keydown',kd);res(v)};
     const kd=e=>{if(e.key==='Escape')done(false)};document.addEventListener('keydown',kd);
-    $('cpNo').onclick=()=>done(false);
-    $('cpNew').onclick=()=>{
+    const apply=()=>{   // the name / CNIC / mobile as corrected in the popup
       const nm=$('cpName').value.trim(),cn=$('cpCnic').value.trim(),mb=$('cpMob').value.trim();
-      if(!nm&&!digits(cn)){$('cpErr').textContent='Enter the name or the CNIC';return}
+      if(!nm&&!digits(cn)){$('cpErr').textContent='Enter the name or the CNIC';return false}
       $('name').value=nm;$('cnic').value=cn;
       if(cleanMob(mb)!==cleanMob(mobsForm()[0]||''))$('pmobile').value=mb;
-      render();done(true);
-    };
-    if($('cpUpd'))$('cpUpd').onclick=()=>{startChange(upd);render();done(true)};
+      return true};
+    $('cpNo').onclick=()=>done(false);
+    $('cpNew').onclick=()=>{if(!apply())return;if(kind==='name')$('status').value='New Patient';render();done(true)};
+    if($('cpRep'))$('cpRep').onclick=()=>{if(!apply())return;$('status').value='Carry Forward Patient';render();done(true)};
+    if($('cpUpd'))$('cpUpd').onclick=()=>{if(!apply())return;startChange(upd);render();done(true)};
   });
 }
 async function backup(){
@@ -1079,7 +1187,7 @@ async function sync(pin){
       try{j=JSON.parse(txt)}catch(e){return{err:/<html|<!doctype/i.test(txt)?'html':'bad'}}
       if(Array.isArray(j))return{err:'old'};
       if(j&&j.error)return{err:j.error};
-      if(j&&j.ok&&Array.isArray(j.rows))return{rows:j.rows,role:j.role||'user',v:j.v||'',tabs:Array.isArray(j.tabs)?j.tabs:null,cfg:Array.isArray(j.cfg)?j.cfg:null};
+      if(j&&j.ok&&Array.isArray(j.rows))return{rows:j.rows,role:j.role||'user',v:j.v||'',tabs:Array.isArray(j.tabs)?j.tabs:null,cfg:Array.isArray(j.cfg)?j.cfg:null,me:j.me||null,staff:Array.isArray(j.staff)?j.staff:null,team:!!j.team};
       return{err:'bad'};
     }catch(e){if(a===1)return{err:'net'};await new Promise(r=>setTimeout(r,1200))}
   }
@@ -1107,10 +1215,10 @@ function applyMode(){
   $('pin').style.display=unlocked?'none':'';$('login').style.display=unlocked?'none':'';$('loginScr').style.display=unlocked?'none':'flex';document.body.style.overflow=unlocked?'':'hidden';
   $('lock').style.display=unlocked?'':'none';
   $('cloud').style.display=unlocked?'':'none';
-  $('tabs').style.display=unlocked?'':'none';if(!unlocked&&REP.view==='rep')showView('email');
+  $('tabs').style.display=unlocked?'':'none';$('tabStaff').style.display=(unlocked&&isAdmin)?'':'none';if(!unlocked&&REP.view==='stf')showView('email');if(!unlocked&&REP.view==='rep')showView('email');
   layout();
   $('status').options[0].text=unlocked?'Auto (from backup)':'Select status…';
-  if(!unlocked){SIGF.forEach(k=>$(k).value='');patients={};prods={};rowsAll=[];curPin='';isAdmin=false;$('ver').textContent='Page '+APP_VER}
+  if(!unlocked){SIGF.forEach(k=>$(k).value='');patients={};prods={};rowsAll=[];curPin='';isAdmin=false;SEEALL=false;ME=null;STAFF=[];$('ver').textContent='Page '+APP_VER}
   refreshLists();render();
 }
 function clearSess(){delete MEM.sess;try{localStorage.removeItem('sess')}catch(e){}}   // the PIN is kept on this device until the user logs out
@@ -1131,14 +1239,14 @@ async function tryUnlock(pin,silent){
     lgErr(m);lgShake();if(!silent)toast(m);return}
   $('pin').value='';lgErr('');
   SS('sess',pin);   // stay logged in after a refresh until Logout
-  SRV_TABS=r.tabs||null;SRV_V=r.v||'';const n=loadRows(r.rows);curPin=pin;cfgLoad(r.cfg);unlocked=true;isAdmin=r.role==='admin';sigLoad();rebuildProds();applyMode();
+  SRV_TABS=r.tabs||null;SRV_V=r.v||'';const n=loadRows(r.rows);curPin=pin;cfgLoad(r.cfg);unlocked=true;isAdmin=r.role==='admin';SEEALL=isAdmin||!!r.team;ME=r.me||null;STAFF=r.staff||[];sigLoad();rebuildProds();applyMode();
   $('ver').textContent='Page '+APP_VER+' · Script '+(r.v||'older version');
   setCloud(true,n+' records, '+Object.keys(prods).length+' products loaded');
   if(!silent)toast(r.role==='admin'?'You are logged in ✔ (Admin)':n?'You are logged in ✔':'You are logged in ✔ – no earlier data for this PIN (check the PIN if this was a mistake)');
 }
 async function resync(){
   const r=await sync(curPin);
-  if(r.rows){SRV_TABS=r.tabs||null;SRV_V=r.v||'';const n=loadRows(r.rows);cfgLoad(r.cfg);repPrep();rebuildProds();refreshLists();render();setCloud(true,n+' records, '+Object.keys(prods).length+' products loaded')}
+  if(r.rows){if(r.staff)STAFF=r.staff;if(r.me)ME=r.me;SRV_TABS=r.tabs||null;SRV_V=r.v||'';const n=loadRows(r.rows);cfgLoad(r.cfg);repPrep();rebuildProds();refreshLists();render();setCloud(true,n+' records, '+Object.keys(prods).length+' products loaded')}
   else{setCloud(false,MSG[r.err]||'Error');if(r.err==='pin'||r.err==='locked')lock()}
 }
 
@@ -1238,7 +1346,8 @@ $('design').innerHTML=DESIGN_LIST.map(x=>`<option value="${x[0]}">🎨 Design: $
 $('design').value='classic';   // always start with Classic (Original)
 $('design').addEventListener('change',render);
 let tm;$('smart').addEventListener('input',()=>{clearTimeout(tm);tm=setTimeout(applySmart,350)});
-$('city').addEventListener('input',()=>{cityManual=!!$('city').value.trim()});   // must run before render
+$('city').addEventListener('input',()=>{cityManual=true});   // typing = manual, even while the box is empty
+$('city').addEventListener('blur',()=>{if(!$('city').value.trim()){cityManual=false;render()}});   // must run before render
 FIELDS.forEach(k=>$(k).addEventListener('input',k==='doctor'?()=>{fillSpec();render()}:render));
 SIGF.forEach(k=>$(k).addEventListener('input',()=>{sigSave();render()}));
 $('doctor').addEventListener('change',()=>{$('doctor').value=normDoc($('doctor').value)||DRP;fillSpec();render()});
@@ -1337,7 +1446,7 @@ function repBuildOpts(reset){
   });
 }
 const msLabel=t=>{const n=REP.sel[t].size,tot=REP.opts[t].length;return (n===0||n>=tot)?'All ('+tot+')':n+' of '+tot+' selected'};
-function repRenderMs(){['city','doc','prod','status'].concat(isAdmin?['pin']:[]).forEach(msRender)}
+function repRenderMs(){['city','doc','prod','status'].concat(SEEALL?['pin']:[]).forEach(msRender)}
 const MS_META={city:['msCity','City'],doc:['msDoc','Doctor'],prod:['msProd','Product'],pin:['msPin','Staff PIN'],status:['msStatus','Patient Status']};
 function msRender(t){
   const [id,title]=MS_META[t],box=$(id),set=REP.sel[t];
@@ -1357,7 +1466,7 @@ function repFiltered(){
   const f=REP.sel,o=REP.opts,df=$('rFrom').value,dt=$('rTo').value;
   if(!df||!dt)return[];   // nothing is listed until both dates are chosen
   const narrow=t=>f[t].size>0&&f[t].size<o[t].length;   // nothing ticked (or everything ticked) = no restriction; ticking some = only those
-  const rc=narrow('city'),rd=narrow('doc'),rp=isAdmin&&narrow('pin'),rpr=narrow('prod'),rs=narrow('status');
+  const rc=narrow('city'),rd=narrow('doc'),rp=SEEALL&&narrow('pin'),rpr=narrow('prod'),rs=narrow('status');
   return rowsAll.filter(r=>{const n=r._n;if(!n||!n.date||n.date<df||n.date>dt)return false;
     if(rp&&!f.pin.has(n.pinK))return false;
     if(rpr&&!f.prod.has(n.prodK))return false;
@@ -1545,7 +1654,7 @@ function flagApply(r,ch){   // update the row here and return what is sent to th
 }
 async function flagBulk(items,ch,label){
   if(!flagOK()){toast('This needs the latest Google Apps Script (version tabs8 or newer). Please deploy the new script first.');return}
-  const mine=items.filter(x=>isAdmin||pn(x.r.pin)===pn(curPin));
+  const mine=items.filter(x=>SEEALL||pn(x.r.pin)===pn(curPin));
   if(!mine.length){toast('You can only change your own patients');return}
   const recs=[];mine.forEach(x=>{const rec=flagApply(x.r,typeof ch==='function'?ch(x):ch);if(rec)recs.push(rec)});
   fcRun(true);   // show the result at once
@@ -1567,13 +1676,16 @@ async function flagSave(r,ch){
 const DAY7=7*86400000;
 function rowMs(r){const t=rowT(r);if(t)return t;const d=r._n&&r._n.date;return d?new Date(d+'T00:00:00').getTime():0}
 function canDelete(r){const t=rowMs(r);return !!t&&Date.now()-t<DAY7&&(isAdmin||pn(r.pin)===pn(curPin))}
+function telNum(m){let d=String(m||'').replace(/\D/g,'');if(d.startsWith('0092'))d=d.slice(2);else if(d.startsWith('0'))d='92'+d.slice(1);else if(d.length===10&&d[0]==='3')d='92'+d;return d}
+function mobBtns(r){const ms=mobsOf(r.pmobile);if(!ms.length)return'';
+  return ms.map(m=>{const n=telNum(m);return'<span class="mrow"><b>'+esc(m)+'</b><a class="cbtn call" href="tel:+'+n+'" title="Call">📞 Call</a><a class="cbtn wa" href="https://wa.me/'+n+'" target="_blank" rel="noopener" title="WhatsApp">💬 WhatsApp</a></span>'}).join('')}
 function detailsHTML(r){
   const mob=mobsOf(r.pmobile).join(' / ')||String(r.pmobile||'').trim();
   const dt=(r._n&&r._n.date?fmtDate(r._n.date):'')+(String(r.time||'').trim()?' · '+String(r.time).trim():'');
   const sp=String(r.speciality||'').trim();
   const L=[['📅 Date & Time',dt],['👤 Patient name',rsp(r.name)],['📱 Mobile',mob],['🪪 CNIC',repCnic(r.cnic)],['🦠 Disease',rsp(r.disease)],['📍 Address',rsp(r.address)],['🏙️ City',rsp(r.city)],['🏷️ Status',rsp(r.status)],
     ['💊 Product',rsp(r.product)],['💰 Patient price',rsp(r.rate)],['📦 Quantity',rsp(r.qty)],['🩺 Prescriber',rsp(r.doctor)+(rsp(r.doctor)&&sp?'   ·   '+sp:(sp||''))],['🧾 Invoice',rsp(r.invoice)],['❄️ Ice kit',rsp(r.icekit)],['📝 Notes',rsp(r.notes)]];
-  return'<div class="dcard"><div class="pt">🧾 Patient details</div>'+L.filter(x=>String(x[1]||'').trim()).map(x=>'<div class="dr"><span>'+x[0]+'</span><b>'+esc(String(x[1]))+'</b></div>').join('')+'</div>';
+  return'<div class="dcard"><div class="pt">🧾 Patient details</div>'+L.filter(x=>String(x[1]||'').trim()).map(x=>x[0]==='📱 Mobile'&&mobBtns(r)?'<div class="dr"><span>'+x[0]+'</span><div class="mcol">'+mobBtns(r)+'</div></div>':'<div class="dr"><span>'+x[0]+'</span><b>'+esc(String(x[1]))+'</b></div>').join('')+'</div>';
 }
 function patientSummaryHTML(r){
   const H=histFor(r);
@@ -1605,7 +1717,7 @@ function paintPick(){
   if(!r||!REP.cur.includes(r)){REP.pick=null;return}
   const tr=[...document.querySelectorAll('#rTable tr[data-i]')].find(t=>REP.cur[+t.dataset.i]===r);
   if(!tr){REP.pick=null;return}
-  const mine=isAdmin||pn(r.pin)===pn(curPin),can=canDelete(r),n=NOREP.get(r),fl=!!n&&mine,xb=RMAP.get(r),ex=!n&&!!xb&&xb.big&&mine;
+  const mine=SEEALL||pn(r.pin)===pn(curPin),can=canDelete(r),n=NOREP.get(r),fl=!!n&&mine,xb=RMAP.get(r),ex=!n&&!!xb&&xb.big&&mine;
   const info='<b>'+esc(rsp(r.name)||'(no name)')+'</b> · '+esc(rsp(r.product)||'(no product)')+' · '+esc(fmtDate(r._n.date));
   const row=document.createElement('tr');row.className='actrow';
   const td=document.createElement('td');td.colSpan=tr.children.length;
@@ -1660,12 +1772,60 @@ $('rTable').onclick=e=>{const tr=e.target.closest('tr[data-i]');if(!tr)return;co
 function repOpen(){
   if(!$('rFrom').value&&!$('rTo').value){$('rFrom').value=todayISO();$('rTo').value=todayISO()}   // History opens on today's emails
   repPrep();
-  $('msPin').style.display=isAdmin?'':'none';
+  $('msPin').style.display=SEEALL?'':'none';
   repBuildOpts(true);repRenderMs();repRun();
 }
+
+/* ===== Staff Management (admin) ===== */
+const LVC=[['#e8f1ff','#2563eb'],['#e6f7ee','#16a34a'],['#fff4e0','#f59e0b'],['#fde8ef','#e11d48'],['#f1e8ff','#7c3aed'],['#e0f7fa','#0891b2'],['#fff0e6','#ea580c'],['#eceff1','#546e7a']],lvc=d=>LVC[(Math.max(d,1)-1)%LVC.length],stfBy=n=>STAFF.find(x=>x.no===n),stfNm=s=>s.no+'. '+(s.name||'(no name)'),DRAFT=[];
+function stfPick(title,opts,cb){
+  const o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px';
+  o.innerHTML='<div style="background:#fff;border-radius:16px;padding:18px;max-width:420px;width:100%"><h2>'+title+'</h2><select style="margin:10px 0">'+opts.map(x=>'<option value="'+x.no+'">'+esc(stfNm(x))+'</option>').join('')+'</select><div class="rbtns"><button type="button" class="b-copy" data-ok>Confirm</button> <button type="button" class="b-lite" data-no>Cancel</button></div></div>';
+  o.onclick=e=>{if(e.target.dataset.no!==undefined||e.target===o)o.remove();else if(e.target.dataset.ok!==undefined){const v=+o.querySelector('select').value;o.remove();cb(v)}};
+  document.body.appendChild(o);
+}
+async function stfSend(op){
+  const ok=await post({stf:'1',pin:curPin,...op});toast(ok?'Saving…':'Could not send – check internet');
+  setTimeout(()=>resync().then(()=>{DRAFT.length=0;stfRender();setCloud(true,'')}),1800);
+}
+function stfRender(){
+  const act=STAFF.filter(x=>x.active),by=n=>STAFF.find(x=>x.no===n),inp='style="padding:7px 9px;border-radius:9px"';
+  const ecnt={};rowsAll.forEach(r=>{const k=pn(r.pin);if(k)ecnt[k]=(ecnt[k]||0)+1});const ent=x=>x.pin?(ecnt[pn(x.pin)]||0):0;
+  const known=new Set(STAFF.map(x=>pn(x.pin)).filter(Boolean)),cnt={};
+  rowsAll.forEach(r=>{const k=pn(r.pin);if(k&&k!==pn(curPin)&&!known.has(k))cnt[k]=(cnt[k]||0)+1});
+  const row=(x,d)=>{
+    const sb=STAFF.filter(y=>y.link.includes(x.no)).map(y=>'<span class="chip" style="background:#fff1c9;border-radius:999px;padding:3px 9px;font-size:12px;margin:2px;display:inline-block">👁 Also seen by '+esc(stfNm(y))+' <a href="#" data-a="unlink" data-no="'+y.no+'" data-to="'+x.no+'">✖ unmerge</a></span>').join('');const lk=x.link.map(n=>by(n)).filter(Boolean).map(t=>'<span class="chip" style="background:#e5f3ef;border-radius:999px;padding:3px 9px;font-size:12px;margin:2px;display:inline-block">🔗 Also sees '+esc(stfNm(t))+' <a href="#" data-a="unlink" data-no="'+x.no+'" data-to="'+t.no+'">✖ unmerge</a></span>').join('');
+    return draft(x.no,d,'above')+'<div class="dcard" style="margin:8px 0 0 '+d*14+'px;background:'+lvc(d)[0]+';border-left:7px solid '+lvc(d)[1]+'"><div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"><b style="min-width:30px">'+x.no+'.</b><span style="background:'+lvc(d)[1]+';color:#fff;border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700">Level '+d+'</span><input data-f="name" value="'+esc(x.name)+'" placeholder="Name" style="flex:1 1 120px;width:auto" '+inp.slice(0,0)+'><input data-f="pin" value="'+esc(x.pin)+'" placeholder="PIN" inputmode="numeric" maxlength="4" style="width:84px;text-align:center" ><button type="button" class="b-copy" data-a="save" data-no="'+x.no+'">💾</button><button type="button" class="b-lite" data-a="add" data-no="'+x.no+'">➕ Add more</button><button type="button" class="b-lite" data-a="above" data-no="'+x.no+'">⬆ Layer above</button>'+(act.some(y=>y.parent===x.no)?'<button type="button" class="b-lite" data-a="below" data-no="'+x.no+'">⬇ Layer between</button>':'')+'<button type="button" class="b-lite" data-a="link" data-no="'+x.no+'">🔗 Merge</button><button type="button" class="b-lite" data-a="'+(ent(x)?'del':'purge')+'" data-no="'+x.no+'">'+(ent(x)?'🗑 Remove':'🗑 Delete')+'</button></div>'+((lk||sb)?'<div style="margin-top:4px">'+lk+sb+'</div>':'')+'<div class="hint">'+ent(x)+' entries</div>'+(x.pin?'':'<div class="hint">Vacant – no PIN yet</div>')+'</div>'+kids(x.no,d+1)};
+  const draft=(par,d,key='par')=>DRAFT.filter(q=>q[key]===par).map(q=>'<div class="dcard" style="margin:8px 0 0 '+d*14+'px;border-left:7px dashed '+lvc(d)[1]+'">'+(q.above?'<div class="hint">⬆ New layer – placed above this seat; it sees the whole team below it</div>':'')+('below' in q?'<div class="hint">⬇ New layer between here and the ticked seats below. They move under the new person, who sees all of them.</div><div style="margin:4px 0">'+act.filter(y=>y.parent===q.below).map(y=>'<label style="display:inline-flex;gap:5px;align-items:center;margin:2px 10px 2px 0"><input type="checkbox" data-k="'+y.no+'" checked style="width:auto;padding:0">'+esc(stfNm(y))+'</label>').join('')+'</div>':'')+'<div style="display:flex;flex-wrap:wrap;gap:6px" data-d="'+q.id+'"><input data-f="name" value="'+esc(q.name||'')+'" placeholder="Name" style="flex:1 1 120px;width:auto"><input data-f="pin" value="'+esc(q.pin||'')+'" placeholder="4-digit PIN" inputmode="numeric" maxlength="4" style="width:100px;text-align:center"><button type="button" class="b-copy" data-a="dsave" data-id="'+q.id+'">💾 Add</button><button type="button" class="b-lite" data-a="dcancel" data-id="'+q.id+'">✖</button></div></div>').join('');
+  const kids=(par,d)=>draft(par,d,'below')+act.filter(x=>x.parent===par).map(x=>row(x,d)).join('')+draft(par,d);
+  const gone=STAFF.filter(x=>!x.active);
+  const dep=x=>{let n=1,p=x;while(p&&p.parent&&n<30){p=by(p.parent);n++}return n},mx=act.reduce((m,x)=>Math.max(m,dep(x)),0);
+  const legend=mx?'<div class="hint" style="margin:6px 0">Colours = layers (Level 1 is directly under Admin; each deeper layer has its own colour): '+Array.from({length:mx},(_,i)=>'<span style="background:'+lvc(i+1)[1]+';color:#fff;border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700;margin:2px;display:inline-block">Level '+(i+1)+'</span>').join('')+'</div>':'';
+  $('stfBody').innerHTML=legend+'<div class="dcard" style="background:#fff8db;border-left:7px solid #d4a017"><b>👑 Admin</b> <button type="button" class="b-lite" data-a="add" data-no="0">➕ Add more</button>'+(act.some(y=>y.parent===0)?' <button type="button" class="b-lite" data-a="below" data-no="0">⬇ Layer between</button>':'')+'</div>'+kids(0,1)+
+    (Object.keys(cnt).length?'<div class="sh">PINs found in your data but not listed – tap to add</div>'+Object.keys(cnt).map(k=>'<button type="button" class="b-lite" style="margin:3px" data-a="adopt" data-pin="'+k+'">➕ '+k+' ('+cnt[k]+' rows)</button>').join(''):'')+
+    (gone.length?'<div class="sh">Removed seats – restore or unmerge any time</div>'+gone.map(x=>{const rb=STAFF.filter(y=>y.link.includes(x.no)).map(y=>'<span class="chip" style="background:#fff1c9;border-radius:999px;padding:3px 9px;font-size:12px;margin:2px;display:inline-block">Data seen by '+esc(stfNm(y))+' <a href="#" data-a="unlink" data-no="'+y.no+'" data-to="'+x.no+'">✖ unmerge</a></span>').join('');return'<div class="dcard" style="margin:8px 0"><b>'+esc(stfNm(x))+'</b> · PIN '+esc(x.pin||'-')+' · '+ent(x)+' entries<div style="margin:4px 0">'+(rb||'<span class="hint">Data not merged anywhere</span>')+'</div><button type="button" class="b-copy" data-a="restore" data-no="'+x.no+'">♻ Restore</button> '+(ent(x)?'':'<button type="button" class="b-lite" data-a="purge" data-no="'+x.no+'">🗑 Delete forever</button>')+'</div>'}).join(''):'');
+}
+$('stfBody').addEventListener('click',e=>{
+  const b=e.target.closest('[data-a]');if(!b)return;e.preventDefault();
+  const a=b.dataset.a,no=+b.dataset.no||0,card=b.closest('.dcard'),val=f=>(card.querySelector('[data-f="'+f+'"]')||{}).value||'';
+  const chk=(pin,self)=>{if(pin&&!/^\d{4}$/.test(pin)){toast('PIN must be 4 digits');return false}
+    if(pin&&(pn(pin)===pn(curPin)||STAFF.some(x=>x.no!==self&&x.pin&&pn(x.pin)===pn(pin)))){toast('This PIN is already used');return false}return true};
+  if(a==='add'){DRAFT.push({id:Date.now(),par:no});stfRender()}
+  else if(a==='below'){DRAFT.push({id:Date.now(),below:no});stfRender()}
+  else if(a==='above'){DRAFT.push({id:Date.now(),above:no});stfRender()}
+  else if(a==='adopt'){DRAFT.push({id:Date.now(),par:0,pin:b.dataset.pin});stfRender()}
+  else if(a==='dcancel'){DRAFT.splice(DRAFT.findIndex(q=>q.id==b.dataset.id),1);stfRender()}
+  else if(a==='dsave'){const q=DRAFT.find(q=>q.id==b.dataset.id),pin=val('pin').trim();if(!val('name').trim()&&!pin){toast('Enter a name or PIN');return}const ks=[...card.querySelectorAll('[data-k]:checked')].map(i=>i.dataset.k).join(',');if('below' in q&&!ks){toast('Tick at least one seat to move under the new layer');return}if(chk(pin,0))stfSend('below' in q?{op:'insbelow',no:q.below,name:val('name').trim(),spin:pin,kids:ks}:q.above?{op:'ins',no:q.above,name:val('name').trim(),spin:pin}:{op:'save',no:0,parent:q.par,name:val('name').trim(),spin:pin})}
+  else if(a==='save'){const pin=val('pin').trim();if(chk(pin,no))stfSend({op:'save',no,name:val('name').trim(),spin:pin})}
+  else if(a==='link'){const o=STAFF.filter(x=>x.active&&x.no!==no);if(!o.length){toast('No other seat yet');return}stfPick('Also show the data of which employee?',o,v=>stfSend({op:'link',no,to:v}))}
+  else if(a==='restore'){stfPick('Restore under which seat? (its data returns to it)',[{no:0,name:'Admin'}].concat(STAFF.filter(x=>x.active&&x.no!==no)),v=>stfSend({op:'restore',no,parent:v}))}
+  else if(a==='purge'){const t=stfBy(no);if(confirm('Delete '+(t?stfNm(t):'this seat')+' permanently? It has no entries. Its employee code becomes free again.'))stfSend({op:'purge',no})}
+  else if(a==='unlink'){if(confirm('Unmerge? The merged data stops showing in that seat.'))stfSend({op:'unlink',no,to:+b.dataset.to})}
+  else if(a==='del'){const o=[{no:0,name:'Admin only (nobody else sees it)'}].concat(STAFF.filter(x=>x.active&&x.no!==no));stfPick('Which employee receives this seat\'s data? (merged, you can unmerge later)',o,v=>stfSend({op:'del',no,into:v}))}
+});
 function repAfterChange(){repPrep();repBuildOpts(false);repRenderMs();repRun()}   // e.g. after a delete: keep the ticks
 function layout(){
-  const rp=REP.view==='rep',fc=REP.view==='fc',em=!rp&&!fc,ok=unlocked;
+  const rp=REP.view==='rep',fc=REP.view==='fc',sf=REP.view==='stf',em=!rp&&!fc&&!sf,ok=unlocked;$('stfPage').style.display=(ok&&sf)?'':'none';
   document.querySelector('main').style.display=(ok&&em)?'':'none';
   $('repPage').style.display=(ok&&rp)?'':'none';
   $('fcPage').style.display=(ok&&fc)?'':'none';
@@ -1673,11 +1833,12 @@ function layout(){
   $('lockMsg').style.display=ok?'none':'';
 }
 function showView(v){
-  REP.view=v;const rp=v==='rep',fc=v==='fc';
-  $('tabEmail').classList.toggle('on',!rp&&!fc);$('tabRep').classList.toggle('on',rp);$('tabFc').classList.toggle('on',fc);
+  if(v==='stf'&&!isAdmin)v='email';REP.view=v;const rp=v==='rep',fc=v==='fc',sf=v==='stf';$('tabStaff').classList.toggle('on',sf);
+  $('tabEmail').classList.toggle('on',!rp&&!fc&&!sf);$('tabRep').classList.toggle('on',rp);$('tabFc').classList.toggle('on',fc);
   layout();
   if(rp&&unlocked){repOpen();scrollTo(0,0)}
   if(fc&&unlocked){fcOpen();scrollTo(0,0)}
+  if(sf&&unlocked){stfRender();scrollTo(0,0)}
 }
 function repReset(){$('rFrom').value='';$('rTo').value='';repOpen()}
 function repDates(){repBuildOpts(true);repRenderMs();repRun()}
@@ -1778,7 +1939,7 @@ function fcShow(k,cat,quiet){
   const dh=cat==='exp'?'Expected date':cat==='up'?'Repeat due date':cat==='total'?'Expected / due date':'Last order';
   const dv=x=>cat==='exp'?x.exp:cat==='up'?x.dueISO:cat==='total'?(c.exp.includes(x)?x.exp:x.dueISO):x.iso;
   FC.cur={k,cat};
-  const act=x=>isAdmin||pn(x.r.pin)===pn(curPin);
+  const act=x=>SEEALL||pn(x.r.pin)===pn(curPin);
   $('fcList').innerHTML='<h2 style="margin:12px 0 4px">'+esc(title)+'</h2><p class="hint" style="margin:0 0 6px">'+sm.n+' patient'+(sm.n===1?'':'s')+', total qty '+fmtN(sm.q)+'. Tap a patient to see the details and remarks, or tick patients to change many together.</p>'+rcChips+
     (sm.n?'<div class="fbulk"><label class="fsel"><input type="checkbox" id="fcAll"> Select all</label><span id="fcCnt" class="hint" style="margin:0">0 selected</span><div class="rbtns" id="fcBtns" style="display:none"><button type="button" class="b-lite" data-b="exp">📅 Expected Date</button><button type="button" class="b-lite" data-b="rmk">💬 Remarks</button>'+(cat==='drop'?'<button type="button" class="b-lite" data-b="undrop">↩️ Undo drop</button>':'<button type="button" class="b-del" data-b="drop">⛔ Drop</button>')+'</div><div id="fcBox"></div></div>':'')+
     '<div style="overflow-x:auto"><table class="fctab"><thead><tr><th></th><th>Patient</th><th>Product</th><th>Qty</th><th>'+dh+'</th></tr></thead><tbody>'+
@@ -1842,7 +2003,7 @@ $('fcList').onclick=e=>{
   document.querySelectorAll('#fcList tr.fdet').forEach(x=>x.remove());   // one open panel at a time
   if(wasOpen)return;
   const x=FC.list[+tr.dataset.i],r=x.r;
-  const mine=isAdmin||pn(r.pin)===pn(curPin),canE=mine&&expOK(x),pr=rmkParse(r.remarks),needCat=!!(x.exp||x.drop);
+  const mine=SEEALL||pn(r.pin)===pn(curPin),canE=mine&&expOK(x),pr=rmkParse(r.remarks),needCat=!!(x.exp||x.drop);
   const fcBtnsH=mine?'<button type="button" class="b-lite" id="fRmk">💬 Remarks</button>'+(canE?'<button type="button" class="b-lite" id="fExp">📅 Expected Date</button>':'')+(x.drop?'<button type="button" class="b-lite" id="fUndrop">↩️ Undo drop</button>':'<button type="button" class="b-del" id="fDrop">⛔ Drop</button>'):'';
   const fcBoxesH=mine?'<div class="psum" id="fRmkBox" style="margin-top:8px;display:none"><label for="fRemark">📝 Remarks'+(rmkEdited(r)?' <b>(edited)</b>':'')+'</label>'+(needCat?'<select id="fCat" style="width:100%;margin:4px 0">'+catOpts(pr.cat)+'</select>':'')+'<textarea id="fRemark" rows="3" maxlength="480" style="min-height:70px">'+esc(pr.text)+'</textarea><button type="button" class="b-lite" id="fRemarkSave" style="margin-top:6px">💾 Save remarks</button></div>'+
     (canE?'<div class="psum" id="fExpBox" style="margin-top:8px;display:none"><label for="fExpDate">📅 Expected date of the next order</label><input type="date" id="fExpDate" min="'+todayISO()+'" value="'+esc(x.exp&&!x.expP?x.exp:'')+'"><div class="rbtns"><button type="button" class="b-lite" id="fExpSave">💾 Save date</button>'+(x.exp?'<button type="button" class="b-lite" id="fExpClear">✕ Clear date</button>':'')+'</div></div>':'')+
@@ -1869,7 +2030,7 @@ $('fcList').onchange=e=>{
   else if(e.target.classList.contains('fck'))fcCount();
 };
 if(!$('rLegend'))$('rSum').insertAdjacentHTML('afterend','<div class="leg" id="rLegend">'+LEG_HTML+'</div>');
-$('tabEmail').onclick=()=>showView('email');$('tabRep').onclick=()=>showView('rep');$('tabFc').onclick=()=>showView('fc');$('rBack').onclick=()=>showView('email');$('fcBack').onclick=()=>showView('email');
+$('tabEmail').onclick=()=>showView('email');$('tabRep').onclick=()=>showView('rep');$('tabFc').onclick=()=>showView('fc');$('tabStaff').onclick=()=>showView('stf');$('rBack').onclick=()=>showView('email');$('fcBack').onclick=()=>showView('email');
 $('rFrom').onchange=$('rTo').onchange=repDates;
 $('rPII').onchange=repRun;$('rReset').onclick=repReset;$('rXlsx').onclick=repXlsx;$('rPdf').onclick=repPdf;
 $('date').value=todayISO();$('time').value=nowHM();applyMode();
@@ -1880,6 +2041,40 @@ async function restoreSession(){
 }
 restoreSession();
 window.addEventListener('online',()=>{if(!unlocked)restoreSession()});
+</script>
+<script>
+/* PREMIUM LAYER – visual effects only */
+(function(){
+  const rm=matchMedia('(prefers-reduced-motion:reduce)').matches,$=id=>document.getElementById(id);
+  /* scroll progress */
+  const pg=document.createElement('div');pg.id='prog';document.body.appendChild(pg);
+  addEventListener('scroll',()=>{const h=document.documentElement;pg.style.width=(h.scrollTop/Math.max(1,h.scrollHeight-h.clientHeight)*100)+'%'},{passive:true});
+  /* ripple on every button */
+  document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('button');if(!b||b.disabled)return;
+    const r=b.getBoundingClientRect(),s=Math.max(r.width,r.height),d=document.createElement('span');d.className='rip';
+    d.style.cssText='width:'+s+'px;height:'+s+'px;left:'+(e.clientX-r.left-s/2)+'px;top:'+(e.clientY-r.top-s/2)+'px';
+    b.appendChild(d);setTimeout(()=>d.remove(),650)});
+  /* cursor spotlight on cards */
+  document.addEventListener('pointermove',e=>{const s=e.target.closest&&e.target.closest('section');if(!s)return;
+    const r=s.getBoundingClientRect();s.style.setProperty('--mx',(e.clientX-r.left)+'px');s.style.setProperty('--my',(e.clientY-r.top)+'px')},{passive:true});
+  /* login: floating 3D orbs, particle network, card tilt */
+  const L=$('loginScr'),card=$('lgCard');if(!L||!card)return;
+  [[90,'#f2c94c','8%','12%','40px','60px','9s'],[150,'#2ec4aa','72%','8%','-60px','50px','12s'],[60,'#ff8a5b','80%','70%','-30px','-60px','10s'],[110,'#14937c','4%','72%','70px','-40px','13s']].forEach(o=>{
+    const d=document.createElement('div');d.className='orb';d.style.cssText='width:'+o[0]+'px;height:'+o[0]+'px;--oc:'+o[1]+';left:'+o[2]+';top:'+o[3]+';--x:'+o[4]+';--y:'+o[5]+';--d:'+o[6];L.insertBefore(d,L.firstChild)});
+  if(rm)return;
+  const cv=document.createElement('canvas');L.insertBefore(cv,L.firstChild);const c=cv.getContext('2d');let W,H,P=[];
+  const fit=()=>{W=cv.width=L.clientWidth;H=cv.height=L.clientHeight;const n=Math.min(55,Math.round(W*H/22000));P=Array.from({length:n},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4}))};
+  fit();addEventListener('resize',fit);
+  (function loop(){requestAnimationFrame(loop);if(L.offsetParent===null&&getComputedStyle(L).display==='none')return;
+    c.clearRect(0,0,W,H);
+    for(let i=0;i<P.length;i++){const a=P[i];a.x+=a.vx;a.y+=a.vy;if(a.x<0||a.x>W)a.vx*=-1;if(a.y<0||a.y>H)a.vy*=-1;
+      c.fillStyle='rgba(246,211,101,.8)';c.beginPath();c.arc(a.x,a.y,1.8,0,6.3);c.fill();
+      for(let j=i+1;j<P.length;j++){const b=P[j],d=Math.hypot(a.x-b.x,a.y-b.y);if(d<130){c.strokeStyle='rgba(46,196,170,'+(.35*(1-d/130))+')';c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.stroke()}}}
+  })();
+  L.addEventListener('pointermove',e=>{if(card.classList.contains('shake'))return;const r=card.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+    card.style.transform='rotateY('+(x*14)+'deg) rotateX('+(-y*14)+'deg)'});
+  L.addEventListener('pointerleave',()=>{card.style.transform=''});
+})();
 </script>
 </body>
 </html>
