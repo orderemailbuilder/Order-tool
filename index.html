@@ -447,7 +447,7 @@ const LS=k=>{if(k in MEM)return MEM[k];try{return JSON.parse(localStorage.getIte
 const SS=(k,v)=>{MEM[k]=v;try{localStorage.setItem(k,JSON.stringify(v));if(JSON.parse(localStorage.getItem(k))===undefined)throw 0}catch(e){storeOK=false}};
 let patients={};
 let SRV_TABS=null,SRV_V='';let prods={};let rowsAll=[];let unlocked=false,isAdmin=false,curPin='',curUser='',busy=false;let STAFF=[],ME=null,SEEALL=false,CREW=[];
-const APP_VER='2026-10-16-g',APP_DATE='16 Oct 2026';
+const APP_VER='2026-10-16-h',APP_DATE='16 Oct 2026';
 const pn=x=>{const d=String(x==null?'':x).replace(/\D/g,'');return d?d.padStart(4,'0'):''};
 try{['patients','prods','history','sheetUrl','design'].forEach(k=>localStorage.removeItem(k))}catch(e){}          // product stats: key = lowercase product
 const AUTO={};                       // field -> value last filled automatically
@@ -561,7 +561,8 @@ function samePerson(a,b){
 }
 function sameWho(r,rec){return samePerson(r,rec)}
 const EDIT={ts:'',row:null};   // History -> Edit: correct one existing row in place
-const editOK=()=>/tabs([5-9]|\d{2})/.test(SRV_V);   // the Apps Script must be the version that knows 'edit'
+const srvNew=min=>{const v=String(SRV_V||''),m=v.match(/tabs(\d+)/);return m?+m[1]>=min:v>='2026-10-16'};   // old scripts are named ...-tabsN, newer ones ...-setN
+const editOK=()=>srvNew(5);   // the Apps Script must be the version that knows 'edit'
 function renderEditBar(){
   const b=$('editBar');if(!b)return;
   if(!EDIT.ts){b.style.display='none';return}
@@ -571,7 +572,7 @@ function renderEditBar(){
 function endEdit(){EDIT.ts='';EDIT.row=null;renderEditBar()}
 function startEdit(r){
   if(!canDelete(r))return;
-  if(!editOK()){toast('Edit needs the latest Google Apps Script (version tabs5 or newer). Please deploy the new script first.');return}
+  if(!editOK()){toast('Edit needs the latest Google Apps Script (Code.gs from 16 Oct 2026 or newer). Please deploy it as a New version first.');return}
   endChange('');CHG.forceNew=false;
   fillFormFrom(r);EDIT.ts=String(r.ts||r._t||'');EDIT.row=r;
   showView('mail');renderEditBar();render();scrollTo(0,0);toast('Editing – change what you need, then tap Save');
@@ -1715,7 +1716,7 @@ function nameCell(r){
   else h+=' <small class="nr">'+cnt+'</small>';
   return h;
 }
-const flagOK=()=>/tabs([8-9]|\d{2})/.test(SRV_V);
+const flagOK=()=>srvNew(8);
 function flagApply(r,ch){   // update the row here and return what is sent to the sheet
   const ts=String(r.ts||r._t||'');if(!ts)return null;
   if('remarks' in ch){const old=String(r.remarks||'').trim();r.remarksedited=!ch.remarks?'':(old&&old!==ch.remarks?'edited':String(r.remarksedited||''))}
@@ -1723,7 +1724,7 @@ function flagApply(r,ch){   // update the row here and return what is sent to th
   return{pin:curPin,rmk:'1',ets:ts,...ch};
 }
 async function flagBulk(items,ch,label){
-  if(!flagOK()){toast('This needs the latest Google Apps Script (version tabs8 or newer). Please deploy the new script first.');return}
+  if(!flagOK()){toast('This needs the latest Google Apps Script (Code.gs from 16 Oct 2026 or newer). Please deploy it as a New version first.');return}
   const mine=items.filter(x=>SEEALL||pn(x.r.pin)===pn(curPin));
   if(!mine.length){toast('You can only change your own patients');return}
   const recs=[];mine.forEach(x=>{const rec=flagApply(x.r,typeof ch==='function'?ch(x):ch);if(rec)recs.push(rec)});
@@ -1735,7 +1736,7 @@ async function flagBulk(items,ch,label){
   setTimeout(()=>resync().then(()=>{if(REP.view==='rep')repAfterChange();if(REP.view==='fc')fcRun(true,true)}),2500);
 }
 async function flagSave(r,ch){
-  if(!flagOK()){toast('This needs the latest Google Apps Script (version tabs8 or newer). Please deploy the new script first.');return}
+  if(!flagOK()){toast('This needs the latest Google Apps Script (Code.gs from 16 Oct 2026 or newer). Please deploy it as a New version first.');return}
   const rec=flagApply(r,ch);if(!rec){toast('This row has no id – it cannot be saved');return}
   repRun();
   if(pending.length)await flush();
