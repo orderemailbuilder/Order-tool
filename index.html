@@ -447,7 +447,7 @@ const LS=k=>{if(k in MEM)return MEM[k];try{return JSON.parse(localStorage.getIte
 const SS=(k,v)=>{MEM[k]=v;try{localStorage.setItem(k,JSON.stringify(v));if(JSON.parse(localStorage.getItem(k))===undefined)throw 0}catch(e){storeOK=false}};
 let patients={};
 let SRV_TABS=null,SRV_V='';let prods={};let rowsAll=[];let unlocked=false,isAdmin=false,curPin='',curUser='',busy=false;let STAFF=[],ME=null,SEEALL=false,CREW=[];
-const APP_VER='2026-10-16-h',APP_DATE='16 Oct 2026';
+const APP_VER='2026-10-16-j',APP_DATE='16 Oct 2026';
 const pn=x=>{const d=String(x==null?'':x).replace(/\D/g,'');return d?d.padStart(4,'0'):''};
 try{['patients','prods','history','sheetUrl','design'].forEach(k=>localStorage.removeItem(k))}catch(e){}          // product stats: key = lowercase product
 const AUTO={};                       // field -> value last filled automatically
@@ -588,6 +588,10 @@ function renderChg(){
   if(!unlocked){if($('chg').checked)endChange();wrap.style.display='none';return}
   if(EDIT.ts){wrap.style.display='none';return}
   if(bothChanged()){endChange(chgKey(data()));toast('Name and CNIC both changed – this will be saved as a new order')}
+  if(!$('chg').checked&&!CHG.forceNew){   // the same patient within 24 hours = "Update earlier order" is ON by itself; only "Add as new entry" makes a new row
+    const d0=data(),k0=chgKey(d0),b0=k0&&CHG.declined!==k0?chgInfo(d0):null,bs0=behSeat(),own=bs0?pn(bs0.pin):pn(curPin);
+    if(b0&&(b0.r.pin===undefined||pn(b0.r.pin)===own))startChange(b0.r);
+  }
   let r=null,t=0;
   if($('chg').checked&&CHG.row){r=CHG.row;t=rowT(r)}
   else{const b=chgInfo(data());if(b){r=b.r;t=b.t}}
@@ -596,7 +600,7 @@ function renderChg(){
   wrap.style.display='';wrap.className='full'+(on?' on':'');
   $('chgText').innerHTML=on
     ?'✏️ <b>Updating earlier order:</b> '+what+', sent '+ago(t)+' ago.'
-    :'An earlier order exists for this patient: '+what+', sent '+ago(t)+' ago. It is saved as a new entry unless you choose “Update earlier order”.';
+    :'An earlier order exists for this patient: '+what+', sent '+ago(t)+' ago. Choose “Add as new entry” if this is a different order.';
   $('chgUpd').classList.toggle('act',on);$('chgNewBtn').classList.toggle('act',!on);
   const pc=on&&CHG.orig&&CHG.orig.prod&&$('product').value.trim()&&pkey($('product').value)!==CHG.orig.prod;
   const note=$('chgNote');note.style.display=pc?'':'none';
@@ -1952,8 +1956,8 @@ $('stfBody').addEventListener('click',e=>{
   else if(a==='above'){DRAFT.push({id:Date.now(),above:no});stfRender()}
   else if(a==='adopt'){DRAFT.push({id:Date.now(),par:0,pin:b.dataset.pin});stfRender()}
   else if(a==='dcancel'){DRAFT.splice(DRAFT.findIndex(q=>q.id==b.dataset.id),1);stfRender()}
-  else if(a==='dsave'){const q=DRAFT.find(q=>q.id==b.dataset.id),pin=val('pin').trim();if(!val('name').trim()&&!pin){toast('Enter a name or PIN');return}const ks=[...card.querySelectorAll('[data-k]:checked')].map(i=>i.dataset.k).join(',');if('below' in q&&!ks){toast('Tick at least one seat to move under the new layer');return}const un=val('user').trim();if(chk(pin,0)&&chkU(un,0))stfSend('below' in q?{op:'insbelow',no:q.below,name:val('name').trim(),spin:pin,kids:ks,user:un}:q.above?{op:'ins',no:q.above,name:val('name').trim(),spin:pin,user:un}:{op:'save',no:0,parent:q.par,name:val('name').trim(),spin:pin,user:un})}
-  else if(a==='save'){const pin=val('pin').trim(),un=val('user').trim();if(chk(pin,no)&&chkU(un,no))stfSend({op:'save',no,name:val('name').trim(),spin:pin,user:un})}
+  else if(a==='dsave'){const q=DRAFT.find(q=>q.id==b.dataset.id),pin=val('pin').trim();if(!val('name').trim()&&!pin){toast('Enter a name or PIN');return}const ks=[...card.querySelectorAll('[data-k]:checked')].map(i=>i.dataset.k).join(',');if('below' in q&&!ks){toast('Tick at least one seat to move under the new layer');return}const un=val('user').trim();if(chk(pin,0)&&chkU(un,0))stfSend('below' in q?{op:'insbelow',no:q.below,name:val('name').trim(),spin:pin,kids:ks,suser:un}:q.above?{op:'ins',no:q.above,name:val('name').trim(),spin:pin,suser:un}:{op:'save',no:0,parent:q.par,name:val('name').trim(),spin:pin,suser:un})}
+  else if(a==='save'){const pin=val('pin').trim(),un=val('user').trim();if(chk(pin,no)&&chkU(un,no))stfSend({op:'save',no,name:val('name').trim(),spin:pin,suser:un})}
   else if(a==='link'){const o=STAFF.filter(x=>x.active&&x.no!==no);if(!o.length){toast('No other seat yet');return}stfPick('Also show the data of which employee?',o,v=>stfSend({op:'link',no,to:v}))}
   else if(a==='restore'){stfPick('Restore under which seat? (its data returns to it)',[{no:0,name:'Admin'}].concat(STAFF.filter(x=>x.active&&x.no!==no)),v=>stfSend({op:'restore',no,parent:v}))}
   else if(a==='purge'){const t=stfBy(no);if(confirm('Delete '+(t?stfNm(t):'this seat')+' permanently? It has no entries. Its employee code becomes free again.'))stfSend({op:'purge',no})}
