@@ -134,6 +134,8 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
 .lgs{margin:4px 0 22px;color:var(--mut);font-size:13.5px}
 #loginScr #pin{width:100%;padding:14px 12px;font-size:28px;text-align:center;letter-spacing:14px;text-indent:14px;border:2px solid #d9e2de;border-radius:14px;background:#f6f9f8;margin:0 0 14px}
 #loginScr #pin:focus{border-color:var(--acc);box-shadow:0 0 0 4px rgba(14,107,92,.15);outline:0}
+#loginScr #user{width:100%;box-sizing:border-box;padding:13px 12px;font-size:18px;text-align:center;border:2px solid #d9e2de;border-radius:16px;background:#fff;margin:0 0 12px}
+#loginScr #user:focus{border-color:var(--acc);box-shadow:0 0 0 4px rgba(14,107,92,.15);outline:0}
 #loginScr #login{width:100%;padding:14px;font-size:16px;border-radius:14px;color:#fff;background:linear-gradient(135deg,#0e6b5c,#14937c);box-shadow:0 10px 22px rgba(14,107,92,.4);letter-spacing:.3px}
 #loginScr #login:disabled{opacity:.75;cursor:wait}
 #lgMsg{min-height:20px;margin-top:12px;color:#b42318;font-size:13px;font-weight:600}
@@ -245,8 +247,9 @@ table tr{transition:background .2s}
   <div class="lgwrap"><div class="lgcard" id="lgCard">
     <div class="lglogo">📨</div>
     <h2 class="lgt">Order Email Builder</h2>
-    <p class="lgs">Secure staff access · enter your 4-digit PIN</p>
+    <p class="lgs">Secure staff access · enter your username and 4-digit PIN</p>
     <div id="lgForm">
+      <input id="user" type="text" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="20" aria-label="Username" placeholder="Username">
       <input id="pin" type="password" inputmode="numeric" autocomplete="new-password" maxlength="4" aria-label="PIN" placeholder="••••">
       <button id="login" type="button">🔑 Login</button>
     </div>
@@ -269,11 +272,15 @@ table tr{transition:background .2s}
 
 
 
-<div id="tabs" style="display:none"><button type="button" id="tabEmail" class="on">✉️ Email Builder</button><button type="button" id="tabRep">📊 History</button><button type="button" id="tabFc">📈 Forecast</button><button type="button" id="tabStaff" style="display:none">👥 Staff Management</button></div>
+<div id="tabs" style="display:none"><button type="button" id="tabEmail" class="on">✉️ Email Builder</button><button type="button" id="tabRep">📊 History</button><button type="button" id="tabFc">📈 Forecast</button><button type="button" id="tabSet">⚙️ Settings</button><button type="button" id="tabStaff" style="display:none">👥 Staff Management</button></div>
 <div id="lockMsg" style="display:none">🔒 Please enter your PIN and tap Login first.<br><span style="font-weight:400;font-size:14px">No entries can be made without logging in.</span></div>
 <main>
   <div id="editBar" style="display:none"><div id="editInfo"></div><button type="button" class="b-lite" id="editCancel">✕ Cancel edit</button></div>
   <section>
+    <div id="behWrap" style="display:none;margin-bottom:12px"><label for="behalf">👥 Junior Entry (data entry only – not shown in the email)</label>
+      <select id="behalf"><option value="">Myself</option></select>
+      <p class="hint" style="margin:6px 0 0"><b>Myself:</b> the entry is saved under your own PIN – only you and your seniors see it, not your juniors.<br><b>A junior's name:</b> the entry is saved under that junior's PIN – it shows in the junior's History and Forecast, and the junior has full access to it as if they had entered it themselves.</p>
+      <p class="hint" id="behNote" style="display:none;font-weight:700"></p></div>
     <h2>1. Paste everything here</h2>
     <textarea id="smart" placeholder="Paste or type anything: name, CNIC, mobile, doctor, product, patient price, address... fields are filled automatically."></textarea>
     <p class="hint">Mobile, CNIC, date, patient price, quantity, doctor and status are detected automatically.</p>
@@ -345,7 +352,32 @@ table tr{transition:background .2s}
     <div id="fcList"></div>
   </section>
 </div>
-<div id="stfPage" style="display:none"><div style="max-width:1200px;margin:auto;padding:16px"><section><h2>👥 Staff Management</h2><p class="hint">Only PINs listed here can log in (plus your admin PIN). A manager sees the data of everyone below. <b>🔗 Merge</b> lets a seat also see another seat's data; unmerge any time.</p><div id="stfBody"></div></section></div></div>
+<div id="setPage" style="display:none"><div style="max-width:720px;margin:auto;padding:16px"><section>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+    <button type="button" class="b-alt" id="setBack">← Email Builder</button>
+    <h2 style="margin:0">⚙️ Settings</h2>
+  </div>
+  <p class="hint" id="setInfo"></p>
+  <div id="setWho"><label for="setUser" style="margin-top:6px">Username (used to login – cannot be changed here)</label><input id="setUser" readonly style="background:#f1f5f3;font-weight:700"></div>
+  <div id="setAcct">
+    <div class="sh">👤 Change name</div>
+    <label for="setName" style="margin-top:8px">Your name</label><input id="setName" maxlength="60" autocomplete="off">
+    <div class="rbtns"><button type="button" class="b-copy" id="setNameBtn">💾 Save name</button></div>
+    <div class="sh" style="margin-top:18px">🔑 Change PIN</div>
+    <label for="setOld" style="margin-top:8px">Current PIN</label><input id="setOld" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" placeholder="••••">
+    <label for="setNew" style="margin-top:8px">New PIN (4 digits)</label><input id="setNew" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" placeholder="••••">
+    <label for="setNew2" style="margin-top:8px">Repeat new PIN</label><input id="setNew2" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" placeholder="••••">
+    <div class="rbtns"><button type="button" class="b-copy" id="setPinBtn">🔑 Change PIN</button></div>
+    <p class="hint">Your username stays the same. If the PIN is already used by someone else you will be asked to choose another one.</p>
+  </div>
+  <p class="hint" id="setNote" style="display:none"></p>
+  <div id="setCmpBox">
+    <div class="sh" style="margin-top:18px">📝 Report / Complaint</div>
+    <p class="hint">Facing a problem or want to report something? Send it to the admin.</p>
+    <div class="rbtns"><button type="button" class="b-alt" id="setCmpBtn">📝 Report / Complaint</button></div>
+  </div>
+</section></div></div>
+<div id="stfPage" style="display:none"><div style="max-width:1200px;margin:auto;padding:16px"><section><h2>👥 Staff Management</h2><p class="hint">Only usernames with PINs listed here can log in (plus the admin: username <b>admin</b> and your admin PIN). A new seat without a typed username gets the first part of its name. A manager sees the data of everyone below. <b>🔗 Merge</b> lets a seat also see another seat's data; unmerge any time.</p><div id="stfBody"></div></section></div></div>
 <div id="repPage" style="display:none">
   <section>
     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
@@ -357,6 +389,8 @@ table tr{transition:background .2s}
       <div><label for="rTo">To date</label><input type="date" id="rTo"></div>
       <div style="display:flex;align-items:flex-end"><button type="button" class="b-lite" id="rReset">Clear filters</button></div>
     </div>
+    <div class="rbtns" style="margin-top:8px"><button type="button" class="b-alt" id="rDeep">🔎 Deep filter ▾</button></div>
+    <div id="rDeepBox" style="display:none">
     <div class="rgrid" style="margin-top:10px">
       <div class="ms" id="msCity"></div>
       <div class="ms" id="msDoc"></div>
@@ -365,6 +399,7 @@ table tr{transition:background .2s}
       <div class="ms" id="msPin" style="display:none"></div>
     </div>
     <p class="hint">Nothing is ticked by default, so the list shows all emails of the chosen dates. Tick a City, Doctor, Product or Status to see only those; every ticked filter must match (AND). Clear removes the ticks of that filter.</p>
+    </div>
     <label class="inv" for="rPII" style="margin-top:8px"><input type="checkbox" id="rPII"> 🪪 Include CNIC and mobile (on screen and in files)</label>
     <div class="rbtns">
       <button type="button" class="b-copy" id="rXlsx">📗 Excel (.xlsx)</button>
@@ -411,8 +446,8 @@ const MEM={};let storeOK=true;
 const LS=k=>{if(k in MEM)return MEM[k];try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
 const SS=(k,v)=>{MEM[k]=v;try{localStorage.setItem(k,JSON.stringify(v));if(JSON.parse(localStorage.getItem(k))===undefined)throw 0}catch(e){storeOK=false}};
 let patients={};
-let SRV_TABS=null,SRV_V='';let prods={};let rowsAll=[];let unlocked=false,isAdmin=false,curPin='',busy=false;let STAFF=[],ME=null,SEEALL=false;
-const APP_VER='2026-10-15-w',APP_DATE='15 Oct 2026';
+let SRV_TABS=null,SRV_V='';let prods={};let rowsAll=[];let unlocked=false,isAdmin=false,curPin='',curUser='',busy=false;let STAFF=[],ME=null,SEEALL=false,CREW=[];
+const APP_VER='2026-10-16-g',APP_DATE='16 Oct 2026';
 const pn=x=>{const d=String(x==null?'':x).replace(/\D/g,'');return d?d.padStart(4,'0'):''};
 try{['patients','prods','history','sheetUrl','design'].forEach(k=>localStorage.removeItem(k))}catch(e){}          // product stats: key = lowercase product
 const AUTO={};                       // field -> value last filled automatically
@@ -1050,12 +1085,13 @@ async function copyText(txt,msg){
 
 /* ---------- backup + PIN (patient data is fetched only after the PIN) ---------- */
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbyrgtSzvgr2r6LYJrxk0LNYvE1j-KZGYuTbx77iXC5YDOMWBjqXqWAs2dxz64EuBU7CFw/exec';
-const MSG={html:'Google returned a login/error page. In the deployment settings, set "Who has access" to Anyone.',bad:'The script returned an unexpected response.',old:'The Apps Script is outdated. Paste the latest code and deploy a new version.',net:'Network or connection problem.',locked:'Too many attempts. Please try again later.',pin:'Incorrect PIN.'};
+const MSG={html:'Google returned a login/error page. In the deployment settings, set "Who has access" to Anyone.',bad:'The script returned an unexpected response.',old:'The Apps Script is outdated. Paste the latest code and deploy a new version.',net:'Network or connection problem.',locked:'Too many attempts. Please try again later.',pin:'Incorrect username or PIN.'};
 function setCloud(ok,msg){const c=$('cloud');c.className=ok===true?'ok':ok===false?'bad':'';c.textContent=ok===true?'☁️ Online'+(ME&&ME.name?' · '+(ME.no?ME.no+'. ':'')+ME.name:''):ok===false?'☁️ Offline':'☁️';c.dataset.msg=msg||'';c.title=msg||''}
 const sentSig={};let pending=[];
 const typedPin=()=>{const v=$('pin').value.trim();return /^\d{4}$/.test(v)?v:''};   // PIN typed but not logged in is still recorded with the order
-function recFrom(d){return{saved:new Date().toLocaleString('en-GB'),...d,date:fmtDate(d.date),time:fmtTime(d.time),invoice:d.invoice?'Yes':'No',pin:unlocked?curPin:typedPin(),chg:d.chg?'1':'',nw:d.chg?'':'1',cts:String(Date.now()),rts:d.chg?(CHG.ts||''):''}}
+function recFrom(d){return{saved:new Date().toLocaleString('en-GB'),...d,date:fmtDate(d.date),time:fmtTime(d.time),invoice:d.invoice?'Yes':'No',pin:unlocked?curPin:typedPin(),user:unlocked?curUser:'',onb:behNo(),chg:d.chg?'1':'',nw:d.chg?'':'1',cts:String(Date.now()),rts:d.chg?(CHG.ts||''):''}}
 async function post(rec){
+  if(unlocked&&curUser&&rec.user===undefined)rec={...rec,user:curUser};   // every backup row / action carries the username
   const body=JSON.stringify(rec);
   try{await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',keepalive:true,headers:{'Content-Type':'text/plain;charset=utf-8'},body});return true}
   catch(e){try{return !!(navigator.sendBeacon&&navigator.sendBeacon(SCRIPT_URL,new Blob([body],{type:'text/plain;charset=utf-8'})))}catch(_){return false}}
@@ -1067,7 +1103,17 @@ addEventListener('online',flush);
    1) the name was changed but the CNIC or the mobile number is already saved for another name  -> new patient, or the same patient?
    2) status is New Patient but the same patient is already saved
    3) same mobile number but a different CNIC                                                    */
-const sigOf=d=>JSON.stringify([digits(d.cnic)||d.name.toLowerCase(),d.pmobile,d.product,d.rate,d.qty,d.doctor,d.speciality,d.disease,d.address,d.notes,d.date,d.chg]);
+const behNo=()=>{const v=($('behalf')||{}).value||'';return unlocked&&v&&CREW.some(c=>c.sub&&String(c.no)===v)?v:''};
+const behSeat=()=>{const v=behNo();return v?CREW.find(c=>String(c.no)===v):null};
+function behFill(){
+  const sel=$('behalf'),subs=CREW.filter(c=>c.sub),keep=sel.value;
+  $('behWrap').style.display=(unlocked||subs.length)&&subs.length?'':'none';
+  sel.innerHTML='<option value="">Myself</option>'+subs.map(c=>'<option value="'+c.no+'">'+'— '.repeat(Math.max(0,(c.depth||1)-1))+esc((c.name||'').trim()||('Seat '+c.no))+'</option>').join('');
+  sel.value=subs.some(c=>String(c.no)===keep)?keep:'';behNote();
+}
+function behNote(){const c=behSeat(),n=$('behNote');n.style.display=c?'':'none';n.textContent=c?'Entries will be saved as '+((c.name||'').trim()||'this staff member')+'\u2019s entries (their PIN).':'';$('behalf').style.borderColor=c?'#e0a800':'';$('behalf').style.background=c?'#fff8db':''}
+$('behalf').onchange=behNote;
+const sigOf=d=>JSON.stringify([behNo(),digits(d.cnic)||d.name.toLowerCase(),d.pmobile,d.product,d.rate,d.qty,d.doctor,d.speciality,d.disease,d.address,d.notes,d.date,d.chg]);
 async function guardPatient(){   // true = go on with Save / Copy / Send, false = the user cancelled
   if(!unlocked||EDIT.ts)return true;
   const d=data();
@@ -1088,7 +1134,7 @@ async function guardPatient(){   // true = go on with Save / Copy / Send, false 
 function patientPopup(d,hits,kind){
   return new Promise(res=>{
     const by=(a,b)=>rowT(b)-rowT(a),best=hits.slice().sort(by)[0],t=rowT(best);
-    const mine=r=>isAdmin||r.pin===undefined||pn(r.pin)===pn(curPin);
+    const mine=r=>isAdmin||SEEALL||r.pin===undefined||pn(r.pin)===pn(curPin);
     const upd=kind==='mob'?null:hits.filter(r=>mine(r)&&rowT(r)&&Date.now()-rowT(r)<86400000).sort(by)[0];   // a row with another CNIC is never overwritten
     const cSame=digits(best.cnic).length>=13&&digits(best.cnic)===digits(d.cnic),mSame=mobOverlap(best.pmobile,d.pmobile);
     const what=cSame&&mSame?'CNIC and mobile number are':cSame?'CNIC is':'mobile number is';
@@ -1134,7 +1180,8 @@ async function backup(){
   if(unlocked){
     const key=digits(d.cnic)||d.name.toLowerCase();
     patients[key]={name:d.name,cnic:d.cnic,pmobile:d.pmobile,doctor:d.doctor,speciality:d.speciality,disease:d.disease,address:d.address,product:d.product,rate:d.rate,qty:d.qty};
-    const loc={...rec,_t:+rec.cts};
+    const loc={...rec,_t:+rec.cts},bs=behSeat();
+    if(bs){loc.pin=bs.pin;loc.user=bs.user;loc.by=curUser;SIGF.forEach(k=>loc[k]='')}   // shown under the junior, exactly as the sheet will hold it
     const win=86400000;   // the same patient within 24 hours = update the earlier row (unless "Add as new entry" was chosen)
     const same=r=>{const t=rowT(r);return t&&Date.now()-t<win&&(isAdmin||r.pin===undefined||pn(r.pin)===pn(rec.pin))&&sameWho(r,rec)};
     let ix=-1;
@@ -1152,10 +1199,10 @@ async function backup(){
   return ok?'ok':'fail';
 }
 async function backupEdit(d){
-  const rec={...recFrom(d),edit:'1',ets:EDIT.ts,chg:'',nw:'',rts:''};
+  const rec={...recFrom(d),edit:'1',ets:EDIT.ts,onb:'',chg:'',nw:'',rts:''};
   const ix=rowsAll.findIndex(r=>String(r.ts)===EDIT.ts);
   if(ix>=0){const n={...rowsAll[ix]};
-    Object.keys(rec).forEach(k=>{if(!['saved','pin','cts','chg','nw','rts','edit','ets'].includes(k))n[k]=rec[k]});
+    Object.keys(rec).forEach(k=>{if(!['saved','pin','user','onb','by','cts','chg','nw','rts','edit','ets'].includes(k)&&!(SIGF.includes(k)&&pn(n.pin)!==pn(curPin)))n[k]=rec[k]});
     rowsAll[ix]=n;EDIT.row=n;}
   rebuildProds();refreshLists();render();
   if(pending.length)await flush();
@@ -1179,15 +1226,15 @@ async function save(){
   }
   toast(!unlocked?'Saved ✔':r==='ok'?'Saved ✔ Backed up to Google Sheet':r==='dup'?'Already saved ✔':'Saved – backup pending, check the internet connection');
 }
-async function sync(pin){
+async function sync(pin,user){
   for(let a=0;a<2;a++){
     try{
-      const res=await fetch(SCRIPT_URL+'?pin='+encodeURIComponent(pin)+'&_='+Date.now(),{cache:'no-store'});
+      const res=await fetch(SCRIPT_URL+'?pin='+encodeURIComponent(pin)+'&user='+encodeURIComponent(user||'')+'&_='+Date.now(),{cache:'no-store'});
       const txt=await res.text();let j;
       try{j=JSON.parse(txt)}catch(e){return{err:/<html|<!doctype/i.test(txt)?'html':'bad'}}
       if(Array.isArray(j))return{err:'old'};
       if(j&&j.error)return{err:j.error};
-      if(j&&j.ok&&Array.isArray(j.rows))return{rows:j.rows,role:j.role||'user',v:j.v||'',tabs:Array.isArray(j.tabs)?j.tabs:null,cfg:Array.isArray(j.cfg)?j.cfg:null,me:j.me||null,staff:Array.isArray(j.staff)?j.staff:null,team:!!j.team};
+      if(j&&j.ok&&Array.isArray(j.rows))return{rows:j.rows,role:j.role||'user',v:j.v||'',tabs:Array.isArray(j.tabs)?j.tabs:null,cfg:Array.isArray(j.cfg)?j.cfg:null,me:j.me||null,staff:Array.isArray(j.staff)?j.staff:null,crew:Array.isArray(j.crew)?j.crew:[],team:!!j.team};
       return{err:'bad'};
     }catch(e){if(a===1)return{err:'net'};await new Promise(r=>setTimeout(r,1200))}
   }
@@ -1212,41 +1259,50 @@ function loadRows(rows){
   return n;
 }
 function applyMode(){
-  $('pin').style.display=unlocked?'none':'';$('login').style.display=unlocked?'none':'';$('loginScr').style.display=unlocked?'none':'flex';document.body.style.overflow=unlocked?'':'hidden';
+  $('user').style.display=unlocked?'none':'';$('pin').style.display=unlocked?'none':'';$('login').style.display=unlocked?'none':'';$('loginScr').style.display=unlocked?'none':'flex';document.body.style.overflow=unlocked?'':'hidden';
   $('lock').style.display=unlocked?'':'none';
   $('cloud').style.display=unlocked?'':'none';
-  $('tabs').style.display=unlocked?'':'none';$('tabStaff').style.display=(unlocked&&isAdmin)?'':'none';if(!unlocked&&REP.view==='stf')showView('email');if(!unlocked&&REP.view==='rep')showView('email');
+  $('tabs').style.display=unlocked?'':'none';$('tabStaff').style.display=(unlocked&&isAdmin)?'':'none';if(!unlocked&&REP.view==='stf')showView('email');if(!unlocked&&REP.view==='set')showView('email');if(!unlocked&&REP.view==='rep')showView('email');
   layout();
   $('status').options[0].text=unlocked?'Auto (from backup)':'Select status…';
-  if(!unlocked){SIGF.forEach(k=>$(k).value='');patients={};prods={};rowsAll=[];curPin='';isAdmin=false;SEEALL=false;ME=null;STAFF=[];$('ver').textContent='Page '+APP_VER}
+  if(!unlocked){SIGF.forEach(k=>$(k).value='');patients={};prods={};rowsAll=[];curPin='';curUser='';isAdmin=false;SEEALL=false;ME=null;STAFF=[];CREW=[];behFill();$('ver').textContent='Page '+APP_VER}
   refreshLists();render();
 }
-function clearSess(){delete MEM.sess;try{localStorage.removeItem('sess')}catch(e){}}   // the PIN is kept on this device until the user logs out
+function clearSess(){delete MEM.sess;try{localStorage.removeItem('sess')}catch(e){}}   // username + PIN + login time are kept on this device for 24 hours (or until Logout)
+const SESS_MS=24*60*60*1000,SESS_END='Your 24-hour session has ended. Please login again.';
+const sessLeft=()=>{const x=LS('sess');return x&&typeof x==='object'&&x.t?SESS_MS-(Date.now()-x.t):0};
+function sessCheck(){if(unlocked&&sessLeft()<=0){lock();lgErr(SESS_END);toast('Session ended – please login again')}}
+setInterval(sessCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)sessCheck()});addEventListener('focus',sessCheck);
 function lgErr(m){const e=$('lgMsg');if(e)e.textContent=m||''}
 function lgState(st){$('lgForm').style.display=st==='form'?'':'none';$('lgRest').style.display=st==='rest'?'':'none'}
 function lgBusy(b){const l=$('login');l.disabled=b;l.textContent=b?'Signing in…':'🔑 Login'}
 function lgShake(){const c=$('lgCard');c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake')}
-function lock(){clearSess();unlocked=false;applyMode();lgErr('');lgState('form')}
-async function tryUnlock(pin,silent){
+function lock(){clearSess();unlocked=false;applyMode();lgErr('');lgState('form');$('user').value=LS('lastuser')||'';$('pin').value=''}
+async function tryUnlock(user,pin,silent){
   if(busy)return;
+  user=String(user||'').trim().toLowerCase();
+  if(!user){lgErr('Enter your username');lgShake();$('user').focus();return}
   if(!/^\d{4}$/.test(pin||'')){lgErr('Enter your 4-digit PIN');lgShake();return}
   busy=true;lgBusy(true);lgErr('');
-  const r=await sync(pin);busy=false;lgBusy(false);
+  const r=await sync(pin,user);busy=false;lgBusy(false);
   if(!r||!r.rows){
     const bad=r&&(r.err==='pin'||r.err==='locked');
     if(silent&&bad)clearSess();
-    const m=silent&&r&&r.err==='pin'?'Your PIN is no longer valid. Please login again.':(MSG[r&&r.err]||'Error');
+    const m=silent&&r&&r.err==='pin'?'Your login is no longer valid. Please login again.':(MSG[r&&r.err]||'Error');
     lgErr(m);lgShake();if(!silent)toast(m);return}
   $('pin').value='';lgErr('');
-  SS('sess',pin);   // stay logged in after a refresh until Logout
-  SRV_TABS=r.tabs||null;SRV_V=r.v||'';const n=loadRows(r.rows);curPin=pin;cfgLoad(r.cfg);unlocked=true;isAdmin=r.role==='admin';SEEALL=isAdmin||!!r.team;ME=r.me||null;STAFF=r.staff||[];sigLoad();rebuildProds();applyMode();
+  const prev=LS('sess');
+  SS('sess',{u:user,p:pin,t:(silent&&prev&&typeof prev==='object'&&prev.t)?prev.t:Date.now()});   // stay logged in after a refresh – for 24 hours from the login
+  curUser=(r.me&&r.me.user)||user;if(curUser)SS('lastuser',curUser);
+  SRV_TABS=r.tabs||null;SRV_V=r.v||'';const n=loadRows(r.rows);curPin=pin;cfgLoad(r.cfg);unlocked=true;isAdmin=r.role==='admin';SEEALL=isAdmin||!!r.team;ME=r.me||null;STAFF=r.staff||[];CREW=r.crew||[];behFill();sigLoad();rebuildProds();applyMode();
   $('ver').textContent='Page '+APP_VER+' · Script '+(r.v||'older version');
   setCloud(true,n+' records, '+Object.keys(prods).length+' products loaded');
-  if(!silent)toast(r.role==='admin'?'You are logged in ✔ (Admin)':n?'You are logged in ✔':'You are logged in ✔ – no earlier data for this PIN (check the PIN if this was a mistake)');
+  if(!silent&&r.role==='admin'&&String(r.v||'')<'2026-10-16-set4')toast('The Apps Script is an older version – deploy the latest Code.gs as a New version for Junior Entry and staff names');
+  else if(!silent)toast(r.role==='admin'?'You are logged in ✔ (Admin)':n?'You are logged in ✔':'You are logged in ✔ – no earlier data for this PIN (check the PIN if this was a mistake)');
 }
 async function resync(){
-  const r=await sync(curPin);
-  if(r.rows){if(r.staff)STAFF=r.staff;if(r.me)ME=r.me;SRV_TABS=r.tabs||null;SRV_V=r.v||'';const n=loadRows(r.rows);cfgLoad(r.cfg);repPrep();rebuildProds();refreshLists();render();setCloud(true,n+' records, '+Object.keys(prods).length+' products loaded')}
+  const r=await sync(curPin,curUser);
+  if(r.rows){if(r.staff)STAFF=r.staff;if(r.me)ME=r.me;CREW=r.crew||CREW;behFill();SRV_TABS=r.tabs||null;SRV_V=r.v||'';const n=loadRows(r.rows);cfgLoad(r.cfg);repPrep();rebuildProds();refreshLists();render();setCloud(true,n+' records, '+Object.keys(prods).length+' products loaded')}
   else{setCloud(false,MSG[r.err]||'Error');if(r.err==='pin'||r.err==='locked')lock()}
 }
 
@@ -1408,8 +1464,9 @@ $('clear').onclick=()=>{EDIT.ts='';EDIT.row=null;renderEditBar();Object.keys(AUT
 
 
 $('pin').addEventListener('input',()=>{$('pin').value=$('pin').value.replace(/\D/g,'').slice(0,4)});
-$('login').onclick=()=>tryUnlock($('pin').value.trim());
-$('pin').addEventListener('keydown',e=>{if(e.key==='Enter')tryUnlock($('pin').value.trim())});
+$('login').onclick=()=>tryUnlock($('user').value,$('pin').value.trim());
+$('pin').addEventListener('keydown',e=>{if(e.key==='Enter')tryUnlock($('user').value,$('pin').value.trim())});
+$('user').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('pin').focus()}});
 $('lock').onclick=()=>{lock();toast('Logged out')};
 $('cloud').onclick=()=>{toast($('cloud').dataset.msg||'☁️');if(unlocked)resync()};
 
@@ -1424,11 +1481,19 @@ const kProd=v=>cleanProd(v).toLowerCase();
 function qtyNum(q){const m=String(q==null?'':q).match(/\d+(?:\.\d+)?/g);return m?m.reduce((a,x)=>a+parseFloat(x),0):null}   // only the numbers count; units (Inj, Packs…) are ignored
 const fmtN=n=>String(Math.round(n*100)/100);
 function repCnic(c){const d=digits(c);return d.length===13?d.slice(0,5)+'-'+d.slice(5,12)+'-'+d.slice(12):String(c||'').trim()}
+function pinName(p){   // staff name instead of the PIN (the PIN stays the filter key)
+  if(!p)return'(no PIN)';
+  const all=CREW.concat((STAFF||[]).filter(x=>!CREW.some(c=>c.no===x.no)));   // CREW from the script; the admin's staff list as a fallback
+  const c=all.find(x=>x.pin&&pn(x.pin)===p);
+  if(!c)return p===pn(curPin)?(isAdmin?'Admin':(ME&&ME.name)||p):p;
+  const nm=(c.name||'').trim()||('Seat '+c.no);
+  return all.filter(x=>((x.name||'').trim()||('Seat '+x.no))===nm).length>1?nm+' ('+(c.user||c.pin)+')':nm;
+}
 function repPrep(){
   rowsAll.forEach(r=>{
     const pkl=prodKL(r,cleanProd(r.product)),city=rsp(r.city),prod=cleanProd(r.product),pin=pn(r.pin),st=normStatus(rsp(r.status)),dk=kDoc(r.doctor);
     r._n={cityK:kCity(city),cityL:city?rtc(city.toLowerCase()):'(blank)',docK:dk,docL:dk?'Dr '+rtc(dk):'(blank)',
-      prodK:pkl[0],prodL:pkl[1],pinK:pin,pinL:pin||'(no PIN)',stK:st,stL:st||'(blank)',date:rowDateISO(r)};
+      prodK:pkl[0],prodL:pkl[1],pinK:pin,pinL:pinName(pin),stK:st,stL:st||'(blank)',date:rowDateISO(r)};
   });
 }
 /* The option lists only contain what exists in the chosen date range, and every option starts ticked.
@@ -1447,7 +1512,7 @@ function repBuildOpts(reset){
 }
 const msLabel=t=>{const n=REP.sel[t].size,tot=REP.opts[t].length;return (n===0||n>=tot)?'All ('+tot+')':n+' of '+tot+' selected'};
 function repRenderMs(){['city','doc','prod','status'].concat(SEEALL?['pin']:[]).forEach(msRender)}
-const MS_META={city:['msCity','City'],doc:['msDoc','Doctor'],prod:['msProd','Product'],pin:['msPin','Staff PIN'],status:['msStatus','Patient Status']};
+const MS_META={city:['msCity','City'],doc:['msDoc','Doctor'],prod:['msProd','Product'],pin:['msPin','Staff Name'],status:['msStatus','Patient Status']};
 function msRender(t){
   const [id,title]=MS_META[t],box=$(id),set=REP.sel[t];
   box.innerHTML='<div class="mh"><span>'+title+'</span><b>'+msLabel(t)+'</b></div><div class="mb"><button type="button" class="b-lite" data-a="all">✓ Select all</button><button type="button" class="b-lite" data-a="none">✕ Clear</button></div><input class="mss" placeholder="Search…" aria-label="'+title+' search"><div class="msl"></div>';
@@ -1503,8 +1568,13 @@ function repInfo(){
   const oldest=ds[0],nod=rowsAll.length-ds.length;
   el.textContent='Loaded from the Google Sheet: '+rowsAll.length+' emails, oldest '+fmtDate(oldest)+', newest '+fmtDate(ds[ds.length-1])+'.'+(nod?' '+nod+' emails have no readable date and cannot be listed.':'')+' ('+$('ver').textContent+')'+(SRV_TABS?' Tabs read: '+(SRV_TABS.filter(t=>!t.s).map(t=>t.n+' ('+t.r+')').join(', ')||'none')+(SRV_TABS.some(t=>t.s)?'. Skipped: '+SRV_TABS.filter(t=>t.s).map(t=>t.n+' ('+t.s+')').join(', '):'')+'.':'')+(df&&df<oldest?' ⚠ Your From date is earlier than the oldest email the sheet sent. If older emails exist in the sheet, the Google Apps Script needs the update (it must send all tabs/months).':'');
 }
+function repDeepBtn(){
+  const t=['city','doc','prod','status'].concat(SEEALL?['pin']:[]).filter(k=>REP.sel[k].size>0&&REP.sel[k].size<REP.opts[k].length).length,open=$('rDeepBox').style.display!=='none';
+  $('rDeep').textContent='🔎 Deep filter'+(t?' ('+t+' active)':'')+(open?' ▴':' ▾');
+}
+$('rDeep').onclick=()=>{const b=$('rDeepBox');b.style.display=b.style.display==='none'?'':'none';repDeepBtn()};
 function repRun(){
-  repInfo();
+  repDeepBtn();repInfo();
   REP.cur=[];
   const df=$('rFrom').value,dt=$('rTo').value;
   if(!df||!dt||df>dt){$('rSum').innerHTML='';$('rTable').innerHTML='<p class="hint">'+(df&&dt?'“From date” is after “To date”. Please correct the dates.':'Select both a From date and a To date to see the emails.')+'</p>';REP.pick=null;paintPick();return}
@@ -1675,7 +1745,7 @@ async function flagSave(r,ch){
 }
 const DAY7=7*86400000;
 function rowMs(r){const t=rowT(r);if(t)return t;const d=r._n&&r._n.date;return d?new Date(d+'T00:00:00').getTime():0}
-function canDelete(r){const t=rowMs(r);return !!t&&Date.now()-t<DAY7&&(isAdmin||pn(r.pin)===pn(curPin))}
+function canDelete(r){const t=rowMs(r);return !!t&&Date.now()-t<DAY7&&(isAdmin||SEEALL||pn(r.pin)===pn(curPin))}   // History only holds the rows of the login and the staff below it, so all of them may be edited / deleted
 function telNum(m){let d=String(m||'').replace(/\D/g,'');if(d.startsWith('0092'))d=d.slice(2);else if(d.startsWith('0'))d='92'+d.slice(1);else if(d.length===10&&d[0]==='3')d='92'+d;return d}
 function mobBtns(r){const ms=mobsOf(r.pmobile);if(!ms.length)return'';
   return ms.map(m=>{const n=telNum(m);return'<span class="mrow"><b>'+esc(m)+'</b><a class="cbtn call" href="tel:+'+n+'" title="Call">📞 Call</a><a class="cbtn wa" href="https://wa.me/'+n+'" target="_blank" rel="noopener" title="WhatsApp">💬 WhatsApp</a></span>'}).join('')}
@@ -1725,7 +1795,7 @@ function paintPick(){
     (can?'<button type="button" class="b-lite" id="rEdit">✏️ Edit</button><button type="button" class="b-del" id="rDel">🗑 Delete</button>':'')+
     (fl?'<button type="button" class="b-lite" id="rRmk">💬 Remarks</button><button type="button" class="b-lite" id="rExp">📅 Expected Date</button>'+(n.drop?'<button type="button" class="b-lite" id="rUndrop">↩️ Undo drop</button>':'<button type="button" class="b-del" id="rDrop">⛔ Drop</button>'):'')+
     (ex?'<button type="button" class="b-lite" id="rExp">📅 Expected Date</button>':'')+'<button type="button" class="b-lite" id="rDet">🧾 Details</button><button type="button" class="b-lite" id="rHist">📜 History</button><button type="button" class="b-lite" id="rCancel">Close</button></div>'+
-    (can?'':'<div class="hint" style="margin:0 0 6px">'+(mine?'Emails older than 7 days cannot be edited or deleted.':'You can only edit or delete your own emails.')+'</div>')+
+    (can?'':'<div class="hint" style="margin:0 0 6px">'+(mine?'Emails older than 7 days cannot be edited or deleted.':'You can only edit or delete the emails of your own team.')+'</div>')+
     patientSummaryHTML(r)+flagHTML(r,mine)+'<div id="pDet" style="display:none"></div><div id="pHist" style="display:none"></div></div>';
   row.appendChild(td);tr.after(row);
   const tgl=(a,b)=>{const x=$(a),y=$(b);if(y)y.style.display='none';const dd=$('dropBox');if(dd)dd.style.display='none';if(x)x.style.display=x.style.display==='none'?'':'none'};
@@ -1757,7 +1827,7 @@ async function repDelete(){
   toast('Deleting…');
   let j=null;
   try{
-    const res=await fetch(SCRIPT_URL+'?pin='+encodeURIComponent(curPin)+'&action=delete&ts='+encodeURIComponent(ts)+'&cts='+encodeURIComponent(cts)+'&_='+Date.now(),{cache:'no-store'});
+    const res=await fetch(SCRIPT_URL+'?pin='+encodeURIComponent(curPin)+'&user='+encodeURIComponent(curUser)+'&action=delete&ts='+encodeURIComponent(ts)+'&cts='+encodeURIComponent(cts)+'&_='+Date.now(),{cache:'no-store'});
     j=JSON.parse(await res.text());
   }catch(e){toast('Could not delete – check the internet connection');return}
   if(j&&j.deleted===true){
@@ -1775,6 +1845,71 @@ function repOpen(){
   $('msPin').style.display=SEEALL?'':'none';
   repBuildOpts(true);repRenderMs();repRun();
 }
+
+/* ===== Settings: change name / PIN, report a problem ===== */
+const SET_MIN='2026-10-16';   // oldest script version that knows these actions
+const setScriptOK=()=>String(SRV_V||'')>=SET_MIN;
+const SETMSG={admin:'The admin PIN and name cannot be changed here.',nostaff:'Your seat is not listed in Staff Management yet.',badname:'Name must be at least 2 characters.',badpin:'PIN must be 4 digits.',samepin:'The new PIN is the same as the current one.',taken:'This PIN is not available. Please choose another one.',pin:'Your login is no longer valid. Please login again.',locked:'Too many attempts. Please try again later.'};
+function setOpen(){
+  const adm=isAdmin,seat=!!(ME&&ME.no);
+  $('setInfo').innerHTML='Logged in as <b>'+esc(curUser||'-')+'</b>'+(ME&&ME.name&&!adm?' · '+esc(ME.name):adm?' · Admin':'');
+  $('setAcct').style.display=(!adm&&seat)?'':'none';
+  $('setNote').style.display=(adm||!seat)?'':'none';
+  $('setNote').innerHTML=adm?'The admin PIN is set in the script (Code.gs). Complaints sent by staff are collected in the <b>Complaints</b> tab of your Google Sheet – set the Status column to Solved when done.':'Name and PIN can be changed once your seat is listed in Staff Management.';
+  $('setCmpBox').style.display=adm?'none':'';
+  $('setUser').value=curUser||'';
+  $('setName').value=(ME&&ME.name)||'';
+  ['setOld','setNew','setNew2'].forEach(i=>$(i).value='');
+}
+async function selfCall(q){
+  if(!setScriptOK()){toast('Please deploy the latest Apps Script (Code.gs) first');return null}
+  try{const res=await fetch(SCRIPT_URL+'?pin='+encodeURIComponent(curPin)+'&user='+encodeURIComponent(curUser)+q+'&_='+Date.now(),{cache:'no-store'});return JSON.parse(await res.text())}
+  catch(e){toast('Network problem – please try again');return null}
+}
+['setOld','setNew','setNew2'].forEach(i=>$(i).addEventListener('input',()=>{$(i).value=$(i).value.replace(/\D/g,'').slice(0,4)}));
+$('setNameBtn').onclick=async()=>{
+  const nm=$('setName').value.replace(/\s+/g,' ').trim(),b=$('setNameBtn');
+  if(nm.length<2){toast(SETMSG.badname);return}
+  b.disabled=true;const j=await selfCall('&action=myname&nm='+encodeURIComponent(nm));b.disabled=false;
+  if(j&&j.ok&&j.name){ME={...(ME||{}),name:j.name};$('setName').value=j.name;setCloud(true,$('cloud').dataset.msg);setOpen();toast('Name changed ✔')}
+  else if(j)toast(SETMSG[j.error]||j.error||'Could not change the name');
+};
+$('setPinBtn').onclick=async()=>{
+  const o=$('setOld').value.trim(),n=$('setNew').value.trim(),n2=$('setNew2').value.trim(),b=$('setPinBtn');
+  if(o!==curPin){toast('Current PIN is wrong');return}
+  if(!/^\d{4}$/.test(n)){toast(SETMSG.badpin);return}
+  if(n!==n2){toast('The two new PINs do not match');return}
+  if(n===curPin){toast(SETMSG.samepin);return}
+  if(!confirm('Change your PIN? Use the new PIN from your next login.'))return;
+  b.disabled=true;const j=await selfCall('&action=mypin&np='+n);b.disabled=false;
+  if(j&&j.ok){
+    const old=curPin,sg=LS('sig'+pn(old));
+    if(sg){SS('sig'+pn(n),sg);delete MEM['sig'+pn(old)];try{localStorage.removeItem('sig'+pn(old))}catch(e){}}
+    curPin=n;const x=LS('sess');if(x&&typeof x==='object')SS('sess',{...x,p:n});
+    ['setOld','setNew','setNew2'].forEach(i=>$(i).value='');
+    toast('PIN changed ✔ – use the new PIN next time');await resync();
+  }else if(j)toast(SETMSG[j.error]||j.error||'Could not change the PIN');
+};
+async function postRead(rec){   // POST whose answer can be read (needed to know the complaint really arrived)
+  try{const res=await fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(rec)});return JSON.parse(await res.text())}
+  catch(e){return null}
+}
+$('setCmpBtn').onclick=()=>{
+  if(!setScriptOK()){toast('Please deploy the latest Apps Script (Code.gs) first');return}
+  const o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px';
+  o.innerHTML='<div style="background:#fff;border-radius:16px;padding:18px;max-width:460px;width:100%"><h2>📝 Report / Complaint</h2><p class="hint">Describe the problem. It goes straight to the admin.</p><textarea maxlength="1500" style="margin:10px 0;min-height:130px" placeholder="Write your report or complaint here…"></textarea><div class="rbtns"><button type="button" class="b-copy" data-ok>📨 Send</button> <button type="button" class="b-lite" data-no>Cancel</button></div></div>';
+  o.onclick=async e=>{
+    if(e.target.dataset.no!==undefined||e.target===o){o.remove();return}
+    if(e.target.dataset.ok===undefined)return;
+    const ta=o.querySelector('textarea'),msg=ta.value.trim(),btn=e.target;
+    if(msg.length<5){toast('Please describe the problem (at least 5 characters)');return}
+    btn.disabled=true;btn.textContent='Sending…';
+    const j=await postRead({cmp:'1',pin:curPin,user:curUser,msg,device:(navigator.userAgent||'').slice(0,150)});
+    if(j&&j.ok){o.remove();toast('Sent to the admin ✔')}
+    else{btn.disabled=false;btn.textContent='📨 Send';toast(j&&j.error?(SETMSG[j.error]||j.error):'Could not send – check internet and try again')}
+  };
+  document.body.appendChild(o);o.querySelector('textarea').focus();
+};
 
 /* ===== Staff Management (admin) ===== */
 const LVC=[['#e8f1ff','#2563eb'],['#e6f7ee','#16a34a'],['#fff4e0','#f59e0b'],['#fde8ef','#e11d48'],['#f1e8ff','#7c3aed'],['#e0f7fa','#0891b2'],['#fff0e6','#ea580c'],['#eceff1','#546e7a']],lvc=d=>LVC[(Math.max(d,1)-1)%LVC.length],stfBy=n=>STAFF.find(x=>x.no===n),stfNm=s=>s.no+'. '+(s.name||'(no name)'),DRAFT=[];
@@ -1795,28 +1930,29 @@ function stfRender(){
   rowsAll.forEach(r=>{const k=pn(r.pin);if(k&&k!==pn(curPin)&&!known.has(k))cnt[k]=(cnt[k]||0)+1});
   const row=(x,d)=>{
     const sb=STAFF.filter(y=>y.link.includes(x.no)).map(y=>'<span class="chip" style="background:#fff1c9;border-radius:999px;padding:3px 9px;font-size:12px;margin:2px;display:inline-block">👁 Also seen by '+esc(stfNm(y))+' <a href="#" data-a="unlink" data-no="'+y.no+'" data-to="'+x.no+'">✖ unmerge</a></span>').join('');const lk=x.link.map(n=>by(n)).filter(Boolean).map(t=>'<span class="chip" style="background:#e5f3ef;border-radius:999px;padding:3px 9px;font-size:12px;margin:2px;display:inline-block">🔗 Also sees '+esc(stfNm(t))+' <a href="#" data-a="unlink" data-no="'+x.no+'" data-to="'+t.no+'">✖ unmerge</a></span>').join('');
-    return draft(x.no,d,'above')+'<div class="dcard" style="margin:8px 0 0 '+d*14+'px;background:'+lvc(d)[0]+';border-left:7px solid '+lvc(d)[1]+'"><div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"><b style="min-width:30px">'+x.no+'.</b><span style="background:'+lvc(d)[1]+';color:#fff;border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700">Level '+d+'</span><input data-f="name" value="'+esc(x.name)+'" placeholder="Name" style="flex:1 1 120px;width:auto" '+inp.slice(0,0)+'><input data-f="pin" value="'+esc(x.pin)+'" placeholder="PIN" inputmode="numeric" maxlength="4" style="width:84px;text-align:center" ><button type="button" class="b-copy" data-a="save" data-no="'+x.no+'">💾</button><button type="button" class="b-lite" data-a="add" data-no="'+x.no+'">➕ Add more</button><button type="button" class="b-lite" data-a="above" data-no="'+x.no+'">⬆ Layer above</button>'+(act.some(y=>y.parent===x.no)?'<button type="button" class="b-lite" data-a="below" data-no="'+x.no+'">⬇ Layer between</button>':'')+'<button type="button" class="b-lite" data-a="link" data-no="'+x.no+'">🔗 Merge</button><button type="button" class="b-lite" data-a="'+(ent(x)?'del':'purge')+'" data-no="'+x.no+'">'+(ent(x)?'🗑 Remove':'🗑 Delete')+'</button></div>'+((lk||sb)?'<div style="margin-top:4px">'+lk+sb+'</div>':'')+'<div class="hint">'+ent(x)+' entries</div>'+(x.pin?'':'<div class="hint">Vacant – no PIN yet</div>')+'</div>'+kids(x.no,d+1)};
-  const draft=(par,d,key='par')=>DRAFT.filter(q=>q[key]===par).map(q=>'<div class="dcard" style="margin:8px 0 0 '+d*14+'px;border-left:7px dashed '+lvc(d)[1]+'">'+(q.above?'<div class="hint">⬆ New layer – placed above this seat; it sees the whole team below it</div>':'')+('below' in q?'<div class="hint">⬇ New layer between here and the ticked seats below. They move under the new person, who sees all of them.</div><div style="margin:4px 0">'+act.filter(y=>y.parent===q.below).map(y=>'<label style="display:inline-flex;gap:5px;align-items:center;margin:2px 10px 2px 0"><input type="checkbox" data-k="'+y.no+'" checked style="width:auto;padding:0">'+esc(stfNm(y))+'</label>').join('')+'</div>':'')+'<div style="display:flex;flex-wrap:wrap;gap:6px" data-d="'+q.id+'"><input data-f="name" value="'+esc(q.name||'')+'" placeholder="Name" style="flex:1 1 120px;width:auto"><input data-f="pin" value="'+esc(q.pin||'')+'" placeholder="4-digit PIN" inputmode="numeric" maxlength="4" style="width:100px;text-align:center"><button type="button" class="b-copy" data-a="dsave" data-id="'+q.id+'">💾 Add</button><button type="button" class="b-lite" data-a="dcancel" data-id="'+q.id+'">✖</button></div></div>').join('');
+    return draft(x.no,d,'above')+'<div class="dcard" style="margin:8px 0 0 '+d*14+'px;background:'+lvc(d)[0]+';border-left:7px solid '+lvc(d)[1]+'"><div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"><b style="min-width:30px">'+x.no+'.</b><span style="background:'+lvc(d)[1]+';color:#fff;border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700">Level '+d+'</span><input data-f="name" value="'+esc(x.name)+'" placeholder="Name" style="flex:1 1 120px;width:auto" '+inp.slice(0,0)+'><input data-f="user" value="'+esc(x.user||'')+'" placeholder="Username" maxlength="20" autocapitalize="none" style="flex:0 1 120px;width:auto"><input data-f="pin" value="'+esc(x.pin)+'" placeholder="PIN" inputmode="numeric" maxlength="4" style="width:84px;text-align:center" ><button type="button" class="b-copy" data-a="save" data-no="'+x.no+'">💾</button><button type="button" class="b-lite" data-a="add" data-no="'+x.no+'">➕ Add more</button><button type="button" class="b-lite" data-a="above" data-no="'+x.no+'">⬆ Layer above</button>'+(act.some(y=>y.parent===x.no)?'<button type="button" class="b-lite" data-a="below" data-no="'+x.no+'">⬇ Layer between</button>':'')+'<button type="button" class="b-lite" data-a="link" data-no="'+x.no+'">🔗 Merge</button><button type="button" class="b-lite" data-a="'+(ent(x)?'del':'purge')+'" data-no="'+x.no+'">'+(ent(x)?'🗑 Remove':'🗑 Delete')+'</button></div>'+((lk||sb)?'<div style="margin-top:4px">'+lk+sb+'</div>':'')+'<div class="hint">'+ent(x)+' entries</div>'+(x.pin?'':'<div class="hint">Vacant – no PIN yet</div>')+'</div>'+kids(x.no,d+1)};
+  const draft=(par,d,key='par')=>DRAFT.filter(q=>q[key]===par).map(q=>'<div class="dcard" style="margin:8px 0 0 '+d*14+'px;border-left:7px dashed '+lvc(d)[1]+'">'+(q.above?'<div class="hint">⬆ New layer – placed above this seat; it sees the whole team below it</div>':'')+('below' in q?'<div class="hint">⬇ New layer between here and the ticked seats below. They move under the new person, who sees all of them.</div><div style="margin:4px 0">'+act.filter(y=>y.parent===q.below).map(y=>'<label style="display:inline-flex;gap:5px;align-items:center;margin:2px 10px 2px 0"><input type="checkbox" data-k="'+y.no+'" checked style="width:auto;padding:0">'+esc(stfNm(y))+'</label>').join('')+'</div>':'')+'<div style="display:flex;flex-wrap:wrap;gap:6px" data-d="'+q.id+'"><input data-f="name" value="'+esc(q.name||'')+'" placeholder="Name" style="flex:1 1 120px;width:auto"><input data-f="user" value="'+esc(q.user||'')+'" placeholder="Username (auto)" maxlength="20" autocapitalize="none" style="flex:0 1 130px;width:auto"><input data-f="pin" value="'+esc(q.pin||'')+'" placeholder="4-digit PIN" inputmode="numeric" maxlength="4" style="width:100px;text-align:center"><button type="button" class="b-copy" data-a="dsave" data-id="'+q.id+'">💾 Add</button><button type="button" class="b-lite" data-a="dcancel" data-id="'+q.id+'">✖</button></div></div>').join('');
   const kids=(par,d)=>draft(par,d,'below')+act.filter(x=>x.parent===par).map(x=>row(x,d)).join('')+draft(par,d);
   const gone=STAFF.filter(x=>!x.active);
   const dep=x=>{let n=1,p=x;while(p&&p.parent&&n<30){p=by(p.parent);n++}return n},mx=act.reduce((m,x)=>Math.max(m,dep(x)),0);
   const legend=mx?'<div class="hint" style="margin:6px 0">Colours = layers (Level 1 is directly under Admin; each deeper layer has its own colour): '+Array.from({length:mx},(_,i)=>'<span style="background:'+lvc(i+1)[1]+';color:#fff;border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700;margin:2px;display:inline-block">Level '+(i+1)+'</span>').join('')+'</div>':'';
   $('stfBody').innerHTML=legend+'<div class="dcard" style="background:#fff8db;border-left:7px solid #d4a017"><b>👑 Admin</b> <button type="button" class="b-lite" data-a="add" data-no="0">➕ Add more</button>'+(act.some(y=>y.parent===0)?' <button type="button" class="b-lite" data-a="below" data-no="0">⬇ Layer between</button>':'')+'</div>'+kids(0,1)+
     (Object.keys(cnt).length?'<div class="sh">PINs found in your data but not listed – tap to add</div>'+Object.keys(cnt).map(k=>'<button type="button" class="b-lite" style="margin:3px" data-a="adopt" data-pin="'+k+'">➕ '+k+' ('+cnt[k]+' rows)</button>').join(''):'')+
-    (gone.length?'<div class="sh">Removed seats – restore or unmerge any time</div>'+gone.map(x=>{const rb=STAFF.filter(y=>y.link.includes(x.no)).map(y=>'<span class="chip" style="background:#fff1c9;border-radius:999px;padding:3px 9px;font-size:12px;margin:2px;display:inline-block">Data seen by '+esc(stfNm(y))+' <a href="#" data-a="unlink" data-no="'+y.no+'" data-to="'+x.no+'">✖ unmerge</a></span>').join('');return'<div class="dcard" style="margin:8px 0"><b>'+esc(stfNm(x))+'</b> · PIN '+esc(x.pin||'-')+' · '+ent(x)+' entries<div style="margin:4px 0">'+(rb||'<span class="hint">Data not merged anywhere</span>')+'</div><button type="button" class="b-copy" data-a="restore" data-no="'+x.no+'">♻ Restore</button> '+(ent(x)?'':'<button type="button" class="b-lite" data-a="purge" data-no="'+x.no+'">🗑 Delete forever</button>')+'</div>'}).join(''):'');
+    (gone.length?'<div class="sh">Removed seats – restore or unmerge any time</div>'+gone.map(x=>{const rb=STAFF.filter(y=>y.link.includes(x.no)).map(y=>'<span class="chip" style="background:#fff1c9;border-radius:999px;padding:3px 9px;font-size:12px;margin:2px;display:inline-block">Data seen by '+esc(stfNm(y))+' <a href="#" data-a="unlink" data-no="'+y.no+'" data-to="'+x.no+'">✖ unmerge</a></span>').join('');return'<div class="dcard" style="margin:8px 0"><b>'+esc(stfNm(x))+'</b> · user '+esc(x.user||'-')+' · PIN '+esc(x.pin||'-')+' · '+ent(x)+' entries<div style="margin:4px 0">'+(rb||'<span class="hint">Data not merged anywhere</span>')+'</div><button type="button" class="b-copy" data-a="restore" data-no="'+x.no+'">♻ Restore</button> '+(ent(x)?'':'<button type="button" class="b-lite" data-a="purge" data-no="'+x.no+'">🗑 Delete forever</button>')+'</div>'}).join(''):'');
 }
 $('stfBody').addEventListener('click',e=>{
   const b=e.target.closest('[data-a]');if(!b)return;e.preventDefault();
   const a=b.dataset.a,no=+b.dataset.no||0,card=b.closest('.dcard'),val=f=>(card.querySelector('[data-f="'+f+'"]')||{}).value||'';
   const chk=(pin,self)=>{if(pin&&!/^\d{4}$/.test(pin)){toast('PIN must be 4 digits');return false}
     if(pin&&(pn(pin)===pn(curPin)||STAFF.some(x=>x.no!==self&&x.pin&&pn(x.pin)===pn(pin)))){toast('This PIN is already used');return false}return true};
+  const chkU=(u,self)=>{u=String(u||'').trim().toLowerCase();if(!u)return true;if(!/^[a-z0-9._-]{2,20}$/.test(u)){toast('Username: 2–20 letters, digits, dot, dash or underscore');return false}if(u==='admin'||STAFF.some(x=>x.no!==self&&x.user===u)){toast('This username is already used');return false}return true};
   if(a==='add'){DRAFT.push({id:Date.now(),par:no});stfRender()}
   else if(a==='below'){DRAFT.push({id:Date.now(),below:no});stfRender()}
   else if(a==='above'){DRAFT.push({id:Date.now(),above:no});stfRender()}
   else if(a==='adopt'){DRAFT.push({id:Date.now(),par:0,pin:b.dataset.pin});stfRender()}
   else if(a==='dcancel'){DRAFT.splice(DRAFT.findIndex(q=>q.id==b.dataset.id),1);stfRender()}
-  else if(a==='dsave'){const q=DRAFT.find(q=>q.id==b.dataset.id),pin=val('pin').trim();if(!val('name').trim()&&!pin){toast('Enter a name or PIN');return}const ks=[...card.querySelectorAll('[data-k]:checked')].map(i=>i.dataset.k).join(',');if('below' in q&&!ks){toast('Tick at least one seat to move under the new layer');return}if(chk(pin,0))stfSend('below' in q?{op:'insbelow',no:q.below,name:val('name').trim(),spin:pin,kids:ks}:q.above?{op:'ins',no:q.above,name:val('name').trim(),spin:pin}:{op:'save',no:0,parent:q.par,name:val('name').trim(),spin:pin})}
-  else if(a==='save'){const pin=val('pin').trim();if(chk(pin,no))stfSend({op:'save',no,name:val('name').trim(),spin:pin})}
+  else if(a==='dsave'){const q=DRAFT.find(q=>q.id==b.dataset.id),pin=val('pin').trim();if(!val('name').trim()&&!pin){toast('Enter a name or PIN');return}const ks=[...card.querySelectorAll('[data-k]:checked')].map(i=>i.dataset.k).join(',');if('below' in q&&!ks){toast('Tick at least one seat to move under the new layer');return}const un=val('user').trim();if(chk(pin,0)&&chkU(un,0))stfSend('below' in q?{op:'insbelow',no:q.below,name:val('name').trim(),spin:pin,kids:ks,user:un}:q.above?{op:'ins',no:q.above,name:val('name').trim(),spin:pin,user:un}:{op:'save',no:0,parent:q.par,name:val('name').trim(),spin:pin,user:un})}
+  else if(a==='save'){const pin=val('pin').trim(),un=val('user').trim();if(chk(pin,no)&&chkU(un,no))stfSend({op:'save',no,name:val('name').trim(),spin:pin,user:un})}
   else if(a==='link'){const o=STAFF.filter(x=>x.active&&x.no!==no);if(!o.length){toast('No other seat yet');return}stfPick('Also show the data of which employee?',o,v=>stfSend({op:'link',no,to:v}))}
   else if(a==='restore'){stfPick('Restore under which seat? (its data returns to it)',[{no:0,name:'Admin'}].concat(STAFF.filter(x=>x.active&&x.no!==no)),v=>stfSend({op:'restore',no,parent:v}))}
   else if(a==='purge'){const t=stfBy(no);if(confirm('Delete '+(t?stfNm(t):'this seat')+' permanently? It has no entries. Its employee code becomes free again.'))stfSend({op:'purge',no})}
@@ -1825,7 +1961,7 @@ $('stfBody').addEventListener('click',e=>{
 });
 function repAfterChange(){repPrep();repBuildOpts(false);repRenderMs();repRun()}   // e.g. after a delete: keep the ticks
 function layout(){
-  const rp=REP.view==='rep',fc=REP.view==='fc',sf=REP.view==='stf',em=!rp&&!fc&&!sf,ok=unlocked;$('stfPage').style.display=(ok&&sf)?'':'none';
+  const rp=REP.view==='rep',fc=REP.view==='fc',sf=REP.view==='stf',se=REP.view==='set',em=!rp&&!fc&&!sf&&!se,ok=unlocked;$('stfPage').style.display=(ok&&sf)?'':'none';$('setPage').style.display=(ok&&se)?'':'none';
   document.querySelector('main').style.display=(ok&&em)?'':'none';
   $('repPage').style.display=(ok&&rp)?'':'none';
   $('fcPage').style.display=(ok&&fc)?'':'none';
@@ -1833,12 +1969,13 @@ function layout(){
   $('lockMsg').style.display=ok?'none':'';
 }
 function showView(v){
-  if(v==='stf'&&!isAdmin)v='email';REP.view=v;const rp=v==='rep',fc=v==='fc',sf=v==='stf';$('tabStaff').classList.toggle('on',sf);
-  $('tabEmail').classList.toggle('on',!rp&&!fc&&!sf);$('tabRep').classList.toggle('on',rp);$('tabFc').classList.toggle('on',fc);
+  if(v==='stf'&&!isAdmin)v='email';REP.view=v;const rp=v==='rep',fc=v==='fc',sf=v==='stf',se=v==='set';$('tabStaff').classList.toggle('on',sf);$('tabSet').classList.toggle('on',se);
+  $('tabEmail').classList.toggle('on',!rp&&!fc&&!sf&&!se);$('tabRep').classList.toggle('on',rp);$('tabFc').classList.toggle('on',fc);
   layout();
   if(rp&&unlocked){repOpen();scrollTo(0,0)}
   if(fc&&unlocked){fcOpen();scrollTo(0,0)}
   if(sf&&unlocked){stfRender();scrollTo(0,0)}
+  if(se&&unlocked){setOpen();scrollTo(0,0)}
 }
 function repReset(){$('rFrom').value='';$('rTo').value='';repOpen()}
 function repDates(){repBuildOpts(true);repRenderMs();repRun()}
@@ -2030,14 +2167,16 @@ $('fcList').onchange=e=>{
   else if(e.target.classList.contains('fck'))fcCount();
 };
 if(!$('rLegend'))$('rSum').insertAdjacentHTML('afterend','<div class="leg" id="rLegend">'+LEG_HTML+'</div>');
-$('tabEmail').onclick=()=>showView('email');$('tabRep').onclick=()=>showView('rep');$('tabFc').onclick=()=>showView('fc');$('tabStaff').onclick=()=>showView('stf');$('rBack').onclick=()=>showView('email');$('fcBack').onclick=()=>showView('email');
+$('tabEmail').onclick=()=>showView('email');$('tabRep').onclick=()=>showView('rep');$('tabFc').onclick=()=>showView('fc');$('tabStaff').onclick=()=>showView('stf');$('tabSet').onclick=()=>showView('set');$('setBack').onclick=()=>showView('email');$('rBack').onclick=()=>showView('email');$('fcBack').onclick=()=>showView('email');
 $('rFrom').onchange=$('rTo').onchange=repDates;
 $('rPII').onchange=repRun;$('rReset').onclick=repReset;$('rXlsx').onclick=repXlsx;$('rPdf').onclick=repPdf;
 $('date').value=todayISO();$('time').value=nowHM();applyMode();
-$('lgVer').textContent='Version '+APP_VER+' · Updated On '+APP_DATE;
+$('lgVer').textContent='Version '+APP_VER+' · Updated On '+APP_DATE;$('user').value=LS('lastuser')||'';
 async function restoreSession(){
-  const p=LS('sess');if(!/^\d{4}$/.test(p||'')||unlocked||busy)return;
-  lgState('rest');await tryUnlock(p,true);if(!unlocked)lgState('form');
+  const x=LS('sess');if(unlocked||busy||!x)return;
+  if(typeof x!=='object'||!x.u||!/^\d{4}$/.test(x.p||'')){clearSess();return}   // an older login (PIN only) must login again with a username
+  if(sessLeft()<=0){clearSess();lgErr(SESS_END);return}
+  lgState('rest');await tryUnlock(x.u||'',x.p,true);if(!unlocked)lgState('form');
 }
 restoreSession();
 window.addEventListener('online',()=>{if(!unlocked)restoreSession()});
