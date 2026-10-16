@@ -134,6 +134,12 @@ details summary{cursor:pointer;color:var(--mut);padding:4px 0}
 .lgs{margin:4px 0 22px;color:var(--mut);font-size:13.5px}
 #loginScr #pin{width:100%;padding:14px 12px;font-size:28px;text-align:center;letter-spacing:14px;text-indent:14px;border:2px solid #d9e2de;border-radius:14px;background:#f6f9f8;margin:0 0 14px}
 #loginScr #pin:focus{border-color:var(--acc);box-shadow:0 0 0 4px rgba(14,107,92,.15);outline:0}
+.dragh{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;font-size:22px;line-height:1;padding:2px 6px;color:#5b6b66;border-radius:8px}
+.dragh:active{cursor:grabbing;background:rgba(0,0,0,.08)}
+.dropAbove{box-shadow:0 -5px 0 #0e6b5c}
+.dropUnder{outline:3px dashed #0e6b5c;outline-offset:-2px}
+.dropSame{outline:3px solid #2563eb;outline-offset:-2px;background-image:linear-gradient(rgba(37,99,235,.10),rgba(37,99,235,.10))}
+body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
 #loginScr #user{width:100%;box-sizing:border-box;padding:13px 12px;font-size:18px;text-align:center;border:2px solid #d9e2de;border-radius:16px;background:#fff;margin:0 0 12px}
 #loginScr #user:focus{border-color:var(--acc);box-shadow:0 0 0 4px rgba(14,107,92,.15);outline:0}
 #loginScr #login{width:100%;padding:14px;font-size:16px;border-radius:14px;color:#fff;background:linear-gradient(135deg,#0e6b5c,#14937c);box-shadow:0 10px 22px rgba(14,107,92,.4);letter-spacing:.3px}
@@ -240,6 +246,31 @@ table tr{transition:background .2s}
 ::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:linear-gradient(#2ec4aa,#14937c);border-radius:10px;border:2px solid #eef3f0}::-webkit-scrollbar-track{background:transparent}
 ::selection{background:#f2c94c;color:#222}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001s!important;animation-iteration-count:1!important;transition-duration:.001s!important}}
+
+.tbar{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.tstats{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;margin:4px 0 10px;color:#475569}
+.tree{overflow-x:auto;padding:6px 4px 14px;-webkit-overflow-scrolling:touch}
+.tree ul{display:flex;justify-content:center;padding:20px 0 0;margin:0;position:relative;list-style:none;width:max-content;min-width:100%}
+.tree>ul{padding-top:0}
+.tree li{position:relative;padding:20px 6px 0;text-align:center;list-style:none;display:flex;flex-direction:column;align-items:center}
+.tree>ul>li{padding-top:0}
+.tree li::before,.tree li::after{content:'';position:absolute;top:0;right:50%;border-top:2px solid #94a3b8;width:50%;height:20px}
+.tree li::after{right:auto;left:50%;border-left:2px solid #94a3b8}
+.tree>ul>li::before,.tree>ul>li::after{display:none}
+.tree li:only-child::before,.tree li:only-child::after{display:none}
+.tree li:only-child{padding-top:20px}
+.tree li:first-child::before,.tree li:last-child::after{border:0 none}
+.tree li:last-child::before{border-right:2px solid #94a3b8;border-radius:0 8px 0 0}
+.tree li:first-child::after{border-radius:8px 0 0 0}
+.tree ul ul::before{content:'';position:absolute;top:0;left:50%;border-left:2px solid #94a3b8;height:20px}
+.tnode{position:relative;width:150px;border-radius:12px;padding:8px 8px 6px;box-shadow:0 1px 5px rgba(0,0,0,.13);font-size:12px;text-align:center}
+.tnode.vac{border:2px dashed #d97706;border-top:4px solid #d97706!important;background:#fffbeb!important}
+.tnode.tadm{background:#fff8db;border-top:4px solid #d4a017;width:130px}
+.tlv{position:absolute;top:-10px;left:8px;color:#fff;border-radius:999px;padding:0 8px;font-size:10px;font-weight:700;line-height:17px}
+.tnm{font-weight:700;font-size:14px;margin-top:2px;word-break:break-word;color:#0f172a}
+.tsb{color:#475569;font-size:11px;margin-top:1px;word-break:break-word}
+.tnode .dragh{position:absolute;top:-1px;right:1px;font-size:16px;padding:2px 5px}
+.tact{margin-top:5px;font-size:11px}.tact a{color:#0e6b5c;font-weight:700;text-decoration:none;margin:0 4px}
 </style>
 </head>
 <body>
@@ -447,7 +478,7 @@ const LS=k=>{if(k in MEM)return MEM[k];try{return JSON.parse(localStorage.getIte
 const SS=(k,v)=>{MEM[k]=v;try{localStorage.setItem(k,JSON.stringify(v));if(JSON.parse(localStorage.getItem(k))===undefined)throw 0}catch(e){storeOK=false}};
 let patients={};
 let SRV_TABS=null,SRV_V='';let prods={};let rowsAll=[];let unlocked=false,isAdmin=false,curPin='',curUser='',busy=false;let STAFF=[],ME=null,SEEALL=false,CREW=[];
-const APP_VER='2026-10-16-j',APP_DATE='16 Oct 2026';
+const APP_VER='2026-10-16-o',APP_DATE='16 Oct 2026';
 const pn=x=>{const d=String(x==null?'':x).replace(/\D/g,'');return d?d.padStart(4,'0'):''};
 try{['patients','prods','history','sheetUrl','design'].forEach(k=>localStorage.removeItem(k))}catch(e){}          // product stats: key = lowercase product
 const AUTO={};                       // field -> value last filled automatically
@@ -1924,27 +1955,133 @@ function stfPick(title,opts,cb){
   o.onclick=e=>{if(e.target.dataset.no!==undefined||e.target===o)o.remove();else if(e.target.dataset.ok!==undefined){const v=+o.querySelector('select').value;o.remove();cb(v)}};
   document.body.appendChild(o);
 }
+const stfSubs=no=>{const out=new Set();(function w(p){STAFF.filter(y=>y.active&&y.parent===p).forEach(y=>{if(!out.has(y.no)){out.add(y.no);w(y.no)}})})(no);return out};
+const stfLevel=n=>{let d=1,p=STAFF.find(x=>x.no===n);while(p&&p.parent&&d<30){p=STAFF.find(x=>x.no===p.parent);d++}return d};
+function stfMoveSend(no,to,mode){
+  const x=STAFF.find(y=>y.no===no);if(!x)return;
+  if(to&&stfSubs(no).has(to)){toast('A seat cannot be moved above or under its own team');return}
+  if(to===no)return;
+  const tg=STAFF.find(y=>y.no===to);
+  if(mode==='under'&&x.parent===to){toast('Already there');return}
+  if(mode==='same'&&tg&&x.parent===tg.parent){toast('Already on the same level');return}
+  stfSend({op:'move',no,to,mode});
+}
+function stfMove(no){   // "↕ Move": pick the seat to go above / under
+  const x=STAFF.find(y=>y.no===no);if(!x)return;
+  const bad=stfSubs(no);bad.add(no);const others=STAFF.filter(y=>y.active&&!bad.has(y.no));
+  const lab=y=>esc(stfNm(y))+' (Level '+stfLevel(y.no)+')';
+  const o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px';
+  o.innerHTML='<div style="background:#fff;border-radius:16px;padding:18px;max-width:440px;width:100%"><h2>↕ Move '+esc(stfNm(x))+'</h2><p class="hint">The seat\'s own team moves with it.</p><select style="margin:10px 0">'+
+    '<optgroup label="⬆ Move ABOVE – takes this person\'s place, this person works under it">'+(others.length?others.map(y=>'<option value="a'+y.no+'">⬆ Above '+lab(y)+'</option>').join(''):'')+'</optgroup>'+
+    '<optgroup label="＝ SAME LEVEL – equal to this person, same senior">'+others.filter(y=>y.parent!==x.parent).map(y=>'<option value="s'+y.no+'">＝ Same level as '+lab(y)+'</option>').join('')+'</optgroup>'+
+    '<optgroup label="⬇ Move BELOW – becomes a junior of this person">'+(x.parent!==0?'<option value="u0">⬇ Top level (directly under Admin)</option>':'')+others.filter(y=>y.no!==x.parent).map(y=>'<option value="u'+y.no+'">⬇ Under '+lab(y)+'</option>').join('')+'</optgroup></select>'+
+    '<div class="rbtns"><button type="button" class="b-copy" data-ok>Move</button> <button type="button" class="b-lite" data-no>Cancel</button></div></div>';
+  o.onclick=e=>{if(e.target.dataset.no!==undefined||e.target===o)o.remove();else if(e.target.dataset.ok!==undefined){const v=o.querySelector('select').value;o.remove();if(v)stfMoveSend(no,+v.slice(1),{a:'above',s:'same'}[v[0]]||'under')}};
+  document.body.appendChild(o);
+}
+(function stfDrag(){   // drag a seat by its ⠿ handle: upper part of a seat = above it, lower part = under it, Admin card = top level
+  let D=null;const clear=()=>document.querySelectorAll('.dropAbove,.dropUnder,.dropSame').forEach(e=>e.classList.remove('dropAbove','dropUnder','dropSame'));
+  const hit=(x,y)=>{const el=document.elementFromPoint(x,y),c=el&&el.closest&&el.closest('#stfBody .dcard[data-seat],#stfBody .tnode[data-seat]');if(!c)return null;
+    const no=+c.dataset.seat;if(no===D.no||D.bad.has(no))return null;
+    if(no===0)return{c,to:0,mode:'under'};const r=c.getBoundingClientRect();return{c,to:no,mode:(y-r.top)<r.height*0.28?'above':((y-r.top)<r.height*0.62?'same':'under')}};
+  $('stfBody').addEventListener('pointerdown',e=>{const h=e.target.closest('.dragh');if(!h||!unlocked||!isAdmin)return;e.preventDefault();
+    const no=+h.dataset.no,bad=stfSubs(no);D={no,bad,t:null,sy:e.clientY,go:0,nm:(STAFF.find(y=>y.no===no)?stfNm(STAFF.find(y=>y.no===no)):'seat')};document.body.classList.add('dragging');
+    const g=document.createElement('div');g.id='dragGhost';g.style.cssText='position:fixed;z-index:500;pointer-events:none;background:#0e6b5c;color:#fff;padding:6px 12px;border-radius:999px;font-size:13px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.3)';
+    const x=STAFF.find(y=>y.no===no);g.textContent='↕ '+(x?stfNm(x):'seat');g.style.left=(e.clientX+12)+'px';g.style.top=(e.clientY+12)+'px';document.body.appendChild(g)});
+  window.addEventListener('pointermove',e=>{if(!D)return;const g=$('dragGhost');if(g){g.style.left=(e.clientX+12)+'px';g.style.top=(e.clientY+12)+'px'}
+    D.go=e.clientY<70?-14:(e.clientY>innerHeight-70?14:0);   // near the screen edge: scroll
+    const tr=document.querySelector('#stfBody .tree');D.gx=0;if(tr){const r=tr.getBoundingClientRect();if(e.clientY>=r.top&&e.clientY<=r.bottom)D.gx=e.clientX<r.left+60?-16:(e.clientX>r.right-60?16:0)}
+    clear();D.t=hit(e.clientX,e.clientY);if(D.t)D.t.c.classList.add({above:'dropAbove',same:'dropSame',under:'dropUnder'}[D.t.mode]);
+    if(g){const tx=D.t&&STAFF.find(y=>y.no===D.t.to),nm=D.nm;g.textContent='↕ '+nm+(D.t?{above:' → above ',same:' → same level as ',under:' → under '}[D.t.mode]+(D.t.to?(tx?stfNm(tx):'seat'):'Admin (top level)'):'')}});
+  setInterval(()=>{if(D&&D.go)scrollBy(0,D.go);if(D&&D.gx){const tr=document.querySelector('#stfBody .tree');if(tr)tr.scrollLeft+=D.gx}},40);
+  const end=(e,ok)=>{if(!D)return;const t=ok?D.t:null,no=D.no;const g=$('dragGhost');if(g)g.remove();clear();document.body.classList.remove('dragging');D=null;if(t)stfMoveSend(no,t.to,t.mode)};
+  window.addEventListener('pointerup',e=>end(e,true));window.addEventListener('pointercancel',e=>end(e,false));
+  window.addEventListener('keydown',e=>{if(e.key==='Escape')end(e,false)});
+})();
 async function stfSend(op){
   const ok=await post({stf:'1',pin:curPin,...op});toast(ok?'Saving…':'Could not send – check internet');
   setTimeout(()=>resync().then(()=>{DRAFT.length=0;stfRender();setCloud(true,'')}),1800);
 }
-function stfRender(){
+function stfRenderList(){
   const act=STAFF.filter(x=>x.active),by=n=>STAFF.find(x=>x.no===n),inp='style="padding:7px 9px;border-radius:9px"';
   const ecnt={};rowsAll.forEach(r=>{const k=pn(r.pin);if(k)ecnt[k]=(ecnt[k]||0)+1});const ent=x=>x.pin?(ecnt[pn(x.pin)]||0):0;
   const known=new Set(STAFF.map(x=>pn(x.pin)).filter(Boolean)),cnt={};
   rowsAll.forEach(r=>{const k=pn(r.pin);if(k&&k!==pn(curPin)&&!known.has(k))cnt[k]=(cnt[k]||0)+1});
   const row=(x,d)=>{
     const sb=STAFF.filter(y=>y.link.includes(x.no)).map(y=>'<span class="chip" style="background:#fff1c9;border-radius:999px;padding:3px 9px;font-size:12px;margin:2px;display:inline-block">👁 Also seen by '+esc(stfNm(y))+' <a href="#" data-a="unlink" data-no="'+y.no+'" data-to="'+x.no+'">✖ unmerge</a></span>').join('');const lk=x.link.map(n=>by(n)).filter(Boolean).map(t=>'<span class="chip" style="background:#e5f3ef;border-radius:999px;padding:3px 9px;font-size:12px;margin:2px;display:inline-block">🔗 Also sees '+esc(stfNm(t))+' <a href="#" data-a="unlink" data-no="'+x.no+'" data-to="'+t.no+'">✖ unmerge</a></span>').join('');
-    return draft(x.no,d,'above')+'<div class="dcard" style="margin:8px 0 0 '+d*14+'px;background:'+lvc(d)[0]+';border-left:7px solid '+lvc(d)[1]+'"><div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"><b style="min-width:30px">'+x.no+'.</b><span style="background:'+lvc(d)[1]+';color:#fff;border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700">Level '+d+'</span><input data-f="name" value="'+esc(x.name)+'" placeholder="Name" style="flex:1 1 120px;width:auto" '+inp.slice(0,0)+'><input data-f="user" value="'+esc(x.user||'')+'" placeholder="Username" maxlength="20" autocapitalize="none" style="flex:0 1 120px;width:auto"><input data-f="pin" value="'+esc(x.pin)+'" placeholder="PIN" inputmode="numeric" maxlength="4" style="width:84px;text-align:center" ><button type="button" class="b-copy" data-a="save" data-no="'+x.no+'">💾</button><button type="button" class="b-lite" data-a="add" data-no="'+x.no+'">➕ Add more</button><button type="button" class="b-lite" data-a="above" data-no="'+x.no+'">⬆ Layer above</button>'+(act.some(y=>y.parent===x.no)?'<button type="button" class="b-lite" data-a="below" data-no="'+x.no+'">⬇ Layer between</button>':'')+'<button type="button" class="b-lite" data-a="link" data-no="'+x.no+'">🔗 Merge</button><button type="button" class="b-lite" data-a="'+(ent(x)?'del':'purge')+'" data-no="'+x.no+'">'+(ent(x)?'🗑 Remove':'🗑 Delete')+'</button></div>'+((lk||sb)?'<div style="margin-top:4px">'+lk+sb+'</div>':'')+'<div class="hint">'+ent(x)+' entries</div>'+(x.pin?'':'<div class="hint">Vacant – no PIN yet</div>')+'</div>'+kids(x.no,d+1)};
+    return draft(x.no,d,'above')+'<div class="dcard" data-seat="'+x.no+'" style="margin:8px 0 0 '+d*14+'px;background:'+lvc(d)[0]+';border-left:7px solid '+lvc(d)[1]+'"><div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"><span class="dragh" data-no="'+x.no+'" title="Drag to move this seat with its team">⠿</span><b style="min-width:30px">'+x.no+'.</b><span style="background:'+lvc(d)[1]+';color:#fff;border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700">Level '+d+'</span><input data-f="name" value="'+esc(x.name)+'" placeholder="Name" style="flex:1 1 120px;width:auto" '+inp.slice(0,0)+'><input data-f="user" value="'+esc(x.user||'')+'" placeholder="Username" maxlength="20" autocapitalize="none" style="flex:0 1 120px;width:auto"><input data-f="pin" value="'+esc(x.pin)+'" placeholder="PIN" inputmode="numeric" maxlength="4" style="width:84px;text-align:center" ><button type="button" class="b-copy" data-a="save" data-no="'+x.no+'">💾</button><button type="button" class="b-lite" data-a="add" data-no="'+x.no+'">➕ Add more</button><button type="button" class="b-lite" data-a="move" data-no="'+x.no+'">↕ Move</button><button type="button" class="b-lite" data-a="above" data-no="'+x.no+'">⬆ Layer above</button>'+(act.some(y=>y.parent===x.no)?'<button type="button" class="b-lite" data-a="below" data-no="'+x.no+'">⬇ Layer between</button>':'')+'<button type="button" class="b-lite" data-a="link" data-no="'+x.no+'">🔗 Merge</button><button type="button" class="b-lite" data-a="tick" data-no="'+x.no+'">👁 Team data</button><button type="button" class="b-lite" data-a="'+(ent(x)?'del':'purge')+'" data-no="'+x.no+'">'+(ent(x)?'🗑 Remove':'🗑 Delete')+'</button></div>'+((lk||sb)?'<div style="margin-top:4px">'+lk+sb+'</div>':'')+'<div class="hint">'+ent(x)+' entries</div>'+(x.pin?'':'<div class="hint">Vacant – no PIN yet</div>')+'</div>'+kids(x.no,d+1)};
   const draft=(par,d,key='par')=>DRAFT.filter(q=>q[key]===par).map(q=>'<div class="dcard" style="margin:8px 0 0 '+d*14+'px;border-left:7px dashed '+lvc(d)[1]+'">'+(q.above?'<div class="hint">⬆ New layer – placed above this seat; it sees the whole team below it</div>':'')+('below' in q?'<div class="hint">⬇ New layer between here and the ticked seats below. They move under the new person, who sees all of them.</div><div style="margin:4px 0">'+act.filter(y=>y.parent===q.below).map(y=>'<label style="display:inline-flex;gap:5px;align-items:center;margin:2px 10px 2px 0"><input type="checkbox" data-k="'+y.no+'" checked style="width:auto;padding:0">'+esc(stfNm(y))+'</label>').join('')+'</div>':'')+'<div style="display:flex;flex-wrap:wrap;gap:6px" data-d="'+q.id+'"><input data-f="name" value="'+esc(q.name||'')+'" placeholder="Name" style="flex:1 1 120px;width:auto"><input data-f="user" value="'+esc(q.user||'')+'" placeholder="Username (auto)" maxlength="20" autocapitalize="none" style="flex:0 1 130px;width:auto"><input data-f="pin" value="'+esc(q.pin||'')+'" placeholder="4-digit PIN" inputmode="numeric" maxlength="4" style="width:100px;text-align:center"><button type="button" class="b-copy" data-a="dsave" data-id="'+q.id+'">💾 Add</button><button type="button" class="b-lite" data-a="dcancel" data-id="'+q.id+'">✖</button></div></div>').join('');
   const kids=(par,d)=>draft(par,d,'below')+act.filter(x=>x.parent===par).map(x=>row(x,d)).join('')+draft(par,d);
   const gone=STAFF.filter(x=>!x.active);
   const dep=x=>{let n=1,p=x;while(p&&p.parent&&n<30){p=by(p.parent);n++}return n},mx=act.reduce((m,x)=>Math.max(m,dep(x)),0);
-  const legend=mx?'<div class="hint" style="margin:6px 0">Colours = layers (Level 1 is directly under Admin; each deeper layer has its own colour): '+Array.from({length:mx},(_,i)=>'<span style="background:'+lvc(i+1)[1]+';color:#fff;border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700;margin:2px;display:inline-block">Level '+(i+1)+'</span>').join('')+'</div>':'';
-  $('stfBody').innerHTML=legend+'<div class="dcard" style="background:#fff8db;border-left:7px solid #d4a017"><b>👑 Admin</b> <button type="button" class="b-lite" data-a="add" data-no="0">➕ Add more</button>'+(act.some(y=>y.parent===0)?' <button type="button" class="b-lite" data-a="below" data-no="0">⬇ Layer between</button>':'')+'</div>'+kids(0,1)+
+  const legend=mx?'<div class="hint" style="margin:6px 0">Colours = layers (Level 1 is directly under Admin; each deeper layer has its own colour). <b>Move a seat:</b> drag it by <b>⠿</b> – drop on the upper part of another seat to put it <b>above</b> (it takes that seat\'s place), on the middle to put it on the <b>same level</b> (equal, same senior), on the lower part to make it a <b>junior</b> of that seat, or on Admin for top level – or tap <b>↕ Move</b>. The seat\'s own team moves with it. '+Array.from({length:mx},(_,i)=>'<span style="background:'+lvc(i+1)[1]+';color:#fff;border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700;margin:2px;display:inline-block">Level '+(i+1)+'</span>').join('')+'</div>':'';
+  $('stfBody').innerHTML=legend+'<div class="dcard" data-seat="0" style="background:#fff8db;border-left:7px solid #d4a017"><b>👑 Admin</b> <button type="button" class="b-lite" data-a="add" data-no="0">➕ Add more</button>'+(act.some(y=>y.parent===0)?' <button type="button" class="b-lite" data-a="below" data-no="0">⬇ Layer between</button>':'')+'</div>'+kids(0,1)+
     (Object.keys(cnt).length?'<div class="sh">PINs found in your data but not listed – tap to add</div>'+Object.keys(cnt).map(k=>'<button type="button" class="b-lite" style="margin:3px" data-a="adopt" data-pin="'+k+'">➕ '+k+' ('+cnt[k]+' rows)</button>').join(''):'')+
     (gone.length?'<div class="sh">Removed seats – restore or unmerge any time</div>'+gone.map(x=>{const rb=STAFF.filter(y=>y.link.includes(x.no)).map(y=>'<span class="chip" style="background:#fff1c9;border-radius:999px;padding:3px 9px;font-size:12px;margin:2px;display:inline-block">Data seen by '+esc(stfNm(y))+' <a href="#" data-a="unlink" data-no="'+y.no+'" data-to="'+x.no+'">✖ unmerge</a></span>').join('');return'<div class="dcard" style="margin:8px 0"><b>'+esc(stfNm(x))+'</b> · user '+esc(x.user||'-')+' · PIN '+esc(x.pin||'-')+' · '+ent(x)+' entries<div style="margin:4px 0">'+(rb||'<span class="hint">Data not merged anywhere</span>')+'</div><button type="button" class="b-copy" data-a="restore" data-no="'+x.no+'">♻ Restore</button> '+(ent(x)?'':'<button type="button" class="b-lite" data-a="purge" data-no="'+x.no+'">🗑 Delete forever</button>')+'</div>'}).join(''):'');
 }
+
+
+/* ===== Team data access: tick which seats (with their whole team) this seat can also see ===== */
+function stfTick(no){
+  const x=STAFF.find(y=>y.no===no);if(!x)return;
+  const bad=stfSubs(no);bad.add(no);   // own team is already visible
+  const walk=(p,d,out)=>{STAFF.filter(y=>y.active&&y.parent===p).forEach(y=>{out.push([y,d]);walk(y.no,d+1,out)});return out};
+  const list=walk(0,1,[]).filter(a=>!bad.has(a[0].no));
+  const o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px';
+  o.innerHTML='<div style="background:#fff;border-radius:16px;padding:18px;max-width:460px;width:100%;max-height:85vh;display:flex;flex-direction:column"><h2>👁 Team data – '+esc(stfNm(x))+'</h2><p class="hint">Tick the seats whose data <b>'+esc(x.name||'this seat')+'</b> should also see. Ticking a seat shows that seat <b>and its whole team</b>. Untick to stop.</p><div style="overflow:auto;margin:8px 0;border:1px solid #e2e8f0;border-radius:10px;padding:6px">'+
+    (list.length?list.map(a=>'<label style="display:flex;gap:8px;align-items:center;padding:5px 4px;margin-left:'+(a[1]-1)*14+'px;border-left:4px solid '+lvc(a[1])[1]+';cursor:pointer"><input type="checkbox" data-t="'+a[0].no+'"'+(x.link.includes(a[0].no)?' checked':'')+' style="width:auto;padding:0"><span>'+esc(stfNm(a[0]))+(STAFF.some(y=>y.active&&y.parent===a[0].no)?' <span class="hint">(+ team)</span>':'')+'</span></label>').join(''):'<div class="hint">No other seat available.</div>')+
+    '</div><div class="rbtns"><button type="button" class="b-copy" data-ok>Save</button> <button type="button" class="b-lite" data-no>Cancel</button></div></div>';
+  o.onclick=async e=>{
+    if(e.target.dataset.no!==undefined||e.target===o){o.remove();return}
+    if(e.target.dataset.ok===undefined)return;
+    const now=new Set([...o.querySelectorAll('[data-t]:checked')].map(i=>+i.dataset.t)),was=new Set(x.link.filter(n=>list.some(a=>a[0].no===n)));
+    const ops=[];now.forEach(n=>{if(!was.has(n))ops.push({op:'link',no,to:n})});was.forEach(n=>{if(!now.has(n))ops.push({op:'unlink',no,to:n})});
+    o.remove();if(!ops.length){toast('No change');return}
+    toast('Saving…');let ok=true;
+    for(const op of ops){ok=(await post({stf:'1',pin:curPin,...op}))&&ok;await new Promise(r=>setTimeout(r,500))}
+    toast(ok?'Saved':'Could not send – check internet');
+    setTimeout(()=>resync().then(()=>{DRAFT.length=0;stfRender();setCloud(true,'')}),1500);
+  };
+  document.body.appendChild(o);
+}
+/* ===== Staff tree view (read-only org chart) ===== */
+let STFV='list';const TCOL=new Set();
+function stfTreeHtml(){
+  const act=STAFF.filter(x=>x.active),by=n=>STAFF.find(x=>x.no===n);
+  const ecnt={};rowsAll.forEach(r=>{const k=pn(r.pin);if(k)ecnt[k]=(ecnt[k]||0)+1});const ent=x=>x.pin?(ecnt[pn(x.pin)]||0):0;
+  const kidsOf=p=>act.filter(y=>y.parent===p);
+  const teamSize=no=>stfSubs(no).size;
+  const mx=act.reduce((m,x)=>Math.max(m,stfLevel(x.no)),0),vac=act.filter(x=>!x.pin).length,mg=act.filter(x=>x.link.length).length;
+  const stats='<div class="tstats"><span><b>'+act.length+'</b> seats</span><span><b>'+mx+'</b> level'+(mx===1?'':'s')+'</span><span><b>'+kidsOf(0).length+'</b> directly under Admin</span><span><b>'+vac+'</b> vacant</span><span><b>'+mg+'</b> merged</span></div>';
+  const node=x=>{
+    const d=stfLevel(x.no),c=lvc(d),ks=kidsOf(x.no),col=TCOL.has(x.no),ts=teamSize(x.no);
+    const lk=x.link.map(n=>by(n)).filter(Boolean).map(t=>esc(t.name||('#'+t.no))).join(', ');
+    const nd='<div class="tnode'+(x.pin?'':' vac')+'" data-seat="'+x.no+'" style="background:'+c[0]+';border-top:4px solid '+c[1]+'"><span class="tlv" style="background:'+c[1]+'">L'+d+'</span><span class="dragh" data-no="'+x.no+'" title="Drag to move this seat with its team">⠿</span>'+
+      '<div class="tnm">'+esc(x.name||'(no name)')+'</div><div class="tsb">#'+x.no+(x.user?' · @'+esc(x.user):'')+'</div>'+
+      (x.pin?'':'<div class="tsb" style="color:#b45309">Vacant – no PIN</div>')+
+      '<div class="tsb">'+ent(x)+' entries'+(ks.length?' · team '+ts:'')+'</div>'+
+      (lk?'<div class="tsb" title="Merged">🔗 '+lk+'</div>':'')+
+      '<div class="tact"><a href="#" data-a="tedit" data-no="'+x.no+'">✏ Edit</a>'+(ks.length?' <a href="#" data-a="tog" data-no="'+x.no+'">'+(col?'▸ Show '+ks.length:'▾ Hide')+'</a>':'')+'</div></div>';
+    return '<li>'+nd+(ks.length&&!col?'<ul>'+ks.map(node).join('')+'</ul>':'')+'</li>';
+  };
+  const root='<div class="tnode tadm" data-seat="0"><span style="font-size:20px">👑</span><div class="tnm">Admin</div><div class="tsb">Top level</div></div>';
+  return stats+'<div class="tree"><ul><li>'+root+(kidsOf(0).length?'<ul>'+kidsOf(0).map(node).join('')+'</ul>':'')+'</li></ul></div>'+
+    '<div class="hint" style="margin-top:8px">Map of your team. <b>Move a seat:</b> hold <b>⠿</b> on a box and drop it on the <b>upper part</b> of another box = <b>above</b> it, the <b>middle</b> = <b>same level</b> (blue), the <b>lower part</b> = <b>junior</b> of it, or on <b>Admin</b> = top level. The seat\'s team moves with it. <b>▾ Hide / ▸ Show</b> folds a branch, <b>✏ Edit</b> opens that seat in the list (rename, merge, team data). Dashed boxes are vacant seats.</div>';
+}
+function stfRender(){
+  const bar='<div class="tbar"><button type="button" class="'+(STFV==='list'?'b-copy':'b-lite')+'" data-a="vw" data-v="list">☰ List</button><button type="button" class="'+(STFV==='tree'?'b-copy':'b-lite')+'" data-a="vw" data-v="tree">🌳 Tree view</button>'+
+    (STFV==='tree'?'<button type="button" class="b-lite" data-a="tall">⊞ Expand all</button><button type="button" class="b-lite" data-a="tcol">⊟ Collapse all</button>':'')+'</div>';
+  if(STFV==='tree'){$('stfBody').innerHTML=bar+stfTreeHtml();return}
+  stfRenderList();$('stfBody').insertAdjacentHTML('afterbegin',bar);
+}
+$('stfBody').addEventListener('click',e=>{
+  const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a;if(!['vw','tog','tall','tcol','tedit'].includes(a))return;e.preventDefault();e.stopImmediatePropagation();
+  if(a==='vw'){STFV=b.dataset.v;stfRender()}
+  else if(a==='tog'){const n=+b.dataset.no;TCOL.has(n)?TCOL.delete(n):TCOL.add(n);stfRender()}
+  else if(a==='tall'){TCOL.clear();stfRender()}
+  else if(a==='tcol'){STAFF.filter(x=>x.active&&STAFF.some(y=>y.active&&y.parent===x.no)).forEach(x=>TCOL.add(x.no));stfRender()}
+  else if(a==='tedit'){STFV='list';stfRender();const c=document.querySelector('#stfBody .dcard[data-seat="'+b.dataset.no+'"]');if(c){c.scrollIntoView({block:'center',behavior:'smooth'});c.style.outline='3px solid #0e6b5c';setTimeout(()=>c.style.outline='',2200)}}
+},true);
 $('stfBody').addEventListener('click',e=>{
   const b=e.target.closest('[data-a]');if(!b)return;e.preventDefault();
   const a=b.dataset.a,no=+b.dataset.no||0,card=b.closest('.dcard'),val=f=>(card.querySelector('[data-f="'+f+'"]')||{}).value||'';
@@ -1958,6 +2095,8 @@ $('stfBody').addEventListener('click',e=>{
   else if(a==='dcancel'){DRAFT.splice(DRAFT.findIndex(q=>q.id==b.dataset.id),1);stfRender()}
   else if(a==='dsave'){const q=DRAFT.find(q=>q.id==b.dataset.id),pin=val('pin').trim();if(!val('name').trim()&&!pin){toast('Enter a name or PIN');return}const ks=[...card.querySelectorAll('[data-k]:checked')].map(i=>i.dataset.k).join(',');if('below' in q&&!ks){toast('Tick at least one seat to move under the new layer');return}const un=val('user').trim();if(chk(pin,0)&&chkU(un,0))stfSend('below' in q?{op:'insbelow',no:q.below,name:val('name').trim(),spin:pin,kids:ks,suser:un}:q.above?{op:'ins',no:q.above,name:val('name').trim(),spin:pin,suser:un}:{op:'save',no:0,parent:q.par,name:val('name').trim(),spin:pin,suser:un})}
   else if(a==='save'){const pin=val('pin').trim(),un=val('user').trim();if(chk(pin,no)&&chkU(un,no))stfSend({op:'save',no,name:val('name').trim(),spin:pin,suser:un})}
+  else if(a==='move'){stfMove(no)}
+  else if(a==='tick'){stfTick(no)}
   else if(a==='link'){const o=STAFF.filter(x=>x.active&&x.no!==no);if(!o.length){toast('No other seat yet');return}stfPick('Also show the data of which employee?',o,v=>stfSend({op:'link',no,to:v}))}
   else if(a==='restore'){stfPick('Restore under which seat? (its data returns to it)',[{no:0,name:'Admin'}].concat(STAFF.filter(x=>x.active&&x.no!==no)),v=>stfSend({op:'restore',no,parent:v}))}
   else if(a==='purge'){const t=stfBy(no);if(confirm('Delete '+(t?stfNm(t):'this seat')+' permanently? It has no entries. Its employee code becomes free again.'))stfSend({op:'purge',no})}
