@@ -478,7 +478,7 @@ const LS=k=>{if(k in MEM)return MEM[k];try{return JSON.parse(localStorage.getIte
 const SS=(k,v)=>{MEM[k]=v;try{localStorage.setItem(k,JSON.stringify(v));if(JSON.parse(localStorage.getItem(k))===undefined)throw 0}catch(e){storeOK=false}};
 let patients={};
 let SRV_TABS=null,SRV_V='';let prods={};let rowsAll=[];let unlocked=false,isAdmin=false,curPin='',curUser='',busy=false;let STAFF=[],ME=null,SEEALL=false,CREW=[];
-const APP_VER='2026-10-16-o',APP_DATE='16 Oct 2026';
+const APP_VER='2026-10-16-p',APP_DATE='16 Oct 2026';
 const pn=x=>{const d=String(x==null?'':x).replace(/\D/g,'');return d?d.padStart(4,'0'):''};
 try{['patients','prods','history','sheetUrl','design'].forEach(k=>localStorage.removeItem(k))}catch(e){}          // product stats: key = lowercase product
 const AUTO={};                       // field -> value last filled automatically
@@ -1149,7 +1149,7 @@ function behFill(){
 }
 function behNote(){const c=behSeat(),n=$('behNote');n.style.display=c?'':'none';n.textContent=c?'Entries will be saved as '+((c.name||'').trim()||'this staff member')+'\u2019s entries (their PIN).':'';$('behalf').style.borderColor=c?'#e0a800':'';$('behalf').style.background=c?'#fff8db':''}
 $('behalf').onchange=behNote;
-const sigOf=d=>JSON.stringify([behNo(),digits(d.cnic)||d.name.toLowerCase(),d.pmobile,d.product,d.rate,d.qty,d.doctor,d.speciality,d.disease,d.address,d.notes,d.date,d.chg]);
+const sigOf=d=>JSON.stringify([behNo(),digits(d.cnic)||d.name.toLowerCase(),d.pmobile,d.product,d.rate,d.qty,d.doctor,d.speciality,d.disease,d.address,d.notes,d.date]);
 async function guardPatient(){   // true = go on with Save / Copy / Send, false = the user cancelled
   if(!unlocked||EDIT.ts)return true;
   const d=data();
@@ -1216,7 +1216,7 @@ async function backup(){
   if(unlocked){
     const key=digits(d.cnic)||d.name.toLowerCase();
     patients[key]={name:d.name,cnic:d.cnic,pmobile:d.pmobile,doctor:d.doctor,speciality:d.speciality,disease:d.disease,address:d.address,product:d.product,rate:d.rate,qty:d.qty};
-    const loc={...rec,_t:+rec.cts},bs=behSeat();
+    const loc={...rec,_t:+rec.cts,ts:String(rec.cts)},bs=behSeat();
     if(bs){loc.pin=bs.pin;loc.user=bs.user;loc.by=curUser;SIGF.forEach(k=>loc[k]='')}   // shown under the junior, exactly as the sheet will hold it
     const win=86400000;   // the same patient within 24 hours = update the earlier row (unless "Add as new entry" was chosen)
     const same=r=>{const t=rowT(r);return t&&Date.now()-t<win&&(isAdmin||r.pin===undefined||pn(r.pin)===pn(rec.pin))&&sameWho(r,rec)};
